@@ -1,25 +1,27 @@
-import ddf.minim.analysis.*;
+import ddf.minim.*;
 import java.util.*;
 import java.io.*;
+import ddf.minim.analysis.*;
 // some random change
 
 // more random changes!
-abstract class Visualizer {
+public abstract class Visualizer {
+    final int TEXT_OFFSET = displayWidth - 200;
+    final int TEXT_SEPARATION = 15;
+    final int TEXT_SIZE = 14;
+
     AudioInput input;
     AudioSource src;
     FFT fft;
     BeatDetect beat;
-    Camera camera; 
-//    HighPassSP hpf;
-    boolean darkMode = true;
-    boolean showInterface = true;
+    Camera camera;
     int contrast = 0;
     String name;
     boolean flashingMode = false;
     float volumeScale = 0.0;
-    final int TEXT_OFFSET = displayWidth - 200;
 
-    boolean highlight, expand, revolve, blur, showParticles;
+    boolean showInterface = true;
+    boolean highlight, expand, revolve, blur, particles;
     
     abstract int getOptimalFrameRate();
     abstract void draw();
@@ -28,7 +30,7 @@ abstract class Visualizer {
     abstract void expand();
     abstract void revolve();
     abstract void blur();
-    abstract void showParticles();
+    abstract void particles();
 
     void setup() {}
     
@@ -74,25 +76,33 @@ abstract class Visualizer {
         }
     }
 
-    void displayHelpMenu() {
+    void displayDebugText() {
+        fill(255 - contrast);
+        stroke(255 - contrast);
         textSize(14);
+        text("current frame rate: " + round(frameRate), 5, height - 25);    
+        text(camera.pos.x + ", " + camera.pos.y + ", " + camera.pos.z, 5, height - 10);
+    }
+
+    void displayHelpMenu() {
+        textSize(TEXT_SIZE);
         textAlign(LEFT, TOP);
-        toggleTextColor(!showInterface);
-        text("[h] hide interface", TEXT_OFFSET, 15);
-        toggleTextColor(contrast == 0);
-        text("[d] dark mode", TEXT_OFFSET, 30);
-        toggleTextColor(frontalView);
-        text("[f] frontal camera view", TEXT_OFFSET, 45);
-        toggleTextColor(rearView);
-        text("[r] rear camera view", TEXT_OFFSET, 60);
-        toggleTextColor(dropLevel1);
-        text("[1] drop level 1", TEXT_OFFSET, 75);
-        toggleTextColor(dropLevel2);
-        text("[2] drop level 2", TEXT_OFFSET, 90);
-        toggleTextColor(dropLevel3);
-        text("[3] drop level 3", TEXT_OFFSET, 105);
-        toggleTextColor(frontalView);
-        
+
+        Map<String, Boolean> menuMap = new LinkedHashMap<String, Boolean>();
+        menuMap.put("[h] hide interface", !showInterface);
+        menuMap.put("[d] dark mode", contrast == 0);
+        menuMap.put("[b] blur", blur);
+        menuMap.put("[p] particle mode", particles);
+        menuMap.put("[1] highlight", highlight);
+        menuMap.put("[2] expand", expand);
+        menuMap.put("[3] revolve", revolve);
+
+        int i = 1;
+        for (String textKey : menuMap.keySet()) {
+            toggleTextColor(menuMap.get(textKey));
+            text(textKey, TEXT_OFFSET, i * TEXT_SEPARATION);
+            i++;
+        }
     }
 
     void toggleTextColor(boolean toggled) {
@@ -103,9 +113,25 @@ abstract class Visualizer {
         }
     }
 
+    // returns intensity of a certain index within the bandsize, and scales it with volumeScale 
+    float getIntensity(int index) {
+        return abs(fft.getBand(index) * 0.8 * volumeScale);
+    }
 
     void keyPressed() {
         switch (key) {
+            case 'h':
+                showInterface = !showInterface;
+                break;
+            case 'd':
+                contrast = 255 - contrast;
+                break;
+            case 'b':
+                blur();
+                break;
+            case 'p':
+                particles();
+                break;
             case '1':
                 highlight();
                 break;
@@ -115,13 +141,8 @@ abstract class Visualizer {
             case '3':
                 revolve();
                 break;
-            case 'b':
-                blur();
+            default:
                 break;
-            case 'p':
-                showParticles();
-                break;
-
         }
     }
 }

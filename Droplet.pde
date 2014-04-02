@@ -1,5 +1,6 @@
+import ddf.minim.*;
 
-class Droplet extends Visualizer {
+public class Droplet extends Visualizer {
     int OPTIMAL_FRAME_RATE = 35;
     int getOptimalFrameRate() {
         return OPTIMAL_FRAME_RATE;
@@ -113,7 +114,10 @@ class Droplet extends Visualizer {
             if (dropLevel1 && this.index != 0) {
                 for (int i = 0; i < rings[index - 1].points.length + 1; i++) {
                     Point curr = rings[index - 1].points[i % rings[index - 1].points.length];
-                    Point next = rings[index - 1].points[(i + 1) % rings[index - 1].points.length]; // last index -> zero index
+
+                    // last index -> zero index
+                    Point next = rings[index - 1].points[(i + 1) % rings[index - 1].points.length];
+
                     curr.setColor();
                     vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
                     vertex(next.pos.x, next.pos.y * ydir, next.pos.z);
@@ -330,10 +334,29 @@ class Droplet extends Visualizer {
             rotateX(-rotater.xRot * mult);
         }
     }
+
+    void blur() {
+        // TODO
+    }
+
+    void particles() {
+        // TODO
+    }
     
-    // returns intensity of a certain index within the bandsize, and scales it with volumeScale 
-    float getIntensity(int index) {
-        return abs(fft.getBand(index) * 0.8 * volumeScale);
+    void highlight() {
+        // TODO
+    }
+
+    void expand() {
+        // TODO
+    }
+
+    void revolve() {
+        dropLevel1 = !dropLevel1;
+        rotater.autoSwitch();
+        if (!dropLevel1) {
+            rotater.initRotate(0, 0, (int) frameRate * 10);    
+        }
     }
     
     void displayDebugText() {
@@ -385,11 +408,7 @@ class Droplet extends Visualizer {
                 topDownView = false;
                 break;
             case '1':
-                dropLevel1 = !dropLevel1;
-                rotater.autoSwitch();
-                if (!dropLevel1) {
-                    rotater.initRotate(0, 0, (int) frameRate * 10);    
-                }
+                
                 break;
             case 'd':
                 contrast = 255 - contrast;

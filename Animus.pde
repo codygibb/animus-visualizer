@@ -32,13 +32,13 @@ void setup() {
     ring = new Ring(minim.getLineIn(Minim.STEREO, 256));
     fluid = new Fluid(minim.getLineIn(Minim.STEREO, 512));
     droplet = new Droplet(minim.getLineIn(Minim.STEREO, 512));
-    swarm = new Swarm(minim.getLineIn(Minim.STEREO, 256));
-//    gravity = new Gravity(minim.getLineIn(Minim.STEREO, 512));
-    globe = new Globe(minim.getLineIn(Minim.STEREO, 512));
+//    swarm = new Swarm(minim.getLineIn(Minim.STEREO, 256));
+////    gravity = new Gravity(minim.getLineIn(Minim.STEREO, 512));
+//    globe = new Globe(minim.getLineIn(Minim.STEREO, 512));
     
     
     
-    visualizers = new Visualizer[] {ring, fluid, droplet, swarm, globe};
+    visualizers = new Visualizer[] {ring, fluid, droplet};
     select = 0;
     frameRate(visualizers[select].getOptimalFrameRate());
     ellipseMode(CENTER);
@@ -61,7 +61,7 @@ void setup() {
 void draw() {
     contrast = visualizers[select].contrast;
     pushStyle();
-    if (showInterface) {
+    if (visualizers[select].showInterface) {
         volSlider.setVisible(true);
         for (int i = 0; i < dots.length; i++) {
             if (i == select) {
@@ -74,6 +74,7 @@ void draw() {
     } else {
         volSlider.setVisible(false);
     }
+
     popStyle();
     
     pushStyle();
@@ -144,10 +145,6 @@ void switchVisualizer() {
 
 void keyPressed() {
     switch (key) {
-        case 'h':
-            showInterface = !showInterface;
-            visualizers[select].showInterface = this.showInterface;
-            break;
         case 'x':
             for (int i = 0; i < visualizers.length; i++) {
                 visualizers[i].initFlashingMode();    

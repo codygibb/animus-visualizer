@@ -1,6 +1,6 @@
-class ColorTracker {
+public class ColorTracker {
     float DELTA_MAX = 10;
-    float DELTA_MIN = 0.5;
+    float DELTA_MIN = 0.5f;
     
     float red, green, blue;
     boolean incrRed, incrGreen, incrBlue;

@@ -1,4 +1,6 @@
-class Ring extends Visualizer {
+import ddf.minim.*; 
+
+public class Ring extends Visualizer {
     int OPTIMAL_FRAME_RATE = 48;
     int getOptimalFrameRate() {
         return OPTIMAL_FRAME_RATE;
@@ -19,7 +21,7 @@ class Ring extends Visualizer {
     ColorTracker tracker;
     ColorTracker tracker2;
     Instance[] instances;
-    boolean dropLevel1 = false;
+    boolean expand = false;
     boolean frontalView = true;
     boolean rearView = false;
     
@@ -29,8 +31,8 @@ class Ring extends Visualizer {
     boolean throttlingOn = false;
     float maxSpeed = 0.2;
     
-    Ring(AudioInput input) {
-        super(input, "Ring");    
+    public Ring(AudioInput input) {
+        super(input, "Ring");
         tracker = new ColorTracker();
         tracker2 = new ColorTracker();
         camera.viewingMode = false;
@@ -202,7 +204,7 @@ class Ring extends Visualizer {
 
             float magnitude = zpos * (ADD_DIST / stop);
             float greatestMag = 0;
-            if (dropLevel1) {
+            if (expand) {
                 for (int i = 0; i < 50; i++) {
                     float tempMag = fft.getBand(i) * 0.9;
                     if (tempMag > greatestMag) {
@@ -212,7 +214,7 @@ class Ring extends Visualizer {
             }
             if (prevSample.pos.z == 0) {
                 PVector p = new PVector(pos.x, pos.y);             
-                if (dropLevel1) {
+                if (expand) {
                     p.setMag(origMag + abs(greatestMag*volumeScale));
                 }
                 pos.x = p.x;
@@ -221,7 +223,7 @@ class Ring extends Visualizer {
                 pos.setMag(pos.mag() + magnitude);
             }
             
-            if (dropLevel1) {
+            if (expand) {
                 strokeWeight(min(0.3 + size, 7));
             } else {
                 strokeWeight(min(0.3 + size*3, 25));
@@ -338,59 +340,38 @@ class Ring extends Visualizer {
         
         
     }
-    void displayDebugText() {
-        fill(255 - contrast);
-        stroke(255 - contrast);
-        textSize(14);
-        text("current frame rate: " + round(frameRate), 5, height - 25);    
-        text(camera.pos.x + ", " + camera.pos.y + ", " + camera.pos.z, 5, height - 10);
+   
+    void blur() {
+        // TODO
+    }
+
+    void particles() {
+        // TODO
     }
     
-    void displayHelpMenu() {
-        textSize(14);
-        textAlign(LEFT, TOP);
-        toggleTextColor(!showInterface);
-        text("[h] hide interface", TEXT_OFFSET, 15);
-        toggleTextColor(contrast == 0);
-        text("[d] dark mode", TEXT_OFFSET, 30);
-        toggleTextColor(frontalView);
-        text("[f] frontal camera view", TEXT_OFFSET, 45);
-        toggleTextColor(rearView);
-        text("[r] rear camera view", TEXT_OFFSET, 60);
-        toggleTextColor(dropLevel1);
-        text("[1] drop level 1", TEXT_OFFSET, 75); 
+    void highlight() {
+        // TODO
     }
-    
-    void toggleTextColor(boolean toggled) {
-        if (toggled) {
-            fill(255, 100, 100);
-        } else {
-            fill(abs(150-contrast), abs(150-contrast), abs(150-contrast));
-        }
+
+    void expand() {
+        expand = !expand;
     }
-    
-    void keyPressed() {
-        switch (key) {
-            case 'v': camera.viewSwitch(); break;
-            case 'a': camera.autoPanSwitch(); break;
-            case 'o': camera.dirSwitch(); break;
-            case 'f': 
-                frontalView = true;
-                rearView = false;
-                camera.disableAllModes();
-                camera.initMoveCamera(new PVector(0, 0, -800), (int)frameRate);
-                break;
-            case 'r':
-                rearView = true;
-                frontalView = false;
-                camera.disableAllModes();
-                camera.initMoveCamera(new PVector(0, 0, REFRESH * INSTANCE_NUM + 600), (int)frameRate);
-                break;
-            case '1': 
-                dropLevel1 = !dropLevel1;
-                break;
-            case 'd': contrast = 255 - contrast; break;
-            case ' ': println(averageSpeed); break;
-        }
+
+    void revolve() {
+        // TODO
     }
+
+// case 'f': 
+//     frontalView = true;
+//     rearView = false;
+//     camera.disableAllModes();
+//     camera.initMoveCamera(new PVector(0, 0, -800), (int)frameRate);
+//     break;
+// case 'r':
+//     rearView = true;
+//     frontalView = false;
+//     camera.disableAllModes();
+//     camera.initMoveCamera(new PVector(0, 0, REFRESH * INSTANCE_NUM + 600), (int)frameRate);
+//     break;
+
 }
