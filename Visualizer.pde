@@ -2,6 +2,8 @@ import ddf.minim.analysis.*;
 import java.util.*;
 import java.io.*;
 // some random change
+
+// more random changes!
 abstract class Visualizer {
     AudioInput input;
     AudioSource src;
