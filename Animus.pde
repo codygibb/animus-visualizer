@@ -19,7 +19,6 @@ PFont font;
 PageDot[] dots;
 
 int contrast = 0;
-boolean showInterface = true;
 
 void setup() {
     size(displayWidth, displayHeight, P3D);
@@ -140,11 +139,15 @@ void checkMouse() {
 void switchVisualizer() {
     visualizers[select].setup();
     frameRate(visualizers[select].getOptimalFrameRate());
-    visualizers[select].showInterface = this.showInterface;
 }
 
 void keyPressed() {
     switch (key) {
+        case 'h':
+            for (int i = 0; i < visualizers.length; i++) {
+                visualizers[i].showInterface = !visualizers[i].showInterface;
+            }
+            break;
         case 'x':
             for (int i = 0; i < visualizers.length; i++) {
                 visualizers[i].initFlashingMode();    

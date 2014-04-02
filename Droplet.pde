@@ -15,10 +15,7 @@ public class Droplet extends Visualizer {
     final float DECAY = 0.3; // DECAY = -y per frame
     final int MAX_DECAY = 100;
     final int PEAK = 40;
-    
-    boolean dropLevel1 = false;
-    boolean frontalView = true;
-    boolean topDownView = false;
+
     RotationTracker rotater;
 
     Droplet(AudioInput input) {
@@ -111,7 +108,7 @@ public class Droplet extends Visualizer {
             }
             
             // if auto rotating, then draws an extra smaller ring before rotating again
-            if (dropLevel1 && this.index != 0) {
+            if (revolve && this.index != 0) {
                 for (int i = 0; i < rings[index - 1].points.length + 1; i++) {
                     Point curr = rings[index - 1].points[i % rings[index - 1].points.length];
 
@@ -352,87 +349,24 @@ public class Droplet extends Visualizer {
     }
 
     void revolve() {
-        dropLevel1 = !dropLevel1;
+        revolve = !revolve;
         rotater.autoSwitch();
-        if (!dropLevel1) {
+        if (!revolve) {
             rotater.initRotate(0, 0, (int) frameRate * 10);    
         }
     }
     
-    void displayDebugText() {
-        fill(255 - contrast);
-        stroke(255 - contrast);
-        textSize(14);
-        text("xRot: " + (int)(degrees(rotater.xRot) * 1000) / 1000.0, 5, height - 55);
-        text("yRot: " + (int)(degrees(rotater.yRot) * 1000) / 1000.0, 5, height - 40);
-        text("current frame rate: " + round(frameRate), 5, height - 25);    
-        text(camera.pos.x + ", " + camera.pos.y + ", " + camera.pos.z, 5, height - 10);
+    void frontView() {
+        camera.initMoveCamera(new PVector(0, 0, 400), (int) frameRate * 2);
+        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate * 2);
     }
     
-    void displayHelpMenu() {
-        textSize(14);
-        textAlign(LEFT, TOP);
-        
-        toggleTextColor(!showInterface);
-        text("[h] hide interface", TEXT_OFFSET, 15);
-        toggleTextColor(contrast == 0);
-        text("[d] dark mode", TEXT_OFFSET, 30);
-        toggleTextColor(frontalView);
-        text("[f] frontal camera view", TEXT_OFFSET, 45);
-        toggleTextColor(topDownView);
-        text("[t] top-down camera view", TEXT_OFFSET, 60);
-        toggleTextColor(dropLevel1);
-        text("[1] drop level 1", TEXT_OFFSET, 75);
-        toggleTextColor(camera.autoPanningMode);
-        text("[a] auto panning mode", TEXT_OFFSET, 90);
-
+    void rearView() {
+        // TODO
     }
     
-    void toggleTextColor(boolean toggled) {
-        if (toggled) {
-            fill(255, 100, 100);
-        } else {
-            fill(abs(150-contrast), abs(150-contrast), abs(150-contrast));
-        }
-    }
-    
-    void keyPressed() {
-        switch (key) {
-            case 'v': 
-                camera.viewSwitch(); 
-                break;
-            case 'a':
-                camera.autoPanSwitch();
-                camera.dirSwitch();
-                frontalView = false;
-                topDownView = false;
-                break;
-            case '1':
-                
-                break;
-            case 'd':
-                contrast = 255 - contrast;
-                break;
-            case 'm': 
-                dropLevel1 = false;
-                rotater.manualSwitch();
-                break;
-            case 'f': 
-                frontalView = true;
-                topDownView = false;
-                camera.disableAllModes();
-                camera.initMoveCamera(new PVector(0, 0, 400), (int) frameRate * 2);
-                camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate * 2);
-                break;
-            case 't':
-                topDownView = true;
-                frontalView = false;
-                camera.disableAllModes();
-                camera.initMoveCamera(new PVector(0, -400, 0), (int) frameRate * 2);
-                camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate * 2);
-                break;
-            default:
-                break;
-        }
+    void topView() { 
+        camera.initMoveCamera(new PVector(0, -400, 0), (int) frameRate * 2);
+        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate * 2);
     }
 }

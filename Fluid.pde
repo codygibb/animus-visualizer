@@ -16,8 +16,6 @@ public class Fluid extends Visualizer {
     final int VERT_SAMPLE_NUM = 30;
     final int REFRESH = 3; 
 
-    boolean expand = false;
-    boolean revolve = false;
     boolean frontalView = true;
     boolean rearView = false;
     float currRot = 0;
@@ -284,29 +282,27 @@ public class Fluid extends Visualizer {
         }
     }
 
-// case 'f':
-//     frontalView = true;
-//     rearView = false;
-//     camera.disableAllModes();
-//     float camX = SPEC_SIZE * SPEC_WIDTH;
-//     if (revolve) {
-//         camera.initMoveCenter(0, 0, 0, (int)frameRate);
-//         camX = 0;
-//     }
-//     camera.initMoveCamera(new PVector(camX, 0, -130), (int)frameRate);
-//     break;
-// case 'r':
-//     rearView = true;
-//     frontalView = false;
-//     camera.disableAllModes();
-//     camX = SPEC_SIZE * SPEC_WIDTH;
-//     if (revolve) {
-//         camera.initMoveCenter(0, 0, 0, (int)frameRate);
-//         camX = 0;
-//     }
-//     camera.initMoveCamera(new PVector(camX, 0, 300), (int)frameRate);
-//     break;
-
+    void frontView() {
+        float camX = SPEC_SIZE * SPEC_WIDTH;
+        if (revolve) {
+            camera.initMoveCenter(0, 0, 0, (int)frameRate);
+            camX = 0;
+        }
+        camera.initMoveCamera(new PVector(camX, 0, -130), (int)frameRate);
+    }
+    
+    void rearView() {
+        float camX = SPEC_SIZE * SPEC_WIDTH;
+        if (revolve) {
+            camera.initMoveCenter(0, 0, 0, (int)frameRate);
+            camX = 0;
+        }
+        camera.initMoveCamera(new PVector(camX, 0, 300), (int)frameRate);
+    }
+    
+    void topView() { 
+        // TODO
+    }
 
 
     class FluidColorTracker extends ColorTracker {

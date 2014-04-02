@@ -21,7 +21,6 @@ public class Ring extends Visualizer {
     ColorTracker tracker;
     ColorTracker tracker2;
     Instance[] instances;
-    boolean expand = false;
     boolean frontalView = true;
     boolean rearView = false;
     
@@ -358,6 +357,18 @@ public class Ring extends Visualizer {
     }
 
     void revolve() {
+        // TODO
+    }
+
+    void frontView() {
+        camera.initMoveCamera(new PVector(0, 0, -800), (int)frameRate);
+    }
+    
+    void rearView() {
+        camera.initMoveCamera(new PVector(0, 0, REFRESH * INSTANCE_NUM + 600), (int)frameRate);
+    }
+    
+    void topView() { 
         // TODO
     }
 

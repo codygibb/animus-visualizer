@@ -19,9 +19,9 @@ public abstract class Visualizer {
     String name;
     boolean flashingMode = false;
     float volumeScale = 0.0;
-
     boolean showInterface = true;
-    boolean highlight, expand, revolve, blur, particles;
+    boolean frontView = true;
+    boolean highlight, expand, revolve, blur, particles, rearView, topView;
     
     abstract int getOptimalFrameRate();
     abstract void draw();
@@ -31,6 +31,9 @@ public abstract class Visualizer {
     abstract void revolve();
     abstract void blur();
     abstract void particles();
+    abstract void frontView();
+    abstract void rearView();
+    abstract void topView();
 
     void setup() {}
     
@@ -90,12 +93,22 @@ public abstract class Visualizer {
 
         Map<String, Boolean> menuMap = new LinkedHashMap<String, Boolean>();
         menuMap.put("[h] hide interface", !showInterface);
+        menuMap.put(" ", false);
+        menuMap.put("Camera options:", false);
+        menuMap.put("[a] auto panning mode", camera.autoPanningMode);
+        menuMap.put("[v] free view mode", camera.viewingMode);
+        menuMap.put("[f] front angle view", frontView);
+        menuMap.put("[r] rear angle view", rearView);
+        menuMap.put("[t] top-down view", topView);
+        menuMap.put("  ", false);
+        menuMap.put("Morph options:", false);
         menuMap.put("[d] dark mode", contrast == 0);
-        menuMap.put("[b] blur", blur);
+        menuMap.put("[b] blur mode", blur);
         menuMap.put("[p] particle mode", particles);
         menuMap.put("[1] highlight", highlight);
         menuMap.put("[2] expand", expand);
         menuMap.put("[3] revolve", revolve);
+        
 
         int i = 1;
         for (String textKey : menuMap.keySet()) {
@@ -120,8 +133,34 @@ public abstract class Visualizer {
 
     void keyPressed() {
         switch (key) {
-            case 'h':
-                showInterface = !showInterface;
+            // showInterface toggle handled in Animus due to static issue (processing fucking sucks)
+            case 'v':
+                camera.viewSwitch(); 
+                break;
+            case 'a':
+                camera.autoPanSwitch();
+                camera.dirSwitch();
+                break;
+            case 'f':
+                camera.disableAllModes();
+                frontView = !frontView;
+                rearView = false;
+                topView = false;
+                frontView();
+                break;
+            case 'r':
+                camera.disableAllModes();
+                rearView = !rearView;
+                topView = false;
+                frontView = false;
+                rearView();
+                break;
+            case 't':
+                camera.disableAllModes();
+                topView = !topView;
+                rearView = false;
+                frontView = false;
+                topView();
                 break;
             case 'd':
                 contrast = 255 - contrast;
