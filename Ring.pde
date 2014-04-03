@@ -15,6 +15,10 @@ public class Ring extends Visualizer {
     final float ADD_DIST = -10; //-10
     final float INIT_DIST = 10;
     final float MAX_TIME = 2000; //in milliseconds
+    RotationTracker rotater;
+    EPVector rotation; //handels rotating the verticies when revolve is turned on
+    float xRot;
+    float yRot;
     
     float deltaRotation = PI / 2000;
     
@@ -34,6 +38,7 @@ public class Ring extends Visualizer {
         super(input, "Ring");
         tracker = new ColorTracker();
         tracker2 = new ColorTracker();
+        rotater = new RotationTracker();
         camera.viewingMode = false;
         camera.pos = new PVector(0, 0, -800);
 //        camera.pos = new PVector(0, 0, INSTANCE_NUM*REFRESH + 600);
@@ -43,8 +48,7 @@ public class Ring extends Visualizer {
         for (int i = 0; i < instances.length; i++) {
             instances[i] = new Instance(i * REFRESH, REFRESH, INSTANCE_NUM * REFRESH, SAMPLE_NUM, SPEC_SIZE / SAMPLE_NUM, i);   
         }
-        
-        sphereDetail(1);
+        rotation = new EPVector();
         start = millis();
     }    
     
@@ -130,10 +134,22 @@ public class Ring extends Visualizer {
                 Instance currInstance = this;
                 Instance prevInstance = instances[prevIndex];
                 
-                beginShape(LINES);
+                if(revolve){
+                    xRot += .000001;
+                    yRot += .00001;
+                } else{
+                    xRot = 0;
+                    yRot = 0;
+                }                    
+                
+                if(particles){
+                   beginShape(POINTS); 
+                } else { 
+                    beginShape(LINES);
+                }
                 for (int i = 0; i < samples.length; i++) {
 //                    vertex(0, 0, 0);
-                    samples[i].drawSample(speed, pos, stop, prevInstance.samples[i]);  
+                    samples[i].drawSample(speed, pos, stop, prevInstance.samples[i], i);  
                     
                     
                 }
@@ -182,7 +198,7 @@ public class Ring extends Visualizer {
             size = avg * volumeScale;
         }
         
-        void drawSample(float end, float zpos, float stop, Sample prevSample) {
+        void drawSample(float end, float zpos, float stop, Sample prevSample, int index) {
             float c = pow((stop - zpos) / stop, 5.0 / 6.0);
             
             float red1 = tracker.red;
@@ -232,13 +248,15 @@ public class Ring extends Visualizer {
 //            beginShape(LINE);
             PVector prevPos = prevSample.pos;
 //            beginShape(LINES);
-            
-            vertex(pos.x, pos.y, pos.z);
-//            bezierVertex(pos.x - size, pos.y - size, pos.z, pos.x + size, pos.y + size, pos.z, prevPos.x, prevPos.y, prevPos.z);
-            vertex(prevPos.x, prevPos.y, prevPos.z);
-//            endShape();
-//            bezierVertex(prevPos.x, prevPos.y, prevPos.z);
-//            endShape();
+            float theta = (10*PI*index)/instances.length;
+            rotation.set(pos.x, pos.y, pos.z);
+            rotation.rotateX(theta*rotater.xRot);
+            rotation.rotateY(theta*rotater.yRot);
+            vertex(rotation.x, rotation.y, rotation.z); 
+            rotation.set(prevPos.x, prevPos.y, prevPos.z); //reuse the same EPVector for memory
+            rotation.rotateX(theta*rotater.xRot);
+            rotation.rotateY(theta*rotater.yRot);
+            vertex(rotation.x, rotation.y, rotation.z);
             if (prevPos.z == 0) {
                 pushMatrix();
                 translate(prevPos.x, prevPos.y, prevPos.z);
@@ -273,7 +291,13 @@ public class Ring extends Visualizer {
 
     synchronized void draw() {
         retrieveSound();
-        setBackground(contrast, 150);
+        if(blur){
+            setBackground(contrast, 10);
+        } else { 
+            setBackground(contrast, 150);
+        }
+            
+        
         if (showInterface) {
             displayHelpMenu();    
             displayDebugText();    
@@ -285,7 +309,7 @@ public class Ring extends Visualizer {
         pushMatrix();
 
         camera.update();
-        
+        rotater.update();
         scale(2);
 //        rotateX(PI/2);
         stroke(255);
@@ -339,26 +363,6 @@ public class Ring extends Visualizer {
         
         
     }
-   
-    void blur() {
-        // TODO
-    }
-
-    void particles() {
-        // TODO
-    }
-    
-    void highlight() {
-        // TODO
-    }
-
-    void expand() {
-        expand = !expand;
-    }
-
-    void revolve() {
-        // TODO
-    }
 
     void frontView() {
         camera.initMoveCamera(new PVector(0, 0, -800), (int)frameRate);
@@ -370,6 +374,13 @@ public class Ring extends Visualizer {
     
     void topView() { 
         // TODO
+    }
+    
+    void revolve(){
+        rotater.autoSwitch();
+        if (!revolve) {
+            rotater.initRotate(0, 0, (int) frameRate * 10);    
+        }
     }
 
 // case 'f': 

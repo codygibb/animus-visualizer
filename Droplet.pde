@@ -12,9 +12,10 @@ public class Droplet extends Visualizer {
     final int SPEC_SIZE = 50;
     final int SPEC_WIDTH = 7;
     final float DETAIL = 1.1; // DETAIL * radius of ring "i" = number of points in ring "i"
-    final float DECAY = 0.3; // DECAY = -y per frame
+    final float DECAY = PHI; // DECAY = -y per frame
     final int MAX_DECAY = 100;
     final int PEAK = 40;
+    int dropletSize = 10;
 
     RotationTracker rotater;
 
@@ -30,10 +31,15 @@ public class Droplet extends Visualizer {
         rotater = new RotationTracker();
         rings = new Ring[SPEC_SIZE];
 //        strokeWeight(1.75);
+        setupDroplet();
+        noCursor();
+    }
+    
+
+    void setupDroplet(){
         for (int i = 0; i < rings.length; i++) {
             rings[i] = new Ring(SPEC_WIDTH * (i + 1), i);  
         }
-        
         for (int i = rings.length - 1; i >= 0; i--) {
             for (int j = 0; j < rings[i].points.length; j++) {
                 if (i != 0) {
@@ -41,7 +47,6 @@ public class Droplet extends Visualizer {
                 }
             }
         }
-        noCursor();
     }
     
     class Ring {
@@ -51,10 +56,11 @@ public class Droplet extends Visualizer {
         // 0 index Ring has a boost in detail
         Ring(int radius, int index) {
             this.index = index;
-            size = (int) (radius * DETAIL + 1);
-            if (index == 0) {
-                size += 5;  
-            }
+//            size = (int) (radius * DETAIL + 1);
+//            if (index == 0) {
+//                size += 5;  
+//            }
+            size = dropletSize;
             points = new Point[size];
             for (int i = 0; i < points.length; i++) {
                 float angle = TWO_PI * i / points.length;
@@ -67,7 +73,7 @@ public class Droplet extends Visualizer {
         void update() {
             for (int i = 0; i < points.length; i++) {
                 points[i].update(index);
-                points[i].colors = getColor(points[i].pos.y);
+                points[i].colors = getColor(points[i].pos.y, tracker, tracker2, PEAK);
             }
         }
         
@@ -91,11 +97,18 @@ public class Droplet extends Visualizer {
 //            strokeWeight(0.1 + 2 * shift2);
 //            stroke(255);
             strokeWeight(1 + ((float) index) / SPEC_SIZE * 4);
-            beginShape(LINES);
+            if(particles){
+                beginShape(POINTS);
+            } else{
+                beginShape(LINES);
+            }
             for (int i = 0; i < points.length + 1; i++) {
                 Point curr = points[i % points.length];
                 Point next = points[(i + 1) % points.length]; // last index -> zero index
                 curr.setColor();
+                if(particles){
+                    strokeWeight(max(abs(curr.pos.y/10), 1));
+                }
                 vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
                 vertex(next.pos.x, next.pos.y * ydir, next.pos.z);
                 Point oneDeeper = points[i % points.length].next;
@@ -123,32 +136,6 @@ public class Droplet extends Visualizer {
 
             endShape();
         }
-        
-        // returns float array of colors {r, g, b, alpha} given an intensity (should be y value of a point)
-        float[] getColor(float intensity) {
-    //        float intensity = 0.5 * getIntensity(index);
-    //        float c = pow((PEAK - intensity) / PEAK, 5.0 / 6.0);
-    //        float c = (PEAK - intensity) / PEAK;
-            intensity = -intensity;
-            float red1 = tracker.red;
-            float green1 = tracker.green;
-            float blue1 = tracker.blue;
-            float red2 = 255 - tracker2.red;
-            float green2 = 255 - tracker2.green;
-            float blue2 = 255 - tracker2.blue;
-            
-            float shift2 = intensity / PEAK;
-            float shift1 = 1 - shift2;
-            
-            float r = red1 * shift1 + red2 * shift2;
-            float g = green1 * shift1 + green2 * shift2;
-            float b = blue1 * shift1 + blue2 * shift2;
-            float alpha = min(5 + 255 * shift2, 255);
-            
-    //        stroke(r, g, b, alpha);
-            float[] result = {r, g, b, alpha};
-            return result;
-        }
     }
     
     class Point {
@@ -169,8 +156,9 @@ public class Droplet extends Visualizer {
         
         void update(int index) {
             if (pos.y < 0) {
-                pos.y += DECAY + abs(pos.y / 20);
-                pos.y = min(0, pos.y);
+                pos.y = lerp(pos.y, 0, .06180339887);
+//                pos.y += DECAY + abs(pos.y / 20);
+//                pos.y = min(0, pos.y);
             }
             float incomingSignal = -1.5 * getIntensity(index);
             if (pos.y > incomingSignal) {
@@ -212,78 +200,13 @@ public class Droplet extends Visualizer {
         }
     }
     
-    class RotationTracker {
-        float xRot, yRot, xStart, yStart, xEnd, yEnd;
-        boolean manualRotate, autoRotate, rotating;
-        int currentTime, moveTime;
-        
-        RotationTracker() {
-            xRot = 0;
-            yRot = 0;
-            manualRotate = false;
-            autoRotate = false;
-            rotating = false;    
-        }
-        
-        void autoSwitch() {
-            autoRotate = !autoRotate;
-            manualRotate = false; 
-        }
-        
-        void manualSwitch() {
-            manualRotate = !manualRotate;
-            autoRotate = false;
-            rotating = false;  
-        }
-        
-        void initRotate(float xDestination, float yDestination, int time) {
-            xStart = xRot;
-            yStart = yRot;
-            xEnd = xDestination;
-            yEnd = yDestination;
-            moveTime = time; 
-            currentTime = 0;
-            rotating = true; 
-        }
-        
-        void update() {
-            if (manualRotate) {
-                xRot = map(mouseX, 0, width, 0, PI);    
-                yRot = map(mouseY, 0, height, 0, PI); 
-            }   
-            
-            if (autoRotate && !rotating) {
-                float x = random(0, PI);
-                float y = random(0, PI);
-                float dist = sqrt(sq(x) + sq(y));
-                int baseLine = (int) random(5 * frameRate, 10 * frameRate);
-                int time = baseLine + (int)(75 * frameRate * (dist / PI));
-                initRotate(x, y, time);
-            }
-            
-            if (rotating) {
-                float angle = (currentTime*1.0 / moveTime) * PI;
-    
-                float xAmp = ((xEnd - xStart) * PI) / (2 * moveTime);
-                float dx = xAmp * sin(angle);
-                xRot += dx;
-                
-                float yAmp = ((yEnd - yStart) * PI) / (2 * moveTime);
-                float dy = yAmp * sin(angle);
-                yRot += dy;
-                
-                currentTime++;
-                if (currentTime == moveTime) {
-                    rotating = false;    
-                }
-            }
-        } 
-    }
-    
     synchronized void draw() {
         retrieveSound();
-        setBackground(contrast, 200);
-        
+        if(blur) {
+            setBackground(contrast, 50);
+        } else {
+            setBackground(contrast, 150);
+        }
         pushMatrix();
         rotater.update();
         camera.update();
@@ -331,30 +254,6 @@ public class Droplet extends Visualizer {
             rotateX(-rotater.xRot * mult);
         }
     }
-
-    void blur() {
-        // TODO
-    }
-
-    void particles() {
-        // TODO
-    }
-    
-    void highlight() {
-        // TODO
-    }
-
-    void expand() {
-        // TODO
-    }
-
-    void revolve() {
-        revolve = !revolve;
-        rotater.autoSwitch();
-        if (!revolve) {
-            rotater.initRotate(0, 0, (int) frameRate * 10);    
-        }
-    }
     
     void frontView() {
         camera.initMoveCamera(new PVector(0, 0, 400), (int) frameRate * 2);
@@ -368,5 +267,25 @@ public class Droplet extends Visualizer {
     void topView() { 
         camera.initMoveCamera(new PVector(0, -400, 0), (int) frameRate * 2);
         camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate * 2);
+    }
+    
+    void revolve(){
+        rotater.autoSwitch();
+        if (!revolve) {
+            rotater.initRotate(0, 0, (int) frameRate * 10);    
+        }
+    }
+    void keyPressed() {
+        super.keyPressed();
+        switch (keyCode) {
+            case 38 : dropletSize+=2;
+                      setupDroplet();
+                      break;
+            case 40 : if(dropletSize>2){
+                        dropletSize-=2;
+                        setupDroplet();
+                      }
+                      break;
+        }
     }
 }

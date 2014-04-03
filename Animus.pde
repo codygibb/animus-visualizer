@@ -13,8 +13,8 @@ float lastMouseY;
 float lastMillis;
 
 GCustomSlider volSlider;
-PImage sprite;
 PFont font;
+final float PHI = (1.0+sqrt(5.0))/2.0;
 
 PageDot[] dots;
 

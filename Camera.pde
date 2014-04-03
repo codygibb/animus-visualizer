@@ -1,6 +1,4 @@
 public class Camera {
-    private int test = 5;
-    
     PVector pos; //current position of camera
     PVector center; //center view for camera
     PVector dir; //"up" of camera;
@@ -194,7 +192,7 @@ public class Camera {
         if (viewingMode) {
             pos.x = map(mouseX, 0, width, -width*3, width*3);
             pos.y = map(mouseY, 0, height, -height*3, height*3);
-            pos.z = height/2.0; 
+//            pos.z = height/2.0; 
         }
         
         if (autoPanningMode && !movingCamera) {

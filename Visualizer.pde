@@ -25,16 +25,11 @@ public abstract class Visualizer {
     
     abstract int getOptimalFrameRate();
     abstract void draw();
-
-    abstract void highlight();
-    abstract void expand();
-    abstract void revolve();
-    abstract void blur();
-    abstract void particles();
     abstract void frontView();
     abstract void rearView();
     abstract void topView();
-
+    
+    void revolve(){}
     void setup() {}
     
     Visualizer(AudioInput input, String name) {
@@ -78,6 +73,28 @@ public abstract class Visualizer {
             blendMode(DIFFERENCE);
         }
     }
+    
+    float[] getColor(float intensity, ColorTracker tracker1,ColorTracker tracker2, int peak) {
+        intensity = -intensity;
+        float red1 = tracker1.red;
+        float green1 = tracker1.green;
+        float blue1 = tracker1.blue;
+        float red2 = 255 - tracker2.red;
+        float green2 = 255 - tracker2.green;
+        float blue2 = 255 - tracker2.blue;
+        
+        float shift2 = intensity / peak;
+        float shift1 = 1 - shift2;
+        
+        float r = red1 * shift1 + red2 * shift2;
+        float g = green1 * shift1 + green2 * shift2;
+        float b = blue1 * shift1 + blue2 * shift2;
+        float alpha = min(5 + 255 * shift2, 255);
+        
+//        stroke(r, g, b, alpha);
+        float[] result = {r, g, b, alpha};
+        return result;
+    }    
 
     void displayDebugText() {
         fill(255 - contrast);
@@ -144,41 +161,43 @@ public abstract class Visualizer {
             case 'f':
                 camera.disableAllModes();
                 frontView = !frontView;
+                frontView();
                 rearView = false;
                 topView = false;
-                frontView();
                 break;
             case 'r':
                 camera.disableAllModes();
                 rearView = !rearView;
+                rearView();
                 topView = false;
                 frontView = false;
-                rearView();
+                
                 break;
             case 't':
                 camera.disableAllModes();
                 topView = !topView;
+                topView();
                 rearView = false;
                 frontView = false;
-                topView();
                 break;
             case 'd':
                 contrast = 255 - contrast;
                 break;
             case 'b':
-                blur();
+                blur = ! blur;
                 break;
             case 'p':
-                particles();
+                particles = ! particles;
                 break;
             case '1':
-                highlight();
+                highlight = ! highlight;
                 break;
             case '2':
-                expand();
+                expand = !expand; 
                 break;
             case '3':
-                revolve();
+                revolve = ! revolve;
+                revolve(); 
                 break;
             default:
                 break;

@@ -3,6 +3,10 @@ class EPVector extends PVector {
         super(x, y, z);       
     }
     
+    EPVector() {
+        super(0, 0, 0);       
+    }
+    
     void rotateX(float angle) {
         PVector temp = new PVector(super.y, super.z);
         temp.rotate(angle);
@@ -22,6 +26,12 @@ class EPVector extends PVector {
         temp.rotate(angle);
         super.x = temp.x;
         super.y = temp.y;
+    }
+    
+    void set(int x, int y, int z){
+        super.x = x;
+        super.y = y;
+        super.z = z;
     }
     
 }
