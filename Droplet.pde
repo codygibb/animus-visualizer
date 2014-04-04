@@ -12,7 +12,7 @@ public class Droplet extends Visualizer {
     final int SPEC_SIZE = 50;
     final int SPEC_WIDTH = 7;
     final float DETAIL = 1.1; // DETAIL * radius of ring "i" = number of points in ring "i"
-    final float DECAY = PHI; // DECAY = -y per frame
+    final float DECAY = 0.3; // DECAY = -y per frame
     final int MAX_DECAY = 100;
     final int PEAK = 40;
     int dropletSize = 10;
@@ -30,12 +30,10 @@ public class Droplet extends Visualizer {
         tracker2 = new ColorTracker();
         rotater = new RotationTracker();
         rings = new Ring[SPEC_SIZE];
-//        strokeWeight(1.75);
         setupDroplet();
         noCursor();
     }
     
-
     void setupDroplet(){
         for (int i = 0; i < rings.length; i++) {
             rings[i] = new Ring(SPEC_WIDTH * (i + 1), i);  
@@ -56,10 +54,6 @@ public class Droplet extends Visualizer {
         // 0 index Ring has a boost in detail
         Ring(int radius, int index) {
             this.index = index;
-//            size = (int) (radius * DETAIL + 1);
-//            if (index == 0) {
-//                size += 5;  
-//            }
             size = dropletSize;
             points = new Point[size];
             for (int i = 0; i < points.length; i++) {
@@ -73,40 +67,24 @@ public class Droplet extends Visualizer {
         void update() {
             for (int i = 0; i < points.length; i++) {
                 points[i].update(index);
-                points[i].colors = getColor(points[i].pos.y, tracker, tracker2, PEAK);
+                points[i].colors = getColor(-points[i].pos.y, tracker, tracker2, PEAK);
             }
         }
         
-        // call twist before drawing
-        void twist(float xRot, float yRot) {
-            for (int i = 0; i < points.length; i++) {
-                points[i].twist(xRot, yRot);
-            }    
-        }
-        
-        //call untwist after drawing (with same values for xRot and yRot as twist!!!);
-        void untwist(float xRot, float yRot) {
-            for (int i = 0; i < points.length; i++) {
-                points[i].untwist(xRot, yRot);    
-            }
-        }
-        
-        // ydir is -1 or 1: determines y orientation
+        // ydir is -1 or 1: determines whether the figure is draw top up or top down
         void drawRing(int ydir) {
             noFill();
-//            strokeWeight(0.1 + 2 * shift2);
-//            stroke(255);
             strokeWeight(1 + ((float) index) / SPEC_SIZE * 4);
-            if(particles){
+            if (particles) {
                 beginShape(POINTS);
-            } else{
+            } else {
                 beginShape(LINES);
             }
             for (int i = 0; i < points.length + 1; i++) {
                 Point curr = points[i % points.length];
                 Point next = points[(i + 1) % points.length]; // last index -> zero index
                 curr.setColor();
-                if(particles){
+                if (particles) {
                     strokeWeight(max(abs(curr.pos.y/10), 1));
                 }
                 vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
@@ -157,26 +135,12 @@ public class Droplet extends Visualizer {
         void update(int index) {
             if (pos.y < 0) {
                 pos.y = lerp(pos.y, 0, .06180339887);
-//                pos.y += DECAY + abs(pos.y / 20);
-//                pos.y = min(0, pos.y);
             }
             float incomingSignal = -1.5 * getIntensity(index);
             if (pos.y > incomingSignal) {
                 pos.y = incomingSignal;    
             }
 
-        }
-        
-        //call twist before drawing
-        void twist(float xRot, float yRot) {
-            pos.rotateX(xRot);
-            pos.rotateY(yRot);   
-        }
-        
-        //call untwist after drawing (with same values for xRot and yRot as twist!!!);
-        void untwist(float xRot, float yRot) {
-            pos.rotateY(-yRot);
-            pos.rotateX(-xRot);    
         }
         
         // ringIndex must not equal zero
@@ -218,7 +182,6 @@ public class Droplet extends Visualizer {
         
         // if the camera is above the figure, the bottom rings are drawn last. If the camera is below the figure,
         // the top rings are drawn last.
-        
         if (camera.pos.y > 0) { 
             drawInOrder(1, -1);
         } else {
@@ -256,8 +219,8 @@ public class Droplet extends Visualizer {
     }
     
     void frontView() {
-        camera.initMoveCamera(new PVector(0, 0, 400), (int) frameRate * 2);
-        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate * 2);
+        camera.initMoveCamera(new PVector(0, 0, 400), (int) frameRate);
+        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
     }
     
     void rearView() {
@@ -265,8 +228,8 @@ public class Droplet extends Visualizer {
     }
     
     void topView() { 
-        camera.initMoveCamera(new PVector(0, -400, 0), (int) frameRate * 2);
-        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate * 2);
+        camera.initMoveCamera(new PVector(0, -400, 0), (int) frameRate);
+        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
     }
     
     void revolve(){
@@ -278,14 +241,18 @@ public class Droplet extends Visualizer {
     void keyPressed() {
         super.keyPressed();
         switch (keyCode) {
-            case 38 : dropletSize+=2;
-                      setupDroplet();
-                      break;
-            case 40 : if(dropletSize>2){
-                        dropletSize-=2;
-                        setupDroplet();
-                      }
-                      break;
+            case 38:
+                dropletSize += 2;
+                setupDroplet();
+                break;
+            case 40:
+                if (dropletSize > 2) {
+                    dropletSize -= 2;
+                    setupDroplet();
+                }
+                break;
+            default:
+                break;
         }
     }
 }

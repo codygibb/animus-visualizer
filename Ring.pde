@@ -11,12 +11,12 @@ public class Ring extends Visualizer {
     final float REFRESH = 1; //3
     final int SAMPLE_NUM = 50; //50
     final float ROT_SPEED = PI / 2800;
-    final float DIST = 1.5; //2
+    final float DIST = PHI; //2
     final float ADD_DIST = -10; //-10
     final float INIT_DIST = 10;
     final float MAX_TIME = 2000; //in milliseconds
     RotationTracker rotater;
-    EPVector rotation; //handels rotating the verticies when revolve is turned on
+    EPVector rotation; //handles rotating the verticies when revolve is turned on
     float xRot;
     float yRot;
     
@@ -25,8 +25,6 @@ public class Ring extends Visualizer {
     ColorTracker tracker;
     ColorTracker tracker2;
     Instance[] instances;
-    boolean frontalView = true;
-    boolean rearView = false;
     
     float start = 0;
     float stop = 0;
@@ -46,7 +44,7 @@ public class Ring extends Visualizer {
         
         instances = new Instance[INSTANCE_NUM];
         for (int i = 0; i < instances.length; i++) {
-            instances[i] = new Instance(i * REFRESH, REFRESH, INSTANCE_NUM * REFRESH, SAMPLE_NUM, SPEC_SIZE / SAMPLE_NUM, i);   
+            instances[i] = new Instance(i * REFRESH, REFRESH, INSTANCE_NUM * REFRESH, SAMPLE_NUM, SPEC_SIZE / SAMPLE_NUM, i);
         }
         rotation = new EPVector();
         start = millis();
@@ -323,7 +321,8 @@ public class Ring extends Visualizer {
 //                println("HIT MAX SPEED, THROTTLING");
                 throttlingOn = true;
                 deltaRotation = -deltaRotation;
-            } else if (((averageSpeed < 0.015 && averageSpeed > 0) || (averageSpeed > -0.015 && averageSpeed < 0)) && throttlingOn) {
+            } else if (((averageSpeed < 0.015 && averageSpeed > 0) || (averageSpeed > -0.015 && averageSpeed < 0))
+                    && throttlingOn) {
 //                println("RESET SUCCESSFUL");
                 throttlingOn = false;   
             }
@@ -366,10 +365,12 @@ public class Ring extends Visualizer {
 
     void frontView() {
         camera.initMoveCamera(new PVector(0, 0, -800), (int)frameRate);
+        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
     }
     
     void rearView() {
         camera.initMoveCamera(new PVector(0, 0, REFRESH * INSTANCE_NUM + 600), (int)frameRate);
+        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
     }
     
     void topView() { 

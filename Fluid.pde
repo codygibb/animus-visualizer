@@ -1,33 +1,37 @@
 import ddf.minim.*; 
 
 public class Fluid extends Visualizer {
-    int OPTIMAL_FRAME_RATE = 40;
+    final int OPTIMAL_FRAME_RATE = 40;
     int getOptimalFrameRate() {
         return OPTIMAL_FRAME_RATE;
     }
 
-    FluidColorTracker tracker1, tracker2;
-    RotationTracker rotater;
-    
-    HorizSample[] horizSamples;
-    VertSample[] vertSamples;
     final int SPEC_SIZE = 30;
     final float SPEC_WIDTH = 5;
     final int HORIZ_SAMPLE_NUM = 80;
     final int VERT_SAMPLE_NUM = 30;
     final int REFRESH = 3; 
+    final float ANGLE_INC = 0.001;
 
-    boolean frontalView = true;
-    boolean rearView = false;
+    // since we need 4 different color trackers -- base and peak colors for both
+    // bottom and top halves -- stored all dem in an array
+    // colorTrackers[0] -> base tracker for bottom half
+    // colorTrackers[1] -> peak tracker for bottom half
+    // colorTrackers[2] -> base tracker for top half
+    // colorTrackers[3] -> peak tracker for top half
+    FluidColorTracker[] colorTrackers;
+    
+    HorizSample[] horizSamples;
+    VertSample[] vertSamples;
+    
     float currRot = 0;
-    float angleInc = 0.001;
-
+    
     Fluid(AudioInput input) {
         super(input, "Fluid");
-        tracker1 = new FluidColorTracker(50, 100, 150, true, true, false);
-        tracker2 = new FluidColorTracker(255, 100, 150, false, true, true);
-        rotater = new RotationTracker();
-        //        camera.setCenter(SPEC_SIZE * SPEC_WIDTH, 0, HORIZ_SAMPLE_NUM * REFRESH);
+        colorTrackers = new FluidColorTracker[4];
+        for (int i = 0; i < colorTrackers.length; i++) {
+            colorTrackers[i] = new FluidColorTracker();   
+        }
         camera.setCenter(SPEC_SIZE * SPEC_WIDTH, 0, 0);
         horizSamples = new HorizSample[HORIZ_SAMPLE_NUM];
         for (int i = 0; i < HORIZ_SAMPLE_NUM; i++) {
@@ -42,11 +46,28 @@ public class Fluid extends Visualizer {
         camera.setOuterBounds(0, -200, -200, SPEC_SIZE * SPEC_WIDTH, 200, REFRESH * HORIZ_SAMPLE_NUM);
     }
 
+    class Point {
+        float x, y, z, intensity;
+
+        // we are re-using the same samples to draw both bottom and top - but bottom and top need
+        // different NON-COMPLEMENTARY colors. so each point keeps track of the two set of colors
+        // it will display as
+        float[] topColors;
+        float[] botColors;
+
+        public Point(float x, float y, float z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            topColors = new float[4];
+            botColors = new float[4];
+        }
+    }
+
     class HorizSample {
         float pos, speed, stop;
         int index;
-        PVector[] points;
-        float[] colors;
+        Point[] points;
         float intensity;
 
         HorizSample(float initPos, float speed, float stop) {
@@ -54,44 +75,39 @@ public class Fluid extends Visualizer {
             this.stop = stop;
             index = (int) (initPos / speed);
             pos = initPos;
-            points = new PVector[SPEC_SIZE * 2];
-            colors = new float[4];
+            points = new Point[SPEC_SIZE * 2];
             for (int i = 0; i < points.length; i++) {
-                points[i] = new PVector(i * SPEC_WIDTH, 0);
+                points[i] = new Point(i * SPEC_WIDTH, 0, 0);
             }
         }
         
-        void setColor(boolean complimentary) {
-            float ratio = colors[3] / 255;
-            if(complimentary){
-                stroke((255-colors[0]) * ratio, (255-colors[1]) * ratio, (255-colors[2]) * ratio);
-                fill((255-colors[0]) * ratio, (255-colors[1]) * ratio, (255-colors[2]) * ratio);
-            } else{
-                stroke(colors[0] * ratio, colors[1] * ratio, colors[2] * ratio);
-                fill(colors[0] * ratio, colors[1] * ratio, colors[2] * ratio);
-            } 
+        void setColor(float fade, float[] colors) {
+            stroke(colors[0] * fade, colors[1] * fade, colors[2] * fade);
         }        
 
         void update() {
             pos += speed;  
             if (expand) {
                 for (int i = 0; i < points.length; i++) {
-                    points[i].y -= pos / 40;
+                    points[i].y += pos / 40;
                 }
             }
             if (pos >= stop) {
                 for (int i = 0; i < points.length; i++) {
                     int fftIndex = abs(points.length / 2 - i);
-                    points[i].y = -fft.getBand(fftIndex) * volumeScale;
-                    intensity = -fft.getBand(fftIndex) * volumeScale;
-                    //                    int srcIndex = abs(points.length / 2 - i);
-                    //                    points[i].y = src.left.get(srcIndex)*200;
+                    points[i].y = getIntensity(fftIndex);
+                    points[i].intensity = getIntensity(fftIndex);
+
+                    // see comment inside Point (above botColors and topColors)
+                    // for explanation on wtf is going on here
+                    points[i].botColors = getColor(points[i].intensity, colorTrackers[0], colorTrackers[1], 40);
+                    points[i].topColors = getColor(points[i].intensity, colorTrackers[2], colorTrackers[3], 40);
                 }
                 pos = 0;
             }
         }
 
-        void drawLines(int ydir) {
+        void drawLines(int ydir, float fade) {
             pushMatrix();
 
             if (pos > 0) {
@@ -100,37 +116,37 @@ public class Fluid extends Visualizer {
                 int prevIndex;
                 if (index == 0) {
                     prevIndex = horizSamples.length - 1;
-                } 
-                else {
+                } else {
                     prevIndex = index - 1;
                 }
 
                 HorizSample prevSample = horizSamples[prevIndex];
-                if (!revolve) {
-//                    fill(0);
-                }
-                if(particles){
+                if (particles) {
                     beginShape(POINTS);
                     noFill();
-                } else{
+                } else {
                     beginShape(QUAD_STRIP);
                 }
 
                 float zEnd = prevSample.pos;
                 float zStart = currSample.pos;
-                //                if (revolve) {
-                //                    rotateZ(pos * (TWO_PI / HORIZ_SAMPLE_NUM) * currRot);    
-                //                }
                 for (int i = 0; i < points.length; i++) {
                     float xStart = currSample.points[i].x;
                     float xEnd = prevSample.points[i].x;
                     float yStart = currSample.points[i].y * ydir;
                     float yEnd = prevSample.points[i].y * ydir;
-                    if(particles){
+                    if (particles) {
                         strokeWeight(max(abs(currSample.intensity*2)*volumeScale, 1));
                     }
-                    colors = getColor(currSample.points[i].y, tracker1, tracker2, 50);
-                    setColor(ydir>=1);
+
+                    // see comment inside Point (above botColors and topColors) for
+                    // explanation on wtf is going on here
+                    if (ydir > 0) {
+                        setColor(fade, points[i].botColors);
+                    } else {
+                        setColor(fade, points[i].topColors);
+                    }
+
                     vertex(xStart, yStart, zStart);
                     vertex(xEnd, yEnd, zEnd);
                 }  
@@ -187,15 +203,12 @@ public class Fluid extends Visualizer {
                     weight *= 5;
                 }
                 strokeWeight(weight);
-
-                //                line(points[i].x, points[i].y*ydir, points[i+1].x, points[i+1].y*ydir);    
+   
                 vertex(points[i].x, points[i].y * ydir);
                 vertex(points[i+1].x, points[i+1].y * ydir);
             }
             float weight = min((points[points.length-2].y + points[points.length-1].y) / 20, 6);
             strokeWeight(weight);
-            //            line(points[points.length-2].x, points[points.length-2].y*ydir,
-            //                 points[points.length-1].x, points[points.length-1].y*ydir);
             vertex(points[points.length-2].x, points[points.length-2].y * ydir);
             vertex(points[points.length-1].x, points[points.length-1].y * ydir);
             endShape();
@@ -205,11 +218,6 @@ public class Fluid extends Visualizer {
     }
 
     synchronized void draw() {
-
-        if (revolve) {
-            currRot += angleInc;
-        }
-
         retrieveSound();
         if(blur) {
             setBackground(contrast, 60);
@@ -218,12 +226,20 @@ public class Fluid extends Visualizer {
         }
         pushMatrix();
         camera.update();
-        rotater.update();
         fill(255);
-        tracker1.incrementColor();
-        tracker2.incrementColor();  
+        for (FluidColorTracker ct : colorTrackers) {
+            ct.incrementColor();
+        }
         noFill();
         pushMatrix();
+
+        if (revolve) {
+            translate(0, 0, -130 + 300);
+        }
+
+        if (revolve) {
+            currRot += ANGLE_INC;
+        }
         
         for (int i = 0; i < VERT_SAMPLE_NUM; i++) {
             vertSamples[i].update();
@@ -231,14 +247,13 @@ public class Fluid extends Visualizer {
         for (int i = 0; i < VERT_SAMPLE_NUM; i++) {
             VertSample s = vertSamples[i];
             if (s.continueSampling) {
-//                if (revolve) {
-                    rotateZ(rotater.zRot);
-//                    rotateZ(currRot);
-//                }
-                float fade = s.pos / (VERT_SAMPLE_NUM * REFRESH);
-                tracker2.setComplementaryColor(1 - fade);
+                if (revolve) {
+                    rotateZ(currRot);
+                }
+                float fade = 1 - s.pos / (VERT_SAMPLE_NUM * REFRESH);
+                colorTrackers[0].setComplementaryColor(fade);
                 s.drawLines(1);
-                tracker1.setComplementaryColor(1 - fade);
+                colorTrackers[2].setComplementaryColor(fade);
                 s.drawLines(-1);
             }
         } 
@@ -252,10 +267,9 @@ public class Fluid extends Visualizer {
 
             int relativeIndex = (int) (s.pos / REFRESH);
 
-//            if (revolve) {
-//                rotateZ(currRot * relativeIndex);
-                  rotateZ(PHI*rotater.zRot*relativeIndex);
-//            }
+            if (revolve) {
+               rotateZ(currRot * relativeIndex);
+            }
 
             if (expand) {
                 float weight = map(s.pos, 0, s.stop, 0.8, 5);
@@ -263,20 +277,16 @@ public class Fluid extends Visualizer {
             }
             float fade;
             if (expand) {
-                fade = s.pos / (HORIZ_SAMPLE_NUM * REFRESH) / 2;
-            } 
-            else {
-                fade = s.pos / (HORIZ_SAMPLE_NUM * REFRESH);
+                fade = 1 - s.pos / (HORIZ_SAMPLE_NUM * REFRESH) / 2;
+            } else {
+                fade = 1 - s.pos / (HORIZ_SAMPLE_NUM * REFRESH);
             }
-//            tracker1.setColor(1 - fade);
-            s.drawLines(1);
-//            tracker2.setColor(1 - fade);
-            s.drawLines(-1);  
+            s.drawLines(1, fade);
+            s.drawLines(-1, fade);  
 
-//            if (revolve) {
-                rotateZ(-PHI*rotater.zRot*relativeIndex);
-//                rotateZ(-currRot * relativeIndex);
-//            }
+            if (revolve) {
+               rotateZ(-currRot * relativeIndex);
+            }
         }
 
         popMatrix();
@@ -295,10 +305,7 @@ public class Fluid extends Visualizer {
         } else {
             camera.initMoveCenter(SPEC_SIZE * SPEC_WIDTH, 0, 0, (int)frameRate);
             camera.initMoveCamera(new PVector(1.0 * SPEC_SIZE * SPEC_WIDTH, 0, -130), (int) frameRate);
-            rotater.initRotate(0, 0, 0, (int) frameRate * 10);
         }
-        rotater.autoSwitch();
-
     }
 
     void frontView() {
@@ -308,6 +315,7 @@ public class Fluid extends Visualizer {
             camX = 0;
         }
         camera.initMoveCamera(new PVector(camX, 0, -130), (int)frameRate);
+        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
     }
     
     void rearView() {
@@ -317,6 +325,7 @@ public class Fluid extends Visualizer {
             camX = 0;
         }
         camera.initMoveCamera(new PVector(camX, 0, 300), (int)frameRate);
+        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
     }
     
     void topView() { 
@@ -333,16 +342,14 @@ public class Fluid extends Visualizer {
         } else{
             camera.initMoveCenter(SPEC_SIZE * SPEC_WIDTH, 0, HORIZ_SAMPLE_NUM*REFRESH/2, (int)frameRate);
         }
+        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
     }
 
 
     class FluidColorTracker extends ColorTracker {
-
-        FluidColorTracker(float red, float green, float blue, boolean incrRed, boolean incrGreen, boolean incrBlue) {
-            super(red, green, blue);    
-            this.incrRed = incrRed;
-            this.incrGreen = incrGreen;
-            this.incrBlue = incrBlue;
+        
+        FluidColorTracker() {
+            super();
         }
 
         void setColor(float fade) {

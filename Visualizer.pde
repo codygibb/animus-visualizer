@@ -2,9 +2,7 @@ import ddf.minim.*;
 import java.util.*;
 import java.io.*;
 import ddf.minim.analysis.*;
-// some random change
 
-// more random changes!
 public abstract class Visualizer {
     final int TEXT_OFFSET = displayWidth - 200;
     final int TEXT_SEPARATION = 15;
@@ -75,7 +73,6 @@ public abstract class Visualizer {
     }
     
     float[] getColor(float intensity, ColorTracker tracker1,ColorTracker tracker2, int peak) {
-        intensity = -intensity;
         float red1 = tracker1.red;
         float green1 = tracker1.green;
         float blue1 = tracker1.blue;
@@ -90,8 +87,7 @@ public abstract class Visualizer {
         float g = green1 * shift1 + green2 * shift2;
         float b = blue1 * shift1 + blue2 * shift2;
         float alpha = min(5 + 255 * shift2, 255);
-        
-//        stroke(r, g, b, alpha);
+
         float[] result = {r, g, b, alpha};
         return result;
     }    
@@ -145,7 +141,7 @@ public abstract class Visualizer {
 
     // returns intensity of a certain index within the bandsize, and scales it with volumeScale 
     float getIntensity(int index) {
-        return abs(fft.getBand(index) * 0.8 * volumeScale);
+        return abs(fft.getBand(index) * volumeScale * 0.8);
     }
 
     void keyPressed() {
