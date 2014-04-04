@@ -179,7 +179,7 @@ class Fluid extends Visualizer {
             if (pos >= stop) {
                 for (int i = 0; i < points.length; i++) {
                     int fftIndex = abs(points.length / 2 - i);
-                    points[i].y = fft.getBand(fftIndex) * 0.5 * volumeScale;
+                    points[i].y = getIntensity(fftIndex) * 0.6;
                 }
                 pos = 0;
                 if (highlight) {
@@ -319,13 +319,6 @@ class Fluid extends Visualizer {
     void revolve() { 
         revolve = !revolve;
         currRot = 0;
-        // if (revolve) {
-        //     camera.initMoveCenter(0, 0, 0, (int)frameRate);
-        //     camera.initMoveCamera(new PVector(0, 0, -160), (int)frameRate);
-        // } else {
-        //     camera.initMoveCenter(SPEC_SIZE * SPEC_WIDTH, 0, 0, (int)frameRate);
-        //     camera.initMoveCamera(new PVector(1.0 * SPEC_SIZE * SPEC_WIDTH, 0, -130), (int) frameRate);
-        // }
         frontView = true;
         rearView = false;
         topView = false;

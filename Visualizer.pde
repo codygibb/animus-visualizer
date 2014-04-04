@@ -79,13 +79,16 @@ public abstract class Visualizer {
         }
     }
     
-    float[] getColor(float intensity, ColorTracker tracker1,ColorTracker tracker2, int peak) {
-        float red1 = tracker1.red;
-        float green1 = tracker1.green;
-        float blue1 = tracker1.blue;
-        float red2 = 255 - tracker2.red;
-        float green2 = 255 - tracker2.green;
-        float blue2 = 255 - tracker2.blue;
+    // given an intensity, two ColorTrackers and a peak (max intensity), calculates and returns an
+    // array of colors, {red, green, blue, alpha} that represents the shift from the colors of the
+    // baseTracker to the colors of the peakTracker. 
+    float[] getColor(float intensity, ColorTracker baseTracker, ColorTracker peakTracker, int peak) {
+        float red1 = baseTracker.red;
+        float green1 = baseTracker.green;
+        float blue1 = baseTracker.blue;
+        float red2 = 255 - peakTracker.red;
+        float green2 = 255 - peakTracker.green;
+        float blue2 = 255 - peakTracker.blue;
         
         float shift2 = intensity / peak;
         float shift1 = 1 - shift2;
@@ -102,7 +105,7 @@ public abstract class Visualizer {
     void displayDebugText() {
         fill(255 - contrast);
         stroke(255 - contrast);
-        textSize(14);
+        textSize(TEXT_SIZE);
         text("current frame rate: " + round(frameRate), 5, height - 25);    
         text(camera.pos.x + ", " + camera.pos.y + ", " + camera.pos.z, 5, height - 10);
     }
@@ -146,7 +149,7 @@ public abstract class Visualizer {
         }
     }
 
-    // returns intensity of a certain index within the bandsize, and scales it with volumeScale 
+    // returns intensity of a certain index within the bandsize, and scales it with volumeScale
     float getIntensity(int index) {
         return abs(fft.getBand(index) * volumeScale * 0.8);
     }
@@ -176,7 +179,6 @@ public abstract class Visualizer {
                 rearView();
                 topView = false;
                 frontView = false;
-                
                 break;
             case 't':
                 if (topView) break;

@@ -164,7 +164,7 @@ class Ring extends Visualizer {
         void updateSnd() {
             float avg = 0;
             for (int i = 0; i < indexes.length; i++) {
-                avg += fft.getBand(indexes[i]) * 0.9;  
+                avg += getIntensity(indexes[i]) * 1.1;
             }  
             avg = avg / indexes.length;
             size = avg * volumeScale;
@@ -193,7 +193,7 @@ class Ring extends Visualizer {
             float greatestMag = 0;
             if (expand) {
                 for (int i = 0; i < 50; i++) {
-                    float tempMag = fft.getBand(i) * 0.9;
+                    float tempMag = getIntensity(i) * 1.1;
                     if (tempMag > greatestMag) {
                         greatestMag = tempMag;    
                     }    
@@ -257,12 +257,13 @@ class Ring extends Visualizer {
             setBackground(contrast, 10);
         } else { 
             setBackground(contrast, 150);
-        } 
+        }
         
         if (showInterface) {
             displayHelpMenu();    
             displayDebugText();    
         }
+        
         hint(ENABLE_DEPTH_MASK);
         tracker.defineLights();
         tracker.incrementColor();

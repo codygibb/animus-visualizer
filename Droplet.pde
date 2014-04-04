@@ -155,6 +155,10 @@ class Droplet extends Visualizer {
         Point next;
         float angle;
         int size, index;
+
+        // we are re-using the same samples to draw both bottom and top - but bottom and top need
+        // different NON-COMPLEMENTARY colors. so each point keeps track of the two set of colors
+        // it will display as
         float[] botColors;
         float[] topColors;
         
