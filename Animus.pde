@@ -25,6 +25,7 @@ void setup() {
     minim = new Minim(this); 
     font = loadFont("AndaleMono-14.vlw");
     textFont(font);
+    background(0);
     
     Visualizer ring, fluid, droplet, swarm, gravity, globe;
     
@@ -32,7 +33,7 @@ void setup() {
     fluid = new Fluid(minim.getLineIn(Minim.STEREO, 512));
     droplet = new Droplet(minim.getLineIn(Minim.STEREO, 512));
 //    swarm = new Swarm(minim.getLineIn(Minim.STEREO, 256));
-////    gravity = new Gravity(minim.getLineIn(Minim.STEREO, 512));
+//    gravity = new Gravity(minim.getLineIn(Minim.STEREO, 512));
 //    globe = new Globe(minim.getLineIn(Minim.STEREO, 512));
     
     
@@ -54,7 +55,6 @@ void setup() {
     volSlider.setLimits(0.0, -2.0, 2.0);
     
     visualizers[select].setup();
-//    print(fluid.testMethod());
 }
 
 void draw() {
@@ -86,6 +86,7 @@ void draw() {
     popStyle();
     
     noLights();
+    
 }
 
 class PageDot {

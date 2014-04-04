@@ -1,7 +1,9 @@
 import ddf.minim.*; 
 
-public class Fluid extends Visualizer {
+class Fluid extends Visualizer {
     final int OPTIMAL_FRAME_RATE = 40;
+
+    @Override
     int getOptimalFrameRate() {
         return OPTIMAL_FRAME_RATE;
     }
@@ -217,7 +219,8 @@ public class Fluid extends Visualizer {
         }
     }
 
-    synchronized void draw() {
+    @Override
+    void draw() {
         retrieveSound();
         if(blur) {
             setBackground(contrast, 60);
@@ -297,27 +300,52 @@ public class Fluid extends Visualizer {
         }
     }
 
-    void revolve() { 
-        currRot = 0;
-        if (revolve) {
-            camera.initMoveCenter(0, 0, 0, (int)frameRate);
-            camera.initMoveCamera(new PVector(0, 0, -160), (int)frameRate);
-        } else {
-            camera.initMoveCenter(SPEC_SIZE * SPEC_WIDTH, 0, 0, (int)frameRate);
-            camera.initMoveCamera(new PVector(1.0 * SPEC_SIZE * SPEC_WIDTH, 0, -130), (int) frameRate);
-        }
+    @Override
+    void particles() {
+        particles = !particles;
     }
 
+    @Override
+    void highlight() {
+        highlight = !highlight;
+    }
+
+    @Override
+    void expand() {
+        expand = !expand;
+    }
+
+    @Override
+    void revolve() { 
+        revolve = !revolve;
+        currRot = 0;
+        // if (revolve) {
+        //     camera.initMoveCenter(0, 0, 0, (int)frameRate);
+        //     camera.initMoveCamera(new PVector(0, 0, -160), (int)frameRate);
+        // } else {
+        //     camera.initMoveCenter(SPEC_SIZE * SPEC_WIDTH, 0, 0, (int)frameRate);
+        //     camera.initMoveCamera(new PVector(1.0 * SPEC_SIZE * SPEC_WIDTH, 0, -130), (int) frameRate);
+        // }
+        frontView = true;
+        rearView = false;
+        topView = false;
+        frontView();
+    }
+
+    @Override
     void frontView() {
         float camX = SPEC_SIZE * SPEC_WIDTH;
         if (revolve) {
             camera.initMoveCenter(0, 0, 0, (int)frameRate);
             camX = 0;
+        } else {
+            camera.initMoveCenter(SPEC_SIZE * SPEC_WIDTH, 0, 0, (int)frameRate);
         }
         camera.initMoveCamera(new PVector(camX, 0, -130), (int)frameRate);
         camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
     }
     
+    @Override
     void rearView() {
         float camX = SPEC_SIZE * SPEC_WIDTH;
         if (revolve) {
@@ -328,6 +356,7 @@ public class Fluid extends Visualizer {
         camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
     }
     
+    @Override
     void topView() { 
         float camZ = HORIZ_SAMPLE_NUM*REFRESH/1.99;
         float camY = -150;

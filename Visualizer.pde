@@ -22,12 +22,19 @@ public abstract class Visualizer {
     boolean highlight, expand, revolve, blur, particles, rearView, topView;
     
     abstract int getOptimalFrameRate();
+    
     abstract void draw();
+
     abstract void frontView();
     abstract void rearView();
     abstract void topView();
     
-    void revolve(){}
+    abstract void particles();
+
+    abstract void highlight();
+    abstract void expand();
+    abstract void revolve();
+
     void setup() {}
     
     Visualizer(AudioInput input, String name) {
@@ -155,6 +162,7 @@ public abstract class Visualizer {
                 camera.dirSwitch();
                 break;
             case 'f':
+                if (frontView) break;
                 camera.disableAllModes();
                 frontView = !frontView;
                 frontView();
@@ -162,6 +170,7 @@ public abstract class Visualizer {
                 topView = false;
                 break;
             case 'r':
+                if (rearView) break;
                 camera.disableAllModes();
                 rearView = !rearView;
                 rearView();
@@ -170,6 +179,7 @@ public abstract class Visualizer {
                 
                 break;
             case 't':
+                if (topView) break;
                 camera.disableAllModes();
                 topView = !topView;
                 topView();
@@ -180,19 +190,18 @@ public abstract class Visualizer {
                 contrast = 255 - contrast;
                 break;
             case 'b':
-                blur = ! blur;
+                blur = !blur;
                 break;
             case 'p':
-                particles = ! particles;
+                particles();
                 break;
             case '1':
-                highlight = ! highlight;
+                highlight();
                 break;
             case '2':
-                expand = !expand; 
+                expand();
                 break;
             case '3':
-                revolve = ! revolve;
                 revolve(); 
                 break;
             default:

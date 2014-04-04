@@ -1,22 +1,34 @@
 import ddf.minim.*;
 
-public class Droplet extends Visualizer {
-    int OPTIMAL_FRAME_RATE = 35;
+class Droplet extends Visualizer {
+    final int OPTIMAL_FRAME_RATE = 35;
+
+    @Override
     int getOptimalFrameRate() {
         return OPTIMAL_FRAME_RATE;
     }
 
-    ColorTracker tracker;
-    ColorTracker tracker2;
-    Ring[] rings;
+    
     final int SPEC_SIZE = 50;
     final int SPEC_WIDTH = 7;
     final float DETAIL = 1.1; // DETAIL * radius of ring "i" = number of points in ring "i"
     final float DECAY = 0.3; // DECAY = -y per frame
     final int MAX_DECAY = 100;
     final int PEAK = 40;
+
     int dropletSize = 10;
 
+    // since we need 4 different color trackers -- base and peak colors for both
+    // bottom and top halves -- stored all dem in an array
+    // colorTrackers[0] -> base tracker for bottom half
+    // colorTrackers[1] -> peak tracker for bottom half
+    // colorTrackers[2] -> base tracker for top half
+    // colorTrackers[3] -> peak tracker for top half
+    ColorTracker[] colorTrackers;
+
+    // ColorTracker tracker;
+    // ColorTracker tracker2;
+    Ring[] rings;
     RotationTracker rotater;
 
     Droplet(AudioInput input) {
@@ -26,12 +38,15 @@ public class Droplet extends Visualizer {
         camera.setOuterBounds(-n, -n * 1.2, -n, n, n * 1.2, n);
         camera.setInnerBounds(-n / 4, 0, - n / 4, n / 4, 0, n / 4);
         camera.viewSwitch();
-        tracker = new ColorTracker();
-        tracker2 = new ColorTracker();
+        // tracker = new ColorTracker();
+        // tracker2 = new ColorTracker();
+        colorTrackers = new ColorTracker[4];
+        for (int i = 0; i < colorTrackers.length; i++) {
+            colorTrackers[i] = new ColorTracker();
+        }
         rotater = new RotationTracker();
         rings = new Ring[SPEC_SIZE];
         setupDroplet();
-        noCursor();
     }
     
     void setupDroplet(){
@@ -63,11 +78,18 @@ public class Droplet extends Visualizer {
                 points[i] = new Point(pos, angle, size, index);
             }
         }
+
+        //converts alpha value to a ratio and multplies every color by that ratio (lets us use blend modes)
+        void setColor(float[] colors) {
+            float ratio = colors[3] / 255;
+            stroke(colors[0] * ratio, colors[1] * ratio, colors[2] * ratio); 
+        }
         
         void update() {
             for (int i = 0; i < points.length; i++) {
                 points[i].update(index);
-                points[i].colors = getColor(-points[i].pos.y, tracker, tracker2, PEAK);
+                points[i].botColors = getColor(-points[i].pos.y, colorTrackers[0], colorTrackers[1], PEAK);
+                points[i].topColors = getColor(-points[i].pos.y, colorTrackers[2], colorTrackers[3], PEAK);
             }
         }
         
@@ -83,18 +105,25 @@ public class Droplet extends Visualizer {
             for (int i = 0; i < points.length + 1; i++) {
                 Point curr = points[i % points.length];
                 Point next = points[(i + 1) % points.length]; // last index -> zero index
-                curr.setColor();
+                if (ydir > 0) {
+                        setColor(curr.botColors);
+                    } else {
+                        setColor(curr.topColors);
+                    }
                 if (particles) {
-                    strokeWeight(max(abs(curr.pos.y/10), 1));
+                    strokeWeight(max(abs(curr.pos.y / 10), 1));
                 }
                 vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
                 vertex(next.pos.x, next.pos.y * ydir, next.pos.z);
                 Point oneDeeper = points[i % points.length].next;
                 if (this.index != 0) {
                     vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
-                    oneDeeper.setColor();
-                    vertex(oneDeeper.pos.x, oneDeeper.pos.y * ydir, oneDeeper.pos.z);
-                    
+                    if (ydir > 0) {
+                        setColor(oneDeeper.botColors);
+                    } else {
+                        setColor(oneDeeper.topColors);
+                    }
+                    vertex(oneDeeper.pos.x, oneDeeper.pos.y * ydir, oneDeeper.pos.z); 
                 }
             }
             
@@ -105,8 +134,13 @@ public class Droplet extends Visualizer {
 
                     // last index -> zero index
                     Point next = rings[index - 1].points[(i + 1) % rings[index - 1].points.length];
-
-                    curr.setColor();
+                    
+                    if (ydir > 0) {
+                        setColor(curr.botColors);
+                    } else {
+                        setColor(curr.topColors);
+                    }
+                    
                     vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
                     vertex(next.pos.x, next.pos.y * ydir, next.pos.z);
                 }
@@ -121,7 +155,8 @@ public class Droplet extends Visualizer {
         Point next;
         float angle;
         int size, index;
-        float[] colors;
+        float[] botColors;
+        float[] topColors;
         
         Point(EPVector pos, float angle, int size, int index) {
             this.pos = pos;
@@ -129,7 +164,8 @@ public class Droplet extends Visualizer {
             this.size = size;
             this.index = index;
             next = null;
-            colors = new float[4];
+            botColors = new float[4];
+            topColors = new float[4];
         }
         
         void update(int index) {
@@ -156,15 +192,10 @@ public class Droplet extends Visualizer {
             }
             return rings[ringIndex - 1].points[nearestIndex];
         }
-        
-        //converts alpha value to a ratio and multplies every color by that ratio (lets us use blend modes)
-        void setColor() {
-            float ratio = colors[3] / 255;
-            stroke(colors[0] * ratio, colors[1] * ratio, colors[2] * ratio); 
-        }
     }
     
-    synchronized void draw() {
+    @Override
+    void draw() {
         retrieveSound();
         if(blur) {
             setBackground(contrast, 50);
@@ -174,8 +205,9 @@ public class Droplet extends Visualizer {
         pushMatrix();
         rotater.update();
         camera.update();
-        tracker.incrementColor();
-        tracker2.incrementColor();
+        for (ColorTracker ct : colorTrackers) {
+            ct.incrementColor();
+        }
         for (int i = 0; i < rings.length; i++) {
             rings[i].update();
         }
@@ -217,27 +249,48 @@ public class Droplet extends Visualizer {
             rotateX(-rotater.xRot * mult);
         }
     }
-    
-    void frontView() {
-        camera.initMoveCamera(new PVector(0, 0, 400), (int) frameRate);
-        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
+
+    @Override
+    void particles() {
+        particles = !particles;
     }
-    
-    void rearView() {
-        // TODO
+
+    @Override
+    void highlight() {
+        highlight = !highlight;
     }
-    
-    void topView() { 
-        camera.initMoveCamera(new PVector(0, -400, 0), (int) frameRate);
-        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
+
+    @Override
+    void expand() {
+        expand = !expand;
     }
-    
-    void revolve(){
+
+    @Override
+    void revolve() { 
+        revolve = !revolve;
         rotater.autoSwitch();
         if (!revolve) {
             rotater.initRotate(0, 0, (int) frameRate * 10);    
         }
     }
+    
+    @Override
+    void frontView() {
+        camera.initMoveCamera(new PVector(0, 0, 400), (int) frameRate);
+        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
+    }
+    
+    @Override
+    void rearView() {
+        // TODO
+    }
+    
+    @Override
+    void topView() { 
+        camera.initMoveCamera(new PVector(0, -400, 0), (int) frameRate);
+        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
+    }
+ 
     void keyPressed() {
         super.keyPressed();
         switch (keyCode) {

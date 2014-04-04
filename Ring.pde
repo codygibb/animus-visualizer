@@ -1,7 +1,9 @@
 import ddf.minim.*; 
 
-public class Ring extends Visualizer {
-    int OPTIMAL_FRAME_RATE = 48;
+class Ring extends Visualizer {
+    final int OPTIMAL_FRAME_RATE = 48;
+    
+    @Override
     int getOptimalFrameRate() {
         return OPTIMAL_FRAME_RATE;
     }
@@ -39,7 +41,6 @@ public class Ring extends Visualizer {
         rotater = new RotationTracker();
         camera.viewingMode = false;
         camera.pos = new PVector(0, 0, -800);
-//        camera.pos = new PVector(0, 0, INSTANCE_NUM*REFRESH + 600);
         camera.setOuterBounds(-2000, -2000, -2000, 2000, 2000, 2000);
         
         instances = new Instance[INSTANCE_NUM];
@@ -70,7 +71,6 @@ public class Ring extends Visualizer {
                 for (int k = 0; k < indexes.length; k++) {
                     indexes[k] = i * indexes.length + k;    
                 }
-//                PVector p = new PVector(0, INIT_DIST + DIST * pow(i, 1.168));
                 PVector p = new PVector(0, INIT_DIST + DIST * pow((float)Math.E, angle));
                 int rotDir;
                 if (i % 2 == 0) {
@@ -99,11 +99,8 @@ public class Ring extends Visualizer {
                 samples[i].pos.z = pos;
                 if (isNewSample) {
                     float angle = i * (TWO_PI / samples.length);
-//                    samples[i].pos = new PVector(0, (i + 1) * DIST, 0);
-//                    PVector temp2d = new PVector(0, INIT_DIST + DIST * pow(i, 1.168));
                     PVector temp2d = new PVector(0, INIT_DIST + DIST * pow((float)Math.E, angle));
                     temp2d.rotate(samples[i].rot);
-                   // temp2d.setMag(temp2d.mag() + src.left.get(i) * 15 * volumeScale);
                     samples[i].pos = new PVector(temp2d.x, temp2d.y, 0);
                     samples[i].updateSnd();                   
                 }
@@ -111,16 +108,6 @@ public class Ring extends Visualizer {
         }
         
         void drawInstance() {
-//            float c = 255 - pos * (255.0 / stop);
-//            float c = pow((stop - pos) / stop, 5.0 / 6.0);
-            
-//            fill(c);
-
-            
-
-//            stroke((255 - tracker.red) * c, (255 - tracker.green) * c, (255 - tracker.blue) * c );
-//            stroke(c, c, c, 1);
-
             if (pos > 0 && pos < stop - speed) {
                 int prevIndex;
                 if (index == 0) {
@@ -132,7 +119,7 @@ public class Ring extends Visualizer {
                 Instance currInstance = this;
                 Instance prevInstance = instances[prevIndex];
                 
-                if(revolve){
+                if (revolve) {
                     xRot += .000001;
                     yRot += .00001;
                 } else{
@@ -140,29 +127,16 @@ public class Ring extends Visualizer {
                     yRot = 0;
                 }                    
                 
-                if(particles){
+                if (particles) {
                    beginShape(POINTS); 
                 } else { 
                     beginShape(LINES);
                 }
                 for (int i = 0; i < samples.length; i++) {
-//                    vertex(0, 0, 0);
                     samples[i].drawSample(speed, pos, stop, prevInstance.samples[i], i);  
-                    
-                    
                 }
-                endShape();
-                 
+                endShape();   
             } 
-//            translate(0, 0, pos);
-            
-            
-//            beginShape(POLYGON);
-//            noFill();
-//            for (int i = 0; i < samples.length; i++) {
-//                vertex(samples[i].pos.x, samples[i].pos.y, pos);
-//            }
-//            endShape();
         }
     }
     
@@ -242,10 +216,7 @@ public class Ring extends Visualizer {
                 strokeWeight(min(0.3 + size*3, 25));
             }
             fill(tracker.red, tracker.green, tracker.blue, size*10);
-//            sphereDetail(min((int)(size)+1, 10));
-//            beginShape(LINE);
             PVector prevPos = prevSample.pos;
-//            beginShape(LINES);
             float theta = (10*PI*index)/instances.length;
             rotation.set(pos.x, pos.y, pos.z);
             rotation.rotateX(theta*rotater.xRot);
@@ -260,15 +231,8 @@ public class Ring extends Visualizer {
                 translate(prevPos.x, prevPos.y, prevPos.z);
                 strokeWeight(1);
                 stroke(150);
-//                sphere(2);
                 popMatrix();
             }
-//            pushMatrix();
-//            translate(pos.x, pos.y, 0);
-//            fill(255);
-//            box(size / 20);
-//            popMatrix();
-            
         }
     }
     
@@ -289,12 +253,11 @@ public class Ring extends Visualizer {
 
     synchronized void draw() {
         retrieveSound();
-        if(blur){
+        if (blur) {
             setBackground(contrast, 10);
         } else { 
             setBackground(contrast, 150);
-        }
-            
+        } 
         
         if (showInterface) {
             displayHelpMenu();    
@@ -309,21 +272,15 @@ public class Ring extends Visualizer {
         camera.update();
         rotater.update();
         scale(2);
-//        rotateX(PI/2);
         stroke(255);
-//        noFill();
-//        rotateZ(millis()/10000.0);
-        
         
         if (millis() - start < stop) {
             averageSpeed = incrRot(deltaRotation);
             if (averageSpeed > maxSpeed || averageSpeed < -maxSpeed) {
-//                println("HIT MAX SPEED, THROTTLING");
                 throttlingOn = true;
                 deltaRotation = -deltaRotation;
             } else if (((averageSpeed < 0.015 && averageSpeed > 0) || (averageSpeed > -0.015 && averageSpeed < 0))
                     && throttlingOn) {
-//                println("RESET SUCCESSFUL");
                 throttlingOn = false;   
             }
         } else {
@@ -337,64 +294,59 @@ public class Ring extends Visualizer {
         for (int i = 0; i < instances.length; i++) {
             instances[i].update();
         }
+
         hint(DISABLE_DEPTH_MASK);
         for (int i = 0; i < instances.length; i++) {
             instances[i].drawInstance();
             if (instances[i].pos == 0) {
                 stroke(30);
-//                beginShape(TRIANGLE_STRIP);
-                strokeWeight(0.7);
+                strokeWeight(1);
                 fill(100); //30
                 for (int k = 0; k < instances[i].samples.length; k++) {
-//                    vertex(0, 0, -200);
                     PVector p = instances[i].samples[k].pos;
-//                    vertex(p.x, p.y, 0);
                 }
-//                endShape();    
             }
         }
-        
-        stroke(150);
-//        rotateY(millis()/10000.0);
-//        rotateX(millis()/10000.0);
-        
         popMatrix();
-        
-        
     }
 
-    void frontView() {
-        camera.initMoveCamera(new PVector(0, 0, -800), (int)frameRate);
-        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
+    @Override
+    void particles() {
+        particles = !particles;
+    }
+
+    @Override
+    void highlight() {
+        highlight = !highlight;
+    }
+
+    @Override
+    void expand() {
+        expand = !expand;
     }
     
-    void rearView() {
-        camera.initMoveCamera(new PVector(0, 0, REFRESH * INSTANCE_NUM + 600), (int)frameRate);
-        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
-    }
-    
-    void topView() { 
-        // TODO
-    }
-    
+    @Override
     void revolve(){
         rotater.autoSwitch();
         if (!revolve) {
             rotater.initRotate(0, 0, (int) frameRate * 10);    
         }
     }
-
-// case 'f': 
-//     frontalView = true;
-//     rearView = false;
-//     camera.disableAllModes();
-//     camera.initMoveCamera(new PVector(0, 0, -800), (int)frameRate);
-//     break;
-// case 'r':
-//     rearView = true;
-//     frontalView = false;
-//     camera.disableAllModes();
-//     camera.initMoveCamera(new PVector(0, 0, REFRESH * INSTANCE_NUM + 600), (int)frameRate);
-//     break;
-
+    
+    @Override
+    void frontView() {
+        camera.initMoveCamera(new PVector(0, 0, -800), (int)frameRate);
+        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
+    }
+    
+    @Override
+    void rearView() {
+        camera.initMoveCamera(new PVector(0, 0, REFRESH * INSTANCE_NUM + 600), (int)frameRate);
+        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
+    }
+    
+    @Override
+    void topView() { 
+        // TODO
+    }
 }
