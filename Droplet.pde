@@ -15,8 +15,13 @@ class Droplet extends Visualizer {
     final float DECAY = 0.3; // DECAY = -y per frame
     final int MAX_DECAY = 100;
     final int PEAK = 40;
+    final float MAX_EXPAND = 0.6;
+    final float EXPAND_RATE = 0.02;
 
     int dropletSize = 10;
+    
+    float currExpand = 0;
+    
 
     // since we need 4 different color trackers -- base and peak colors for both
     // bottom and top halves -- stored all dem in an array
@@ -113,17 +118,17 @@ class Droplet extends Visualizer {
                 if (particles) {
                     strokeWeight(max(abs(curr.pos.y / 10), 1));
                 }
-                vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
-                vertex(next.pos.x, next.pos.y * ydir, next.pos.z);
+                vertex(curr.pos.x, getExpandedY(curr) * ydir, curr.pos.z);
+                vertex(next.pos.x, getExpandedY(next) * ydir, next.pos.z);
                 Point oneDeeper = points[i % points.length].next;
                 if (this.index != 0) {
-                    vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
+                    vertex(curr.pos.x, getExpandedY(curr) * ydir, curr.pos.z);
                     if (ydir > 0) {
                         setColor(oneDeeper.botColors);
                     } else {
                         setColor(oneDeeper.topColors);
                     }
-                    vertex(oneDeeper.pos.x, oneDeeper.pos.y * ydir, oneDeeper.pos.z); 
+                    vertex(oneDeeper.pos.x, getExpandedY(oneDeeper) * ydir, oneDeeper.pos.z); 
                 }
             }
             
@@ -140,13 +145,20 @@ class Droplet extends Visualizer {
                     } else {
                         setColor(curr.topColors);
                     }
-                    
-                    vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
-                    vertex(next.pos.x, next.pos.y * ydir, next.pos.z);
+                    vertex(curr.pos.x, getExpandedY(curr) * ydir, curr.pos.z);
+                    vertex(next.pos.x, getExpandedY(next) * ydir, next.pos.z);  
                 }
             }
 
             endShape();
+        }
+        
+        float getExpandedY(Point p) {
+            if (currExpand > 0) {
+                return p.pos.y - currExpand * sqrt(sq(p.pos.x) + sq(p.pos.z));
+            } else {
+                return p.pos.y;
+            }
         }
     }
     
@@ -180,7 +192,6 @@ class Droplet extends Visualizer {
             if (pos.y > incomingSignal) {
                 pos.y = incomingSignal;    
             }
-
         }
         
         // ringIndex must not equal zero
@@ -206,6 +217,13 @@ class Droplet extends Visualizer {
         } else {
             setBackground(contrast, 150);
         }
+        
+        if (expand && currExpand < MAX_EXPAND) {
+            currExpand += EXPAND_RATE;
+        } else if (!expand && currExpand > 0) {
+            currExpand -= EXPAND_RATE;    
+        }
+
         pushMatrix();
         rotater.update();
         camera.update();
