@@ -101,7 +101,11 @@ class Droplet extends Visualizer {
         // ydir is -1 or 1: determines whether the figure is draw top up or top down
         void drawRing(int ydir) {
             noFill();
-            strokeWeight(1 + ((float) index) / SPEC_SIZE * 4);
+            if (expand) {
+                strokeWeight(1 + ((float) index) / SPEC_SIZE * 10);
+            } else {
+                strokeWeight(1 + ((float) index) / SPEC_SIZE * 4);
+            }
             if (particles) {
                 beginShape(POINTS);
             } else {
@@ -122,7 +126,7 @@ class Droplet extends Visualizer {
                 vertex(next.pos.x, getExpandedY(next) * ydir, next.pos.z);
                 Point oneDeeper = points[i % points.length].next;
                 if (this.index != 0) {
-                    vertex(curr.pos.x, getExpandedY(curr) * ydir, curr.pos.z);
+                    vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
                     if (ydir > 0) {
                         setColor(oneDeeper.botColors);
                     } else {
