@@ -124,6 +124,10 @@ class Droplet extends Visualizer {
                 }
                 vertex(curr.pos.x, getExpandedY(curr) * ydir, curr.pos.z);
                 vertex(next.pos.x, getExpandedY(next) * ydir, next.pos.z);
+                if (currExpand > 0) {
+                    vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
+                    vertex(next.pos.x, next.pos.y * ydir, next.pos.z);
+                }
                 Point oneDeeper = points[i % points.length].next;
                 if (this.index != 0) {
                     vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
