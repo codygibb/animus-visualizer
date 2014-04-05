@@ -299,14 +299,6 @@ class Ring extends Visualizer {
         hint(DISABLE_DEPTH_MASK);
         for (int i = 0; i < instances.length; i++) {
             instances[i].drawInstance();
-            if (instances[i].pos == 0) {
-                stroke(30);
-                strokeWeight(1);
-                fill(100); //30
-                for (int k = 0; k < instances[i].samples.length; k++) {
-                    PVector p = instances[i].samples[k].pos;
-                }
-            }
         }
         popMatrix();
     }

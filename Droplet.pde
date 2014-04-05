@@ -7,8 +7,7 @@ class Droplet extends Visualizer {
     int getOptimalFrameRate() {
         return OPTIMAL_FRAME_RATE;
     }
-
-    
+ 
     final int SPEC_SIZE = 50;
     final int SPEC_WIDTH = 7;
     final float DETAIL = 1.1; // DETAIL * radius of ring "i" = number of points in ring "i"
@@ -21,7 +20,6 @@ class Droplet extends Visualizer {
     int dropletSize = 10;
     
     float currExpand = 0;
-    
 
     // since we need 4 different color trackers -- base and peak colors for both
     // bottom and top halves -- stored all dem in an array
@@ -30,9 +28,7 @@ class Droplet extends Visualizer {
     // colorTrackers[2] -> base tracker for top half
     // colorTrackers[3] -> peak tracker for top half
     ColorTracker[] colorTrackers;
-
-    // ColorTracker tracker;
-    // ColorTracker tracker2;
+    
     Ring[] rings;
     RotationTracker rotater;
 
@@ -43,8 +39,6 @@ class Droplet extends Visualizer {
         camera.setOuterBounds(-n, -n * 1.2, -n, n, n * 1.2, n);
         camera.setInnerBounds(-n / 4, 0, - n / 4, n / 4, 0, n / 4);
         camera.viewSwitch();
-        // tracker = new ColorTracker();
-        // tracker2 = new ColorTracker();
         colorTrackers = new ColorTracker[4];
         for (int i = 0; i < colorTrackers.length; i++) {
             colorTrackers[i] = new ColorTracker();
@@ -80,7 +74,7 @@ class Droplet extends Visualizer {
                 float angle = TWO_PI * i / points.length;
                 EPVector pos = new EPVector(radius, 0, 0);
                 pos.rotateY(angle);
-                points[i] = new Point(pos, angle, size, index);
+                points[i] = new Point(pos, index);
             }
         }
 
@@ -115,19 +109,23 @@ class Droplet extends Visualizer {
                 Point curr = points[i % points.length];
                 Point next = points[(i + 1) % points.length]; // last index -> zero index
                 if (ydir > 0) {
-                        setColor(curr.botColors);
-                    } else {
-                        setColor(curr.topColors);
-                    }
+                    setColor(curr.botColors);
+                } else {
+                    setColor(curr.topColors);
+                }
                 if (particles) {
                     strokeWeight(max(abs(curr.pos.y / 10), 1));
                 }
                 vertex(curr.pos.x, getExpandedY(curr) * ydir, curr.pos.z);
                 vertex(next.pos.x, getExpandedY(next) * ydir, next.pos.z);
+
+                // if still expanded, draw an extra ring of points so we don't have
+                // unconnected lines hanging down
                 if (currExpand > 0) {
                     vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
                     vertex(next.pos.x, next.pos.y * ydir, next.pos.z);
                 }
+
                 Point oneDeeper = points[i % points.length].next;
                 if (this.index != 0) {
                     vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
@@ -141,6 +139,7 @@ class Droplet extends Visualizer {
             }
             
             // if auto rotating, then draws an extra smaller ring before rotating again
+            // (this makes sure that we don't have unconnected lines showing)
             if (revolve && this.index != 0) {
                 for (int i = 0; i < rings[index - 1].points.length + 1; i++) {
                     Point curr = rings[index - 1].points[i % rings[index - 1].points.length];
@@ -173,8 +172,7 @@ class Droplet extends Visualizer {
     class Point {
         EPVector pos;
         Point next;
-        float angle;
-        int size, index;
+        int index;
 
         // we are re-using the same samples to draw both bottom and top - but bottom and top need
         // different NON-COMPLEMENTARY colors. so each point keeps track of the two set of colors
@@ -182,10 +180,8 @@ class Droplet extends Visualizer {
         float[] botColors;
         float[] topColors;
         
-        Point(EPVector pos, float angle, int size, int index) {
+        Point(EPVector pos, int index) {
             this.pos = pos;
-            this.angle = angle;
-            this.size = size;
             this.index = index;
             next = null;
             botColors = new float[4];
@@ -194,6 +190,7 @@ class Droplet extends Visualizer {
         
         void update(int index) {
             if (pos.y < 0) {
+                // points decay in a downwards motion
                 pos.y = lerp(pos.y, 0, .06180339887);
             }
             float incomingSignal = -1.5 * getIntensity(index);
@@ -202,6 +199,8 @@ class Droplet extends Visualizer {
             }
         }
         
+        // finds the equivalent Point to this Point that is located on a ring
+        // one deeper than this Point's current ring
         // ringIndex must not equal zero
         Point findNearestOneDeeper(int ringIndex) {
             int nearestIndex = 0;
@@ -267,11 +266,14 @@ class Droplet extends Visualizer {
             } else {
                 order = behind;    
             }
+
+            // the first 5 rings are rotated together
             if (i % (rings.length - 1) > 5) {
                 mult = i;
             } else {
                 mult = 5;
             }
+
             rotateX(rotater.xRot * mult);
             rotateY(rotater.yRot * mult);
             rings[i % (rings.length - 1)].drawRing(order);

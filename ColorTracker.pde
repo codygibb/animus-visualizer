@@ -87,48 +87,33 @@ public class ColorTracker {
         if (fillOn) 
             fill(red, green, blue);
     }
-    
-     void defineLights() {
-         lightSpecular(red / 15, red / 15, red / 15);
-         directionalLight(0, green / 8, blue / 4, 
-                          1, 0, 0);
-         pointLight(min(red*2, 255), green / 4, blue / 4,
-                    200, -150, 0);
-         pointLight(0, 0, blue,
-                    0, 150, 200);
-         spotLight(255 - red, 255 - (green / 4), 255 - (blue / 4),
-                   0, 40, 200,
-                   0, -0.5, -0.5,
-                   PI/2, 1);
-         directionalLight(0, 0, 0,
-                          -1, 0, 0);
-                          
-//        pointLight(red, green, blue,
-//                   200, -150, 0);
-//
-//        directionalLight(red / 4, green / 4, blue / 4,
-//                         -1, 0, 0);
-//                   
-//        lightSpecular(0, 1, 2);
-//        
-//        directionalLight(0, 0, 0, //color
-//                         1, 0, 0); //position
-////
-//        spotLight(255 - red, 255 - green, 255 - blue,
-//                  0, 40, 200,
-//                  0, -0.5, -0.5,
-//                  PI/2, 0.1);
 
-///////////////////
-//        emissive(0, 0, blue);
-//        specular(0, random(0, 255), random(0, 255));
-//        directionalLight(red/10, green/10, blue/10,
-//                          0.5, 0, -1);
-//                          
-//        lightSpecular(0, 0, 0);
-//        ambientLight(0, 0, 0);
-//        directionalLight(0, 0, 0,
-//                         1, 0, 0);
-        
+    void setColor(float fade) {
+        stroke(red * fade, green * fade, blue * fade);
+    } 
+
+    void setComplementaryColor(float fade) {
+        stroke((255 - red) * fade, (255 - green) * fade, (255 - blue) * fade);
+    }
+    
+    void defineLights() {
+        lightSpecular(red / 15, red / 15, red / 15);
+
+        directionalLight(0, green / 8, blue / 4, 
+                1, 0, 0);
+        pointLight(min(red*2, 255), green / 4, blue / 4,
+                200, -150, 0);
+
+        pointLight(0, 0, blue,
+                0, 150, 200);
+
+        spotLight(255 - red, 255 - (green / 4), 255 - (blue / 4),
+                0, 40, 200,
+                0, -0.5, -0.5,
+                PI/2, 1);
+
+        directionalLight(0, 0, 0,
+                -1, 0, 0);
+
     }
 }
