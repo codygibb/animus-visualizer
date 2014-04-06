@@ -12,7 +12,7 @@ class Fluid extends Visualizer {
     final float SPEC_WIDTH = 5;
     final int HORIZ_SAMPLE_NUM = 80;
     final int VERT_SAMPLE_NUM = 30;
-    final int REFRESH = 3; 
+    final int REFRESH = 3;
     final float ANGLE_INC = 0.001;
 
     // since we need 4 different color trackers -- base and peak colors for both
@@ -261,9 +261,9 @@ class Fluid extends Visualizer {
                     rotateZ(currRot);
                 }
                 float fade = 1 - s.pos / (VERT_SAMPLE_NUM * REFRESH);
-                colorTrackers[0].setComplementaryColor(fade);
+                setComplementaryColor(fade, colorTrackers[0]);
                 s.drawLines(1);
-                colorTrackers[2].setComplementaryColor(fade);
+                setComplementaryColor(fade, colorTrackers[2]);
                 s.drawLines(-1);
             }
         } 
@@ -305,6 +305,10 @@ class Fluid extends Visualizer {
         }
 
         popMatrix();
+    }
+    
+    void setComplementaryColor(float fade, ColorTracker tracker) {
+        stroke((255 - tracker.red) * fade, (255 - tracker.green) * fade, (255 - tracker.blue) * fade);
     }
 
     @Override

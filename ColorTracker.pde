@@ -71,31 +71,6 @@ public class ColorTracker {
         blue = random(0, 255);    
     }
     
-    //sets stroke and/or fill to complementary colors of the current rgb values
-    void setComplementaryColor(boolean strokeOn, boolean fillOn) {
-        if (strokeOn)
-            stroke(255 - red, 255 - green, 255 - blue);
-        if (fillOn)
-            fill(255 - red, 255 - green, 255 - blue);
-    }
-    
-    //sets stroke and/or fill to current rgb values
-    //generally should call each frame
-    void setColor(boolean strokeOn, boolean fillOn) {
-        if (strokeOn)
-            stroke(red, green, blue);    
-        if (fillOn) 
-            fill(red, green, blue);
-    }
-
-    void setColor(float fade) {
-        stroke(red * fade, green * fade, blue * fade);
-    } 
-
-    void setComplementaryColor(float fade) {
-        stroke((255 - red) * fade, (255 - green) * fade, (255 - blue) * fade);
-    }
-    
     void defineLights() {
         lightSpecular(red / 15, red / 15, red / 15);
 

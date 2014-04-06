@@ -159,10 +159,16 @@ public abstract class Visualizer {
             // showInterface toggle handled in Animus due to static issue (processing fucking sucks)
             case 'v':
                 camera.viewSwitch(); 
+                rearView = false;
+                topView = false;
+                frontView = false;
                 break;
             case 'a':
                 camera.autoPanSwitch();
                 camera.dirSwitch();
+                rearView = false;
+                topView = false;
+                frontView = false;
                 break;
             case 'f':
                 if (frontView) break;

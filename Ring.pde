@@ -10,7 +10,7 @@ class Ring extends Visualizer {
     
     final int INSTANCE_NUM = 180; //180
     final int SPEC_SIZE = 50;
-    final float REFRESH = 1; //3
+    final float REFRESH = 1; //1
     final int SAMPLE_NUM = 50; //50
     final float ROT_SPEED = PI / 2800;
     final float DIST = PHI; //2
@@ -167,7 +167,7 @@ class Ring extends Visualizer {
                 avg += getIntensity(indexes[i]) * 1.1;
             }  
             avg = avg / indexes.length;
-            size = avg * volumeScale;
+            size = avg;
         }
         
         void drawSample(float end, float zpos, float stop, Sample prevSample, int index) {
@@ -202,7 +202,7 @@ class Ring extends Visualizer {
             if (prevSample.pos.z == 0) {
                 PVector p = new PVector(pos.x, pos.y);             
                 if (expand) {
-                    p.setMag(origMag + abs(greatestMag*volumeScale));
+                    p.setMag(origMag + abs(greatestMag));
                 }
                 pos.x = p.x;
                 pos.y = p.y;    

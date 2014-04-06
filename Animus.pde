@@ -27,17 +27,14 @@ void setup() {
     textFont(font);
     background(0);
     
-    Visualizer ring, fluid, droplet, swarm, gravity, globe;
+    Visualizer ring, fluid, droplet;
     
-    ring = new Ring(minim.getLineIn(Minim.STEREO, 256));
-    fluid = new Fluid(minim.getLineIn(Minim.STEREO, 512));
-    droplet = new Droplet(minim.getLineIn(Minim.STEREO, 512));
-//    swarm = new Swarm(minim.getLineIn(Minim.STEREO, 256));
-//    gravity = new Gravity(minim.getLineIn(Minim.STEREO, 512));
-//    globe = new Globe(minim.getLineIn(Minim.STEREO, 512));
+    AudioInput input = minim.getLineIn(Minim.STEREO, 512);
     
-    
-    
+    ring = new Ring(input);
+    fluid = new Fluid(input);
+    droplet = new Droplet(input);
+  
     visualizers = new Visualizer[] {ring, fluid, droplet};
     select = 0;
     frameRate(visualizers[select].getOptimalFrameRate());

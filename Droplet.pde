@@ -11,7 +11,7 @@ class Droplet extends Visualizer {
     final int SPEC_SIZE = 50;
     final int SPEC_WIDTH = 7;
     final float DETAIL = 1.1; // DETAIL * radius of ring "i" = number of points in ring "i"
-    final float DECAY = 0.3; // DECAY = -y per frame
+    final float DECAY = 0.25; // DECAY = -y per frame
     final int MAX_DECAY = 100;
     final int PEAK = 40;
     final float MAX_EXPAND = 0.6;
@@ -95,16 +95,16 @@ class Droplet extends Visualizer {
         // ydir is -1 or 1: determines whether the figure is draw top up or top down
         void drawRing(int ydir) {
             noFill();
-            if (expand) {
-                strokeWeight(1 + ((float) index) / SPEC_SIZE * 10);
-            } else {
-                strokeWeight(1 + ((float) index) / SPEC_SIZE * 4);
-            }
+
+            float strokeFactor = (expand) ? 4 : 2;
+            strokeWeight(1 + ((float) index) / SPEC_SIZE * strokeFactor);
+
             if (particles) {
                 beginShape(POINTS);
             } else {
                 beginShape(LINES);
             }
+            
             for (int i = 0; i < points.length + 1; i++) {
                 Point curr = points[i % points.length];
                 Point next = points[(i + 1) % points.length]; // last index -> zero index
@@ -118,13 +118,6 @@ class Droplet extends Visualizer {
                 }
                 vertex(curr.pos.x, getExpandedY(curr) * ydir, curr.pos.z);
                 vertex(next.pos.x, getExpandedY(next) * ydir, next.pos.z);
-
-                // if still expanded, draw an extra ring of points so we don't have
-                // unconnected lines hanging down
-                if (currExpand > 0) {
-                    vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
-                    vertex(next.pos.x, next.pos.y * ydir, next.pos.z);
-                }
 
                 Point oneDeeper = points[i % points.length].next;
                 if (this.index != 0) {
@@ -190,8 +183,8 @@ class Droplet extends Visualizer {
         
         void update(int index) {
             if (pos.y < 0) {
-                // points decay in a downwards motion
-                pos.y = lerp(pos.y, 0, .06180339887);
+                pos.y += DECAY + abs(pos.y / 20);
+                pos.y = min(0, pos.y);
             }
             float incomingSignal = -1.5 * getIntensity(index);
             if (pos.y > incomingSignal) {
