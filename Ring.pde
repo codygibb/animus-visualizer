@@ -36,8 +36,8 @@ class Ring extends Visualizer {
     
     public Ring(AudioInput input) {
         super(input, "Ring");
-        tracker = new ColorTracker();
-        tracker2 = new ColorTracker();
+        tracker = new ColorTracker(0.1, 0.8);
+        tracker2 = new ColorTracker(0.1, 0.8);
         rotater = new RotationTracker();
         camera.viewingMode = false;
         camera.pos = new PVector(0, 0, -800);
@@ -146,7 +146,8 @@ class Ring extends Visualizer {
         PVector pos;
         float rotSpeed, rot; 
         float origMag;  
-        int rotDir;    
+        int rotDir;
+        float[] colors;    
         
         Sample(int[] indexes, float size, PVector pos, float rotSpeed, int rotDir) {
             this.indexes = indexes;
@@ -155,6 +156,7 @@ class Ring extends Visualizer {
             this.rotSpeed = rotSpeed;
             origMag = INIT_DIST + (new PVector(pos.x, pos.y)).mag();
             this.rotDir = rotDir;
+            colors = new float[3];
         }
         
         void updateRot() {
@@ -168,10 +170,6 @@ class Ring extends Visualizer {
             }  
             avg = avg / indexes.length;
             size = avg;
-        }
-        
-        void drawSample(float end, float zpos, float stop, Sample prevSample, int index) {
-            float c = pow((stop - zpos) / stop, 5.0 / 6.0);
             
             float red1 = tracker.red;
             float green1 = tracker.green;
@@ -183,11 +181,15 @@ class Ring extends Visualizer {
             float shift2 = pos.mag() / 100;
             float shift1 = 1 - shift2;
             
-            float r = (255 - (red1 * shift1 + red2 * shift2)) * c;
-            float g = (255 - (green1 * shift1 + green2 * shift2)) * c;
-            float b = (255 - (blue1 * shift1 + blue2 * shift2)) * c;
-            
-            stroke(r, g, b);
+            colors[0] = (255 - (red1 * shift1 + red2 * shift2));
+            colors[1] = (255 - (green1 * shift1 + green2 * shift2));
+            colors[2] = (255 - (blue1 * shift1 + blue2 * shift2));
+        }
+        
+        void drawSample(float end, float zpos, float stop, Sample prevSample, int index) {
+            float fade = pow((stop - zpos) / stop, 5.0 / 6.0);
+
+            stroke(colors[0] * fade, colors[1] * fade, colors[2] * fade);
 
             float magnitude = zpos * (ADD_DIST / stop);
             float greatestMag = 0;
@@ -320,6 +322,7 @@ class Ring extends Visualizer {
     
     @Override
     void revolve(){
+        revolve = !revolve;
         rotater.autoSwitch();
         if (!revolve) {
             rotater.initRotate(0, 0, (int) frameRate * 10);    

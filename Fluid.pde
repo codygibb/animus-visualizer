@@ -32,7 +32,7 @@ class Fluid extends Visualizer {
         super(input, "Fluid");
         colorTrackers = new ColorTracker[4];
         for (int i = 0; i < colorTrackers.length; i++) {
-            colorTrackers[i] = new ColorTracker();   
+            colorTrackers[i] = new ColorTracker(0.5, 4);   
         }
         camera.setCenter(SPEC_SIZE * SPEC_WIDTH, 0, 0);
         horizSamples = new HorizSample[HORIZ_SAMPLE_NUM];

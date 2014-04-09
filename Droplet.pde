@@ -41,7 +41,7 @@ class Droplet extends Visualizer {
         camera.viewSwitch();
         colorTrackers = new ColorTracker[4];
         for (int i = 0; i < colorTrackers.length; i++) {
-            colorTrackers[i] = new ColorTracker();
+            colorTrackers[i] = new ColorTracker(0.5, 4);
         }
         rotater = new RotationTracker();
         rings = new Ring[SPEC_SIZE];
@@ -104,7 +104,7 @@ class Droplet extends Visualizer {
             } else {
                 beginShape(LINES);
             }
-            
+
             for (int i = 0; i < points.length + 1; i++) {
                 Point curr = points[i % points.length];
                 Point next = points[(i + 1) % points.length]; // last index -> zero index
@@ -118,6 +118,11 @@ class Droplet extends Visualizer {
                 }
                 vertex(curr.pos.x, getExpandedY(curr) * ydir, curr.pos.z);
                 vertex(next.pos.x, getExpandedY(next) * ydir, next.pos.z);
+
+                if (currExpand > 0) {
+                    vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
+                    vertex(next.pos.x, next.pos.y * ydir, next.pos.z);
+                }
 
                 Point oneDeeper = points[i % points.length].next;
                 if (this.index != 0) {

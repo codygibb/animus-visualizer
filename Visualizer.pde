@@ -54,10 +54,6 @@ public abstract class Visualizer {
         fft.forward(input.mix);
         volumeScale = pow(10, volSlider.getValueF());
     }
-    
-    void initFlashingMode() {
-        flashingMode = !flashingMode;    
-    }
 
     //Call at the beginning of draw to setup background
     //backgroundColor is on gray scale from 0 to 255
@@ -67,7 +63,13 @@ public abstract class Visualizer {
         if (flashingMode && beat.isKick()) {
             contrast = 255 - contrast;
             backgroundColor = contrast;    
-        } 
+        }
+
+        // flashingMode overrides opacity in order to create more blur
+        if (flashingMode) {
+            opacity = 10;
+        }
+
         fill(backgroundColor, opacity);
         rect(0, 0, width, height);
         hint(ENABLE_DEPTH_TEST);
@@ -125,12 +127,15 @@ public abstract class Visualizer {
         menuMap.put("[t] top-down view", topView);
         menuMap.put("  ", false);
         menuMap.put("Morph options:", false);
-        menuMap.put("[d] dark mode", contrast == 0);
-        menuMap.put("[b] blur mode", blur);
-        menuMap.put("[p] particle mode", particles);
         menuMap.put("[1] highlight", highlight);
         menuMap.put("[2] expand", expand);
         menuMap.put("[3] revolve", revolve);
+        menuMap.put("   ", false);
+        menuMap.put("Screen options:", false);
+        menuMap.put("[d] dark mode", contrast == 0);
+        menuMap.put("[b] blur mode", blur);
+        menuMap.put("[p] particle mode", particles);
+        menuMap.put("[x] flashing mode", flashingMode);
         
 
         int i = 1;
@@ -202,6 +207,10 @@ public abstract class Visualizer {
                 break;
             case 'p':
                 particles();
+                break;
+            case 'x':
+                flashingMode = !flashingMode;
+                blur = flashingMode;
                 break;
             case '1':
                 highlight();

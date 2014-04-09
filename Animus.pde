@@ -146,11 +146,6 @@ void keyPressed() {
                 visualizers[i].showInterface = !visualizers[i].showInterface;
             }
             break;
-        case 'x':
-            for (int i = 0; i < visualizers.length; i++) {
-                visualizers[i].initFlashingMode();    
-            }
-            break;
         default: break;
     }
     switch (keyCode) {

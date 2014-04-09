@@ -1,12 +1,14 @@
 public class ColorTracker {
-    float DELTA_MAX = 5;
-    float DELTA_MIN = 0.5;
+    float deltaMax;
+    float deltaMin;
     
     float red, green, blue;
     boolean incrRed, incrGreen, incrBlue;
     float dr, dg, db;
 
-    ColorTracker(float redStart, float greenStart, float blueStart) {
+    ColorTracker(float redStart, float greenStart, float blueStart, float deltaMin, float deltaMax) {
+        this.deltaMin = deltaMin;
+        this.deltaMax = deltaMax;
         incrRed = true;
         incrBlue = false;
         incrGreen = false;
@@ -16,14 +18,14 @@ public class ColorTracker {
         pickRandomDeltas();
     }    
     
-    ColorTracker() {
-        this(random(125, 255), random(0, 125), random(67, 200));
+    ColorTracker(float deltaMin, float deltaMax) {
+        this(random(125, 255), random(0, 125), random(67, 200), deltaMin, deltaMax);
     }
     
     void pickRandomDeltas() {
-        dr = random(DELTA_MIN, DELTA_MAX);
-        dg = random(DELTA_MIN, DELTA_MAX);
-        db = random(DELTA_MIN, DELTA_MAX);
+        dr = random(deltaMin, deltaMax);
+        dg = random(deltaMin, deltaMax);
+        db = random(deltaMin, deltaMax);
     }
     
     //call each frame to slowly change colors over time
@@ -43,15 +45,15 @@ public class ColorTracker {
         
         if (red > 255) {
             incrRed = false;
-            dr = random(DELTA_MIN, DELTA_MAX);
+            dr = random(deltaMin, deltaMax);
         }
         if (blue > 255) {
             incrBlue = false;
-            db = random(DELTA_MIN, DELTA_MAX);
+            db = random(deltaMin, deltaMax);
         }
         if (green > 255) {
             incrGreen = false;
-            dg = random(DELTA_MIN, DELTA_MAX);
+            dg = random(deltaMin, deltaMax);
         }
         if (red < 0) incrRed = true;
         if (blue < 0) incrBlue = true;
