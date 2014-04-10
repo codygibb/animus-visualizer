@@ -20,7 +20,6 @@ class Droplet extends Visualizer {
     int dropletSize = 10;
     
     float currExpand = 0;
-    int tick;
 
     // since we need 4 different color trackers -- base and peak colors for both
     // bottom and top halves -- stored all dem in an array
@@ -51,7 +50,9 @@ class Droplet extends Visualizer {
     
     void setupDroplet(){
         for (int i = 0; i < rings.length; i++) {
-            rings[i] = new Ring(SPEC_WIDTH * (i + 1), i);  
+            int radius = SPEC_WIDTH * (i + 1);
+            int pointNum = dropletSize * (i + 1);
+            rings[i] = new Ring(radius, i, pointNum);  
         }
         for (int i = rings.length - 1; i >= 0; i--) {
             for (int j = 0; j < rings[i].points.length; j++) {
@@ -63,15 +64,14 @@ class Droplet extends Visualizer {
     }
     
     class Ring {
-        int index, size, expandTick;
+        int index, expandTick;
         Point[] points;
         
         // 0 index Ring has a boost in detail
-        Ring(int radius, int index) {
+        Ring(int radius, int index, int pointNum) {
             this.index = index;
             expandTick = index;
-            size = dropletSize;
-            points = new Point[size];
+            points = new Point[pointNum];
             for (int i = 0; i < points.length; i++) {
                 float angle = TWO_PI * i / points.length;
                 EPVector pos = new EPVector(radius, 0, 0);
@@ -90,9 +90,9 @@ class Droplet extends Visualizer {
             expandTick--;
             expandTick %= SPEC_SIZE;
             for (int i = 0; i < points.length; i++) {
-                points[i].update(index);
-                points[i].botColors = getColor(-points[i].pos.y, colorTrackers[0], colorTrackers[1], PEAK);
-                points[i].topColors = getColor(-points[i].pos.y, colorTrackers[2], colorTrackers[3], PEAK);
+                points[i].update(index, expandTick);
+                points[i].botColors = getColor(-points[i].naturalY, colorTrackers[0], colorTrackers[1], PEAK);
+                points[i].topColors = getColor(-points[i].naturalY, colorTrackers[2], colorTrackers[3], PEAK);
             }
         }
         
@@ -120,23 +120,19 @@ class Droplet extends Visualizer {
                 if (particles) {
                     strokeWeight(max(abs(curr.pos.y / 10), 1));
                 }
-                vertex(curr.pos.x, getExpandedY(curr) * ydir, curr.pos.z);
-                vertex(next.pos.x, getExpandedY(next) * ydir, next.pos.z);
 
-                // if (currExpand > 0) {
-                //     vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
-                //     vertex(next.pos.x, next.pos.y * ydir, next.pos.z);
-                // }
+                vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
+                vertex(next.pos.x, next.pos.y * ydir, next.pos.z);
 
                 Point oneDeeper = points[i % points.length].next;
                 if (this.index != 0) {
-                    vertex(curr.pos.x, getExpandedY(curr) * ydir, curr.pos.z);
+                    vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
                     if (ydir > 0) {
                         setColor(oneDeeper.botColors);
                     } else {
                         setColor(oneDeeper.topColors);
                     }
-                    vertex(oneDeeper.pos.x, getExpandedY(oneDeeper) * ydir, oneDeeper.pos.z); 
+                    vertex(oneDeeper.pos.x, oneDeeper.pos.y * ydir, oneDeeper.pos.z); 
                 }
             }
             
@@ -154,26 +150,24 @@ class Droplet extends Visualizer {
                     } else {
                         setColor(curr.topColors);
                     }
-                    vertex(curr.pos.x, getExpandedY(curr) * ydir, curr.pos.z);
-                    vertex(next.pos.x, getExpandedY(next) * ydir, next.pos.z);  
+                    vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
+                    vertex(next.pos.x, next.pos.y * ydir, next.pos.z);  
                 }
             }
 
             endShape();
         }
-        
-        float getExpandedY(Point p) {
-            if (currExpand > 0) {
-                // return p.pos.y - currExpand * sqrt(sq(p.pos.x) + sq(p.pos.z));
-                return p.pos.y - currExpand * 75 * sin(TWO_PI * expandTick / SPEC_SIZE) - currExpand * 75;
-            } else {
-                return p.pos.y;
-            }
-        }
     }
     
     class Point {
         EPVector pos;
+
+        // always use point.expandedY , the expandedY will
+        // store the natural y position of the point + whatever expansion amt we need.
+        // obviously the expansion amt is zero when not expanding, so during those times
+        // expandedY will just hold the natural y position
+        float naturalY;
+
         Point next;
         int index;
 
@@ -185,21 +179,23 @@ class Droplet extends Visualizer {
         
         Point(EPVector pos, int index) {
             this.pos = pos;
+            naturalY = pos.y;
             this.index = index;
             next = null;
             botColors = new float[4];
             topColors = new float[4];
         }
         
-        void update(int index) {
-            if (pos.y < 0) {
-                pos.y += DECAY + abs(pos.y / 20);
-                pos.y = min(0, pos.y);
+        void update(int index, int expandTick) {
+            if (naturalY < 0) {
+                naturalY += DECAY + abs(naturalY / 20);
+                naturalY = min(0, naturalY);
             }
             float incomingSignal = -1.5 * getIntensity(index);
-            if (pos.y > incomingSignal) {
-                pos.y = incomingSignal;    
+            if (naturalY > incomingSignal) {
+                naturalY = incomingSignal;    
             }
+            pos.y = getExpandedY(expandTick);
         }
         
         // finds the equivalent Point to this Point that is located on a ring
@@ -216,6 +212,17 @@ class Droplet extends Visualizer {
                 }
             }
             return rings[ringIndex - 1].points[nearestIndex];
+        }
+
+        float getExpandedY(int expandTick) {
+            if (currExpand > 0) {
+                // expandTick is decremented in update. keeps the sin wave moving forward.
+                // "- currExpand * 75" so the waves don't overlap
+                float time = TWO_PI * expandTick / SPEC_SIZE;
+                return naturalY - currExpand * 75 * sin(time) - currExpand * 75;
+            } else {
+                return naturalY;
+            }
         }
     }
     
