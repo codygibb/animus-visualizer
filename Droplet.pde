@@ -20,6 +20,7 @@ class Droplet extends Visualizer {
     int dropletSize = 10;
     
     float currExpand = 0;
+    int tick;
 
     // since we need 4 different color trackers -- base and peak colors for both
     // bottom and top halves -- stored all dem in an array
@@ -62,12 +63,13 @@ class Droplet extends Visualizer {
     }
     
     class Ring {
-        int index, size;
+        int index, size, expandTick;
         Point[] points;
         
         // 0 index Ring has a boost in detail
         Ring(int radius, int index) {
             this.index = index;
+            expandTick = index;
             size = dropletSize;
             points = new Point[size];
             for (int i = 0; i < points.length; i++) {
@@ -80,11 +82,13 @@ class Droplet extends Visualizer {
 
         //converts alpha value to a ratio and multplies every color by that ratio (lets us use blend modes)
         void setColor(float[] colors) {
-            float ratio = colors[3] / 255;
+            float ratio = max(0.3, colors[3] / 255);
             stroke(colors[0] * ratio, colors[1] * ratio, colors[2] * ratio); 
         }
         
         void update() {
+            expandTick--;
+            expandTick %= SPEC_SIZE;
             for (int i = 0; i < points.length; i++) {
                 points[i].update(index);
                 points[i].botColors = getColor(-points[i].pos.y, colorTrackers[0], colorTrackers[1], PEAK);
@@ -97,8 +101,8 @@ class Droplet extends Visualizer {
             noFill();
 
             float strokeFactor = (expand) ? 4 : 2;
-            strokeWeight(1 + ((float) index) / SPEC_SIZE * strokeFactor);
-
+            // strokeWeight(1 + ((float) index) / SPEC_SIZE * strokeFactor);
+            strokeWeight(1.5);
             if (particles) {
                 beginShape(POINTS);
             } else {
@@ -119,14 +123,14 @@ class Droplet extends Visualizer {
                 vertex(curr.pos.x, getExpandedY(curr) * ydir, curr.pos.z);
                 vertex(next.pos.x, getExpandedY(next) * ydir, next.pos.z);
 
-                if (currExpand > 0) {
-                    vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
-                    vertex(next.pos.x, next.pos.y * ydir, next.pos.z);
-                }
+                // if (currExpand > 0) {
+                //     vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
+                //     vertex(next.pos.x, next.pos.y * ydir, next.pos.z);
+                // }
 
                 Point oneDeeper = points[i % points.length].next;
                 if (this.index != 0) {
-                    vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
+                    vertex(curr.pos.x, getExpandedY(curr) * ydir, curr.pos.z);
                     if (ydir > 0) {
                         setColor(oneDeeper.botColors);
                     } else {
@@ -160,7 +164,8 @@ class Droplet extends Visualizer {
         
         float getExpandedY(Point p) {
             if (currExpand > 0) {
-                return p.pos.y - currExpand * sqrt(sq(p.pos.x) + sq(p.pos.z));
+                // return p.pos.y - currExpand * sqrt(sq(p.pos.x) + sq(p.pos.z));
+                return p.pos.y - currExpand * 75 * sin(TWO_PI * expandTick / SPEC_SIZE) - currExpand * 75;
             } else {
                 return p.pos.y;
             }
@@ -222,7 +227,7 @@ class Droplet extends Visualizer {
         } else {
             setBackground(contrast, 150);
         }
-        
+
         if (expand && currExpand < MAX_EXPAND) {
             currExpand += EXPAND_RATE;
         } else if (!expand && currExpand > 0) {
