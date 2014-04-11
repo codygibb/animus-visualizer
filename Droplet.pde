@@ -88,7 +88,7 @@ class Droplet extends Visualizer {
         
         void update() {
             expandTick--;
-            expandTick %= SPEC_SIZE;
+            // expandTick %= SPEC_SIZE;
             for (int i = 0; i < points.length; i++) {
                 points[i].update(index, expandTick);
                 points[i].botColors = getColor(-points[i].naturalY, colorTrackers[0], colorTrackers[1], PEAK);
@@ -217,9 +217,11 @@ class Droplet extends Visualizer {
         float getExpandedY(int expandTick) {
             if (currExpand > 0) {
                 // expandTick is decremented in update. keeps the sin wave moving forward.
-                // "- currExpand * 75" so the waves don't overlap
-                float time = TWO_PI * expandTick / SPEC_SIZE;
-                return naturalY - currExpand * 75 * sin(time) - currExpand * 75;
+                // "- currExpand * amp" shifts the planes vertically apart so the waves don't 
+                // overlap
+                float time = TWO_PI * expandTick / SPEC_SIZE * 1.3;
+                float amp = 75 * sqrt(index * 1.0 / SPEC_SIZE);
+                return naturalY - currExpand * amp * sin(time) - currExpand * amp;
             } else {
                 return naturalY;
             }
