@@ -109,7 +109,7 @@ class Droplet extends Visualizer {
                 beginShape(LINES);
             }
 
-            for (int i = 0; i < points.length + 1; i++) {
+            for (int i = 0; i < points.length; i++) {
                 Point curr = points[i % points.length];
                 Point next = points[(i + 1) % points.length]; // last index -> zero index
                 if (ydir > 0) {
