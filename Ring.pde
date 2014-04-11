@@ -195,7 +195,7 @@ class Ring extends Visualizer {
             float greatestMag = 0;
             if (expand) {
                 for (int i = 0; i < 50; i++) {
-                    float tempMag = getIntensity(i) * 1.1;
+                    float tempMag = getIntensity(i);
                     if (tempMag > greatestMag) {
                         greatestMag = tempMag;    
                     }    
@@ -204,7 +204,8 @@ class Ring extends Visualizer {
             if (prevSample.pos.z == 0) {
                 PVector p = new PVector(pos.x, pos.y);             
                 if (expand) {
-                    p.setMag(origMag + abs(greatestMag));
+                    float mag = origMag + abs(greatestMag);
+                    p.setMag(mag);
                 }
                 pos.x = p.x;
                 pos.y = p.y;    
