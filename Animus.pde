@@ -1,8 +1,8 @@
-// ozio mofo
-
 import ddf.minim.*;
 import g4p_controls.*;
 import java.util.*;
+
+final float PHI = (1.0 + sqrt(5.0)) / 2.0;
 
 Minim minim;
 AudioInput input;
@@ -11,14 +11,11 @@ int select;
 float lastMouseX;
 float lastMouseY;
 float lastMillis;
-
 GCustomSlider volSlider;
 PFont font;
-final float PHI = (1.0+sqrt(5.0))/2.0;
-
 PageDot[] dots;
-
-int contrast = 0;
+boolean showInterface;
+int contrast;
 
 void setup() {
     size(displayWidth, displayHeight, P3D);
@@ -26,7 +23,7 @@ void setup() {
     font = loadFont("AndaleMono-14.vlw");
     textFont(font);
     background(0);
-    
+    showInterface = true;
     Visualizer ring, fluid, droplet;
     
     AudioInput input = minim.getLineIn(Minim.STEREO, 512);
@@ -55,24 +52,6 @@ void setup() {
 }
 
 void draw() {
-    contrast = visualizers[select].contrast;
-    pushStyle();
-    if (visualizers[select].showInterface) {
-        volSlider.setVisible(true);
-        for (int i = 0; i < dots.length; i++) {
-            if (i == select) {
-                fill(255);
-            } else {
-                fill(0);
-            }
-            dots[i].update();
-        }
-    } else {
-        volSlider.setVisible(false);
-    }
-
-    popStyle();
-    
     pushStyle();
     pushMatrix();
         
@@ -83,7 +62,27 @@ void draw() {
     popStyle();
     
     noLights();
-    
+
+    pushStyle();
+
+    contrast = visualizers[select].contrast;
+    if (showInterface) {
+        volSlider.setVisible(true);
+        for (int i = 0; i < dots.length; i++) {
+            if (i == select) {
+                fill(255);
+            } else {
+                fill(0);
+            }
+            dots[i].update();
+        }
+        visualizers[select].displayHelpMenu(showInterface);
+        visualizers[select].displayDebugText();
+    } else {
+        volSlider.setVisible(false);
+    }
+
+    popStyle();
 }
 
 class PageDot {
@@ -142,9 +141,7 @@ void switchVisualizer() {
 void keyPressed() {
     switch (key) {
         case 'h':
-            for (int i = 0; i < visualizers.length; i++) {
-                visualizers[i].showInterface = !visualizers[i].showInterface;
-            }
+            showInterface = !showInterface;
             break;
         default: break;
     }

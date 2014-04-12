@@ -166,24 +166,26 @@ class Ring extends Visualizer {
         void updateSnd() {
             float avg = 0;
             for (int i = 0; i < indexes.length; i++) {
-                avg += getIntensity(indexes[i]) * 1.1;
+                avg += getIntensity(indexes[i]) * 0.9;
             }  
             avg = avg / indexes.length;
             size = avg;
             
-            float red1 = tracker.red;
-            float green1 = tracker.green;
-            float blue1 = tracker.blue;
-            float red2 = tracker2.red;
-            float green2 = tracker2.green;
-            float blue2 = tracker2.blue;
+            colors = getColor(pos.mag(), 100, tracker, tracker2);
+
+            // float red1 = tracker.red;
+            // float green1 = tracker.green;
+            // float blue1 = tracker.blue;
+            // float red2 = tracker2.red;
+            // float green2 = tracker2.green;
+            // float blue2 = tracker2.blue;
             
-            float shift2 = pos.mag() / 100;
-            float shift1 = 1 - shift2;
+            // float shift2 = pos.mag() / 100;
+            // float shift1 = 1 - shift2;
             
-            colors[0] = (255 - (red1 * shift1 + red2 * shift2));
-            colors[1] = (255 - (green1 * shift1 + green2 * shift2));
-            colors[2] = (255 - (blue1 * shift1 + blue2 * shift2));
+            // colors[0] = (255 - (red1 * shift1 + red2 * shift2));
+            // colors[1] = (255 - (green1 * shift1 + green2 * shift2));
+            // colors[2] = (255 - (blue1 * shift1 + blue2 * shift2));
         }
         
         void drawSample(float end, float zpos, float stop, Sample prevSample, int index) {
@@ -260,11 +262,6 @@ class Ring extends Visualizer {
             setBackground(contrast, 10);
         } else { 
             setBackground(contrast, 150);
-        }
-        
-        if (showInterface) {
-            displayHelpMenu();    
-            displayDebugText();    
         }
         
         hint(ENABLE_DEPTH_MASK);

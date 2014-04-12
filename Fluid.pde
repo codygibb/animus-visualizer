@@ -102,8 +102,8 @@ class Fluid extends Visualizer {
 
                     // see comment inside Point (above botColors and topColors)
                     // for explanation on wtf is going on here
-                    points[i].botColors = getColor(points[i].intensity, colorTrackers[0], colorTrackers[1], 40);
-                    points[i].topColors = getColor(points[i].intensity, colorTrackers[2], colorTrackers[3], 40);
+                    points[i].botColors = getColor(points[i].intensity, 40, colorTrackers[0], colorTrackers[1]);
+                    points[i].topColors = getColor(points[i].intensity, 40, colorTrackers[2], colorTrackers[3]);
                 }
                 pos = 0;
             }
@@ -228,11 +228,6 @@ class Fluid extends Visualizer {
             setBackground(contrast, 60);
         } else {
             setBackground(contrast, 150);
-        }
-        
-        if (showInterface) {
-            displayHelpMenu();    
-            displayDebugText();
         }
         
         camera.update();

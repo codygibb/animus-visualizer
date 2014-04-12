@@ -13,24 +13,42 @@ public abstract class Visualizer {
     FFT fft;
     BeatDetect beat;
     Camera camera;
-    int contrast = 0;
+    int contrast;
     String name;
-    boolean flashingMode = false;
-    float volumeScale = 0.0;
-    boolean showInterface = true;
-    boolean frontView = true;
-    boolean highlight, expand, revolve, blur, particles, rearView, topView;
+    boolean flashingMode;
+    float volumeScale;
+    boolean blur;
     
+    
+    // visualizers must return what their optimal frame rate is. this is so that
+    // faster computers will not go crazy and update the visualizer way too fast
     abstract int getOptimalFrameRate();
     
+    // basic processing draw function, called every frame
     abstract void draw();
 
+    // the following 3 methods must implement 3 different views of the visualizer
+    // by manually moving the camera (see Camera's initMoveCamera method).
+    // these methods will be called with key presses 'f', 'r', and 't' respectively
+    // NOTE: the logical handling of switching different views is handled in the
+    // keyPressed() method of Visualizer, all these methods should ONLY implement the physical
+    // moving of the camera.
+    boolean frontView, rearView, topView;
     abstract void frontView();
     abstract void rearView();
     abstract void topView();
     
+    // implements particle mode (should just be switching boolean particles on/off in 
+    // addition to reducing the detail of a visualizer as needed - particles are expensive
+    // to render!)
+    boolean particles;
     abstract void particles();
 
+    // the following 3 methods must implement the 3 basic "drop levels" of a visualizer.
+    // usually this is just switching the booleans highlight, expand, and revolve on/off,
+    // then using these booleans in the code that draws the Visualizer to determine what
+    // should be drawn every frame
+    boolean highlight, expand, revolve;
     abstract void highlight();
     abstract void expand();
     abstract void revolve();
@@ -38,6 +56,7 @@ public abstract class Visualizer {
     void setup() {}
     
     Visualizer(AudioInput input, String name) {
+        frontView = true;
         this.input = input;
         src = (AudioSource)input;
         fft = new FFT(input.bufferSize(), input.sampleRate());
@@ -55,8 +74,10 @@ public abstract class Visualizer {
         volumeScale = pow(10, volSlider.getValueF());
     }
 
-    //Call at the beginning of draw to setup background
-    //backgroundColor is on gray scale from 0 to 255
+    // Call at the beginning of draw to setup background
+    // backgroundColor is on gray scale from 0 to 255
+    // opacity is on a scale from 0 to 255, where 0 is the max amt of blur, and
+    // 255 is no blur at all
     void setBackground(int backgroundColor, int opacity) {
         hint(DISABLE_DEPTH_TEST);
         noStroke();
@@ -81,10 +102,11 @@ public abstract class Visualizer {
         }
     }
     
-    // given an intensity, two ColorTrackers and a peak (max intensity), calculates and returns an
+    // given an intensity, a peak (max intensity), and two ColorTrackers, calculates and returns an
     // array of colors, {red, green, blue, alpha} that represents the shift from the colors of the
-    // baseTracker to the colors of the peakTracker. 
-    float[] getColor(float intensity, ColorTracker baseTracker, ColorTracker peakTracker, int peak) {
+    // baseTracker to the colors of the peakTracker. the alpha value is based on the instensity 
+    // so that the baseTracker's colors will appear darker/fainter. ignore it as needed
+    float[] getColor(float intensity, int peak, ColorTracker baseTracker, ColorTracker peakTracker) {
         float red1 = baseTracker.red;
         float green1 = baseTracker.green;
         float blue1 = baseTracker.blue;
@@ -105,14 +127,18 @@ public abstract class Visualizer {
     }    
 
     void displayDebugText() {
-        fill(255 - contrast);
-        stroke(255 - contrast);
         textSize(TEXT_SIZE);
+        textAlign(LEFT, TOP);
+        fill(255 - contrast);
         text("current frame rate: " + round(frameRate), 5, height - 25);    
         text(camera.pos.x + ", " + camera.pos.y + ", " + camera.pos.z, 5, height - 10);
     }
 
-    void displayHelpMenu() {
+    // called by Animus (essentially main). since the displaying the help menu is global
+    // to all visualizers, Animus handles that functionality and lets each Visualizer
+    // know whether to display a help menu or not. we had to do it this way because
+    // processing doesn't allow for static variables :(
+    void displayHelpMenu(boolean showInterface) {
         textSize(TEXT_SIZE);
         textAlign(LEFT, TOP);
 
@@ -136,7 +162,6 @@ public abstract class Visualizer {
         menuMap.put("[b] blur mode", blur);
         menuMap.put("[p] particle mode", particles);
         menuMap.put("[x] flashing mode", flashingMode);
-        
 
         int i = 1;
         for (String textKey : menuMap.keySet()) {
@@ -144,6 +169,10 @@ public abstract class Visualizer {
             text(textKey, TEXT_OFFSET, i * TEXT_SEPARATION);
             i++;
         }
+
+        textAlign(CENTER, TOP);
+        fill(255 - contrast);
+        text(name, displayWidth / 2, TEXT_SEPARATION);
     }
 
     void toggleTextColor(boolean toggled) {
@@ -161,7 +190,8 @@ public abstract class Visualizer {
 
     void keyPressed() {
         switch (key) {
-            // showInterface toggle handled in Animus due to static issue (processing fucking sucks)
+            // showInterface toggle handled in Animus due to not being able to
+            // use static variables (processing fucking sucks!)
             case 'v':
                 camera.viewSwitch(); 
                 rearView = false;

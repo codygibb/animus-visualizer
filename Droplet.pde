@@ -82,7 +82,8 @@ class Droplet extends Visualizer {
 
         //converts alpha value to a ratio and multplies every color by that ratio (lets us use blend modes)
         void setColor(float[] colors) {
-            float ratio = max(0.3, colors[3] / 255);
+            // float ratio = max(0.3, colors[3] / 255);
+            float ratio = 1 - (1.0 * index / SPEC_SIZE);
             stroke(colors[0] * ratio, colors[1] * ratio, colors[2] * ratio); 
         }
         
@@ -91,8 +92,8 @@ class Droplet extends Visualizer {
             // expandTick %= SPEC_SIZE;
             for (int i = 0; i < points.length; i++) {
                 points[i].update(index, expandTick);
-                points[i].botColors = getColor(-points[i].naturalY, colorTrackers[0], colorTrackers[1], PEAK);
-                points[i].topColors = getColor(-points[i].naturalY, colorTrackers[2], colorTrackers[3], PEAK);
+                points[i].botColors = getColor(-points[i].naturalY, PEAK, colorTrackers[0], colorTrackers[1]);
+                points[i].topColors = getColor(-points[i].naturalY, PEAK, colorTrackers[2], colorTrackers[3]);
             }
         }
         
@@ -262,11 +263,6 @@ class Droplet extends Visualizer {
         } 
 
         popMatrix();
-        
-        if (showInterface) {
-            displayDebugText();
-            displayHelpMenu();
-        }
     }
     
     void drawInOrder(int front, int behind) {
