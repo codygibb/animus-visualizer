@@ -8,17 +8,17 @@ class Ring extends Visualizer {
         return OPTIMAL_FRAME_RATE;
     }
     
-    final int INSTANCE_NUM = 180; //180
+    final int SAMPLE_NUM = 180;
     final int SPEC_SIZE = 50;
-    final float REFRESH = 1; //1
-    final int SAMPLE_NUM = 50; //50
+    final float REFRESH = 1;
     final float ROT_SPEED = PI / 2800;
-    final float DIST = PHI; //2
+    final float DIST = PHI * 2; //PHI
     final float ADD_DIST = -10; //-10
-    final float INIT_DIST = 10;
+    final float INIT_DIST = 20; // 10
     final float MAX_TIME = 2000; //in milliseconds
+    final float MAX_SPEED = 0.2;
     RotationTracker rotater;
-    EPVector rotation; //handles rotating the verticies when revolve is turned on
+    EPVector rotationVector; //handles rotating the verticies when revolve is turned on
     float xRot;
     float yRot;
     
@@ -26,13 +26,13 @@ class Ring extends Visualizer {
     
     ColorTracker tracker;
     ColorTracker tracker2;
-    Instance[] instances;
+    Sample[] samples;
     
     float start = 0;
     float stop = 0;
     float averageSpeed = 0;
     boolean throttlingOn = false;
-    float maxSpeed = 0.2;
+    
     
     public Ring(AudioInput input) {
         super(input, "Ring");
@@ -41,36 +41,31 @@ class Ring extends Visualizer {
         rotater = new RotationTracker();
         camera.viewingMode = false;
         camera.pos = new PVector(0, 0, -800);
-        camera.setOuterBounds(-2000, -2000, -2000, 2000, 2000, 2000);
+        camera.setOuterBounds(-1000, -1000, -1000, 1000, 1000, 1000);
         
-        instances = new Instance[INSTANCE_NUM];
-        for (int i = 0; i < instances.length; i++) {
-            instances[i] = new Instance(i * REFRESH, REFRESH, INSTANCE_NUM * REFRESH, SAMPLE_NUM, SPEC_SIZE / SAMPLE_NUM, i);
+        samples = new Sample[SAMPLE_NUM];
+        for (int i = 0; i < samples.length; i++) {
+            samples[i] = new Sample(i * REFRESH, SAMPLE_NUM * REFRESH, SPEC_SIZE, i);
         }
-        rotation = new EPVector();
+        rotationVector = new EPVector();
         start = millis();
     }    
     
-    class Instance {
-        Sample[] samples;
-        float pos, speed, stop, rot, rotSpeed;
+    // Samples are slices of the sound
+    class Sample {
+        Point[] points;
+        float pos, stop, rot, rotSpeed;
         int index;
         
-        //sampleNum is number of orbs, indexRange is the number of fft indexes each orb will include
-        Instance(float pos, float speed, float stop, int sampleNum, int indexRange, int index) {
+        Sample(float pos, float stop, int pointNum, int index) {
             this.pos = pos;
-            this.speed = speed;
             this.stop = stop;
             this.index = index;
             
-            samples = new Sample[sampleNum];
-            for (int i = 0; i < samples.length; i++) {
-                float angle = i * (TWO_PI / samples.length);
+            points = new Point[pointNum];
+            for (int i = 0; i < points.length; i++) {
+                float angle = i * (TWO_PI / points.length);
                 
-                int[] indexes = new int[indexRange];
-                for (int k = 0; k < indexes.length; k++) {
-                    indexes[k] = i * indexes.length + k;    
-                }
                 PVector p = new PVector(0, INIT_DIST + DIST * pow((float)Math.E, angle));
                 int rotDir;
                 if (i % 2 == 0) {
@@ -79,50 +74,57 @@ class Ring extends Visualizer {
                     rotDir = -1;
                 }
                 
-                samples[i] = new Sample(indexes, 5, p, pow(samples.length - i, 1.168) * ROT_SPEED, rotDir);
-
+                points[i] = new Point(i, p, pow(points.length - i, 1.168) * ROT_SPEED, rotDir);
             }
         }
         
         void update() {
-            pos += speed;
+            pos += REFRESH;      
             
-            
-            boolean isNewSample = false;
+            boolean isNewPoint = false;
+            float greatestMag = 0.0;
             if (pos >= stop) {
                 pos = 0;
-                isNewSample = true;
+                isNewPoint = true;
+                if (expand) {
+                    greatestMag = getGreatestMag();
+                }
             }
             
-            for (int i = 0; i < samples.length; i++) {
-                samples[i].updateRot();
-                samples[i].pos.z = pos;
-                if (isNewSample) {
-                    float angle = i * (TWO_PI / samples.length);
+            for (int i = 0; i < points.length; i++) {
+                Point p = points[i];
+                p.updateRot();
+                p.pos.z = pos;
+                if (isNewPoint) {
+                    float angle = i * (TWO_PI / points.length);
                     PVector temp2d = new PVector(0, INIT_DIST + DIST * pow((float)Math.E, angle));
-                    temp2d.rotate(samples[i].rot);
-                    samples[i].pos = new PVector(temp2d.x, temp2d.y, 0);
-                    samples[i].updateSnd();                   
+                    temp2d.rotate(p.rot);
+                    p.pos = new PVector(temp2d.x, temp2d.y, 0);
+                    p.updateSnd(greatestMag);
+                    if (expand) {
+                        p.strokeWeight = min(0.3 + p.size, 7);
+                    } else {
+                        p.strokeWeight = min(0.3 + p.size * 3, 25);
+                    }   
                 }
             } 
         }
         
-        void drawInstance() {
-            if (pos > 0 && pos < stop - speed) {
+        void drawSample() {
+            if (pos > 0 && pos < stop - REFRESH) {
                 int prevIndex;
                 if (index == 0) {
-                    prevIndex = instances.length - 1;
+                    prevIndex = samples.length - 1;
                 } else {
                     prevIndex = index - 1;
                 }
                 
-                Instance currInstance = this;
-                Instance prevInstance = instances[prevIndex];
+                Sample prevSample = samples[prevIndex];
                 
                 if (revolve) {
                     xRot += .000001;
                     yRot += .00001;
-                } else{
+                } else {
                     xRot = 0;
                     yRot = 0;
                 }                    
@@ -132,78 +134,47 @@ class Ring extends Visualizer {
                 } else { 
                     beginShape(LINES);
                 }
-                for (int i = 0; i < samples.length; i++) {
-                    samples[i].drawSample(speed, pos, stop, prevInstance.samples[i], i);  
+                for (int i = 0; i < points.length; i++) {
+                    points[i].drawPoint(pos, stop, prevSample.points[i], i);  
                 }
                 endShape();   
             } 
         }
     }
     
-    class Sample {
-        int[] indexes;
-        float size;
+    class Point {
+        int index, rotDir;
         PVector pos;
-        float rotSpeed, rot; 
-        float origMag;  
-        int rotDir;
-        float[] colors;    
+        float size, rotSpeed, rot, origMag, greatestMag, strokeWeight;
+        float[] colors;
         
-        Sample(int[] indexes, float size, PVector pos, float rotSpeed, int rotDir) {
-            this.indexes = indexes;
-            this.size = size;
+        Point(int index, PVector pos, float rotSpeed, int rotDir) {
+            this.index = index;
             this.pos = pos;
             this.rotSpeed = rotSpeed;
             origMag = INIT_DIST + (new PVector(pos.x, pos.y)).mag();
             this.rotDir = rotDir;
-            colors = new float[3];
+            colors = new float[4];
         }
         
         void updateRot() {
             rot += rotSpeed * rotDir;
         }
         
-        void updateSnd() {
-            float avg = 0;
-            for (int i = 0; i < indexes.length; i++) {
-                avg += getIntensity(indexes[i]) * 0.9;
-            }  
-            avg = avg / indexes.length;
-            size = avg;
-            
-            colors = getColor(pos.mag(), 100, tracker, tracker2);
-
-            // float red1 = tracker.red;
-            // float green1 = tracker.green;
-            // float blue1 = tracker.blue;
-            // float red2 = tracker2.red;
-            // float green2 = tracker2.green;
-            // float blue2 = tracker2.blue;
-            
-            // float shift2 = pos.mag() / 100;
-            // float shift1 = 1 - shift2;
-            
-            // colors[0] = (255 - (red1 * shift1 + red2 * shift2));
-            // colors[1] = (255 - (green1 * shift1 + green2 * shift2));
-            // colors[2] = (255 - (blue1 * shift1 + blue2 * shift2));
+        void updateSnd(float greatestMag) {
+            this.greatestMag = greatestMag;
+            size = getIntensity(index) * 0.9;
+            colors = getColor(pos.mag(), 200, tracker, tracker2);
         }
         
-        void drawSample(float end, float zpos, float stop, Sample prevSample, int index) {
+        void drawPoint(float zpos, float stop, Point prevPoint, int index) {
             float fade = pow((stop - zpos) / stop, 5.0 / 6.0);
 
             stroke(colors[0] * fade, colors[1] * fade, colors[2] * fade);
 
             float magnitude = zpos * (ADD_DIST / stop);
-            float greatestMag = 0;
-            if (expand) {
-                for (int i = 0; i < 50; i++) {
-                    float tempMag = getIntensity(i);
-                    if (tempMag > greatestMag) {
-                        greatestMag = tempMag;    
-                    }    
-                }
-            }
-            if (prevSample.pos.z == 0) {
+            
+            if (prevPoint.pos.z == 0) {
                 PVector p = new PVector(pos.x, pos.y);             
                 if (expand) {
                     float mag = origMag + abs(greatestMag);
@@ -215,45 +186,28 @@ class Ring extends Visualizer {
                 pos.setMag(pos.mag() + magnitude);
             }
             
-            if (expand) {
-                strokeWeight(min(0.3 + size, 7));
-            } else {
-                strokeWeight(min(0.3 + size*3, 25));
-            }
-            fill(tracker.red, tracker.green, tracker.blue, size*10);
-            PVector prevPos = prevSample.pos;
-            float theta = (10*PI*index)/instances.length;
-            rotation.set(pos.x, pos.y, pos.z);
-            rotation.rotateX(theta*rotater.xRot);
-            rotation.rotateY(theta*rotater.yRot);
-            vertex(rotation.x, rotation.y, rotation.z); 
-            rotation.set(prevPos.x, prevPos.y, prevPos.z); //reuse the same EPVector for memory
-            rotation.rotateX(theta*rotater.xRot);
-            rotation.rotateY(theta*rotater.yRot);
-            vertex(rotation.x, rotation.y, rotation.z);
-            if (prevPos.z == 0) {
-                pushMatrix();
-                translate(prevPos.x, prevPos.y, prevPos.z);
-                strokeWeight(1);
-                stroke(150);
-                popMatrix();
-            }
+            // if (expand) {
+            //     strokeWeight(min(0.3 + size, 7));
+            // } else {
+            //     strokeWeight(min(0.3 + size * 3, 25));
+            // }
+            strokeWeight(strokeWeight);
+            // fill(tracker.red, tracker.green, tracker.blue, size * 10);
+            PVector prevPos = prevPoint.pos;
+            float theta = (10 * PI * index) / samples.length;
+
+            rotationVector.set(pos.x, pos.y, pos.z);
+            rotationVector.rotateX(theta * rotater.xRot);
+            rotationVector.rotateY(theta * rotater.yRot);
+
+            vertex(rotationVector.x, rotationVector.y, rotationVector.z); 
+
+            rotationVector.set(prevPos.x, prevPos.y, prevPos.z);
+            rotationVector.rotateX(theta * rotater.xRot);
+            rotationVector.rotateY(theta * rotater.yRot);
+
+            vertex(rotationVector.x, rotationVector.y, rotationVector.z);
         }
-    }
-    
-    float incrRot(float increment) {
-        float total = 0;
-        float count = 0;
-        for (int i = 0; i < instances.length; i++) {
-            Instance foo = instances[i];
-            for (int j = 0; j < foo.samples.length; j++) {
-                Sample s = foo.samples[j];
-                s.rotSpeed += increment;
-                total += s.rotSpeed;   
-                count++;     
-            }
-        }
-        return total / count;
     }
 
     synchronized void draw() {
@@ -265,19 +219,18 @@ class Ring extends Visualizer {
         }
         
         hint(ENABLE_DEPTH_MASK);
-        tracker.defineLights();
         tracker.incrementColor();
         tracker2.incrementColor();
         pushMatrix();
 
         camera.update();
         rotater.update();
-        scale(2);
+        // scale(2);
         stroke(255);
         
         if (millis() - start < stop) {
             averageSpeed = incrRot(deltaRotation);
-            if (averageSpeed > maxSpeed || averageSpeed < -maxSpeed) {
+            if (averageSpeed > MAX_SPEED || averageSpeed < -MAX_SPEED) {
                 throttlingOn = true;
                 deltaRotation = -deltaRotation;
             } else if (((averageSpeed < 0.015 && averageSpeed > 0) || (averageSpeed > -0.015 && averageSpeed < 0))
@@ -292,15 +245,42 @@ class Ring extends Visualizer {
             }
         }
 
-        for (int i = 0; i < instances.length; i++) {
-            instances[i].update();
+        for (int i = 0; i < samples.length; i++) {
+            samples[i].update();
         }
 
         hint(DISABLE_DEPTH_MASK);
-        for (int i = 0; i < instances.length; i++) {
-            instances[i].drawInstance();
+        for (int i = 0; i < samples.length; i++) {
+            samples[i].drawSample();
         }
         popMatrix();
+    }
+
+    float getGreatestMag() {
+        float greatestMag = 0;
+        if (expand) {
+            for (int i = 0; i < 50; i++) {
+                float tempMag = getIntensity(i);
+                if (tempMag > greatestMag) {
+                    greatestMag = tempMag;    
+                }    
+            }
+        }
+        return greatestMag;
+    }
+
+    // returns avg rotation of all points
+    float incrRot(float increment) {
+        float total = 0;
+        float count = 0;
+        for (Sample sample : samples) {
+            for (Point point : sample.points) {
+                point.rotSpeed += increment;
+                total += point.rotSpeed;   
+                count++;     
+            }
+        }
+        return total / count;
     }
 
     @Override
@@ -335,7 +315,7 @@ class Ring extends Visualizer {
     
     @Override
     void rearView() {
-        camera.initMoveCamera(new PVector(0, 0, REFRESH * INSTANCE_NUM + 600), (int)frameRate);
+        camera.initMoveCamera(new PVector(0, 0, REFRESH * SAMPLE_NUM + 600), (int)frameRate);
         camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
     }
     
