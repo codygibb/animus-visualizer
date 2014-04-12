@@ -55,24 +55,28 @@ void draw() {
     pushStyle();
     pushMatrix();
         
-        visualizers[select].draw();
-        blendMode(BLEND);
+    visualizers[select].draw();
+    blendMode(BLEND);
         
     popMatrix();
     popStyle();
     
     noLights();
 
-    pushStyle();
-
     contrast = visualizers[select].contrast;
     if (showInterface) {
         volSlider.setVisible(true);
         for (int i = 0; i < dots.length; i++) {
             if (i == select) {
-                fill(255);
+                fill(255 - contrast);
             } else {
-                fill(0);
+                fill(contrast);
+            }
+            if (dots[i].overDot) {
+                textSize(12);
+                textAlign(CENTER, TOP);
+                fill(255 - contrast);
+                text(dots[i].name, dots[i].x, dots[i].y - 20);
             }
             dots[i].update();
         }
@@ -81,8 +85,6 @@ void draw() {
     } else {
         volSlider.setVisible(false);
     }
-
-    popStyle();
 }
 
 class PageDot {
@@ -117,7 +119,7 @@ void mousePressed() {
     for (int i = 0; i < dots.length; i++) {
         if (dots[i].overDot) {
             select = i;
-            break;    
+            break;
         }
     }        
 }
@@ -143,24 +145,24 @@ void keyPressed() {
         case 'h':
             showInterface = !showInterface;
             break;
-        default: break;
+        default:
+            break;
     }
     switch (keyCode) {
-        case 37:
+        case 37: // left arrow key
             select--;
             if (select < 0) {
                 select = visualizers.length - 1;
             }
             switchVisualizer();
-            frameRate(visualizers[select].getOptimalFrameRate());
             break;
-        case 39:
+        case 39: // right arrow key
             select++;
             select %= visualizers.length;
             switchVisualizer();
-            frameRate(visualizers[select].getOptimalFrameRate());
             break;
-        default: break;
+        default:
+            break;
     }
     visualizers[select].keyPressed();
 }
