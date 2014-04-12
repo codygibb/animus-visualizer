@@ -82,9 +82,10 @@ class Droplet extends Visualizer {
 
         //converts alpha value to a ratio and multplies every color by that ratio (lets us use blend modes)
         void setColor(float[] colors) {
-            // float ratio = max(0.3, colors[3] / 255);
-            float ratio = 1 - (1.0 * index / SPEC_SIZE);
-            stroke(colors[0] * ratio, colors[1] * ratio, colors[2] * ratio); 
+            // slightly fades the outer edges of the plane
+            float fade = pow((SPEC_SIZE - index) * 1.0 / SPEC_SIZE, 5.0 / 6.0);
+            
+            stroke(colors[0] * fade, colors[1] * fade, colors[2] * fade); 
         }
         
         void update() {
