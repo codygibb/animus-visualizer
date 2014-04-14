@@ -54,7 +54,8 @@ void setup() {
 void draw() {
     pushStyle();
     pushMatrix();
-        
+    
+    visualizers[select].retrieveSound();
     visualizers[select].draw();
     blendMode(BLEND);
         

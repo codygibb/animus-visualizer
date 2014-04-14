@@ -222,8 +222,6 @@ class Fluid extends Visualizer {
 
     @Override
     void draw() {
-        retrieveSound();
-        
         if(blur) {
             setBackground(contrast, 60);
         } else {

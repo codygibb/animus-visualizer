@@ -84,7 +84,7 @@ class Droplet extends Visualizer {
         void setColor(float[] colors) {
             // slightly fades the outer edges of the plane
             float fade = pow((SPEC_SIZE - index) * 1.0 / SPEC_SIZE, 5.0 / 6.0);
-            
+
             stroke(colors[0] * fade, colors[1] * fade, colors[2] * fade); 
         }
         
@@ -232,8 +232,7 @@ class Droplet extends Visualizer {
     
     @Override
     void draw() {
-        retrieveSound();
-        if(blur) {
+        if (blur) {
             setBackground(contrast, 50);
         } else {
             setBackground(contrast, 150);

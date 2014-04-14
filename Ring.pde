@@ -211,7 +211,6 @@ class Ring extends Visualizer {
     }
 
     synchronized void draw() {
-        retrieveSound();
         if (blur) {
             setBackground(contrast, 10);
         } else { 
