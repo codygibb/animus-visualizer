@@ -14,7 +14,6 @@ class Droplet extends Visualizer {
     final float DECAY = 0.25; // DECAY = -y per frame
     final int MAX_DECAY = 100;
     final int PEAK = 40;
-    final float MAX_EXPAND = 0.6;
     final float EXPAND_RATE = 0.02;
 
     int dropletSize = 10;
@@ -84,7 +83,9 @@ class Droplet extends Visualizer {
         void setColor(float[] colors) {
             // slightly fades the outer edges of the plane
             float fade = pow((SPEC_SIZE - index) * 1.0 / SPEC_SIZE, 5.0 / 6.0);
-
+            fade *= (colors[3] / 255);
+            fade += currExpand;
+            fade = min(fade, 1);
             stroke(colors[0] * fade, colors[1] * fade, colors[2] * fade); 
         }
         
@@ -222,7 +223,7 @@ class Droplet extends Visualizer {
                 // "- currExpand * amp" shifts the planes vertically apart so the waves don't 
                 // overlap
                 float time = TWO_PI * expandTick / SPEC_SIZE * 1.3;
-                float amp = 75 * sqrt(index * 1.0 / SPEC_SIZE);
+                float amp = 40 * sqrt(index * 1.0 / SPEC_SIZE);
                 return naturalY - currExpand * amp * sin(time) - currExpand * amp;
             } else {
                 return naturalY;
@@ -238,10 +239,18 @@ class Droplet extends Visualizer {
             setBackground(contrast, 150);
         }
 
-        if (expand && currExpand < MAX_EXPAND) {
+        if (expand && currExpand < 1) {
             currExpand += EXPAND_RATE;
         } else if (!expand && currExpand > 0) {
             currExpand -= EXPAND_RATE;    
+        }
+
+        if (!expand && currExpand < 0) {
+            currExpand = 0;
+        }
+
+        if (expand && currExpand > 1) {
+            currExpand = 1;
         }
 
         pushMatrix();
@@ -333,6 +342,10 @@ class Droplet extends Visualizer {
  
     void keyPressed() {
         super.keyPressed();
+        switch (key) {
+            case ' ':
+                println(currExpand);
+        }
         switch (keyCode) {
             case 38:
                 dropletSize += 2;
