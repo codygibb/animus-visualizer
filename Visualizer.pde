@@ -67,7 +67,6 @@ public abstract class Visualizer {
         this.name = name;
     }
     
-    //Call at the beginning of draw
     void retrieveSound() {
         beat.detect(input.mix);
         fft.forward(input.mix);
@@ -120,7 +119,7 @@ public abstract class Visualizer {
         float r = red1 * shift1 + red2 * shift2;
         float g = green1 * shift1 + green2 * shift2;
         float b = blue1 * shift1 + blue2 * shift2;
-        float alpha = min(5 + 255 * shift2, 255);
+        float alpha = min(255 * shift2, 255);
 
         float[] result = {r, g, b, alpha};
         return result;
@@ -186,6 +185,17 @@ public abstract class Visualizer {
     // returns intensity of a certain index within the bandsize, and scales it with volumeScale
     float getIntensity(int index) {
         return abs(fft.getBand(index) * volumeScale * 0.8);
+    }
+
+    float getGreatestMag(int maxFreq) {
+        float greatestMag = 0;
+        for (int i = 0; i < maxFreq; i++) {
+            float tempMag = getIntensity(i);
+            if (tempMag > greatestMag) {
+                greatestMag = tempMag;    
+            }    
+        }
+        return greatestMag;
     }
 
     void keyPressed() {
