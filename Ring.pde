@@ -87,7 +87,7 @@ class Ring extends Visualizer {
                 pos = 0;
                 isNewPoint = true;
                 if (expand) {
-                    greatestMag = getGreatestMag();
+                    greatestMag = getGreatestMag(50);
                 }
             }
             
@@ -253,19 +253,6 @@ class Ring extends Visualizer {
             samples[i].drawSample();
         }
         popMatrix();
-    }
-
-    float getGreatestMag() {
-        float greatestMag = 0;
-        if (expand) {
-            for (int i = 0; i < 50; i++) {
-                float tempMag = getIntensity(i);
-                if (tempMag > greatestMag) {
-                    greatestMag = tempMag;    
-                }    
-            }
-        }
-        return greatestMag;
     }
 
     // returns avg rotation of all points
