@@ -15,8 +15,9 @@ class Droplet extends Visualizer {
     final int MAX_DECAY = 100;
     final int PEAK = 40;
     final float EXPAND_RATE = 0.02;
+    final float HIGHLIGHT_POINT_STOP = 80;
 
-    int dropletSize = 10;
+    int dropletSize = 6;
     
     float currExpand = 0;
 
@@ -56,7 +57,7 @@ class Droplet extends Visualizer {
         for (int i = rings.length - 1; i >= 0; i--) {
             for (int j = 0; j < rings[i].points.length; j++) {
                 if (i != 0) {
-                    rings[i].points[j].next = rings[i].points[j].findNearestOneDeeper(i);
+                    rings[i].points[j].oneDeeper = rings[i].points[j].findNearestOneDeeper(i);
                 }
             }
         }
@@ -65,11 +66,17 @@ class Droplet extends Visualizer {
     class Ring {
         int index, expandTick;
         Point[] points;
+        HighlightPoint[] hpoints;
+        
+        // allow HighlightPoints to access the same base fade that each ring has
+        // (they will be doing some additional fading on top of that as well)
+        float baseFade;
         
         // 0 index Ring has a boost in detail
         Ring(int radius, int index, int pointNum) {
             this.index = index;
             expandTick = index;
+
             points = new Point[pointNum];
             for (int i = 0; i < points.length; i++) {
                 float angle = TWO_PI * i / points.length;
@@ -77,15 +84,31 @@ class Droplet extends Visualizer {
                 pos.rotateY(angle);
                 points[i] = new Point(pos, index);
             }
+
+            hpoints = new HighlightPoint[pointNum / 10];
+            for (int i = 0; i < hpoints.length; i++) {
+                float angle = random(0, TWO_PI);
+                EPVector pos = new EPVector(radius, 0, 0);
+                pos.rotateY(angle);
+                float size = random(1, 3);
+                float speed = random(0.8, 1.1);
+                hpoints[i] = new HighlightPoint(pos, speed, size);
+            }
         }
 
         //converts alpha value to a ratio and multplies every color by that ratio (lets us use blend modes)
         void setColor(float[] colors) {
-            // slightly fades the outer edges of the plane
-            float fade = pow((SPEC_SIZE - index) * 1.0 / SPEC_SIZE, 5.0 / 6.0);
-            fade *= (colors[3] / 255);
+            float fade = colors[3] / 255;
             fade += currExpand;
             fade = min(fade, 1);
+
+            // slightly fades the outer edges of the plane
+            fade *= pow((SPEC_SIZE - index) * 1.0 / SPEC_SIZE, 5.0 / 6.0);
+
+            // set baseFade so that the HighlightPoints can access this fading when they have to set their
+            // color
+            baseFade = fade;
+            
             stroke(colors[0] * fade, colors[1] * fade, colors[2] * fade); 
         }
         
@@ -97,15 +120,22 @@ class Droplet extends Visualizer {
                 points[i].botColors = getColor(-points[i].naturalY, PEAK, colorTrackers[0], colorTrackers[1]);
                 points[i].topColors = getColor(-points[i].naturalY, PEAK, colorTrackers[2], colorTrackers[3]);
             }
+
+            float incomingSignal = getIntensity(index) / 2;
+            // float incomingSignal = getGreatestMag(SPEC_SIZE) / 3;
+            for (HighlightPoint hp : hpoints) {
+                hp.update(incomingSignal);
+            }
         }
         
         // ydir is -1 or 1: determines whether the figure is draw top up or top down
         void drawRing(int ydir) {
             noFill();
 
-            float strokeFactor = (expand) ? 4 : 2;
+            // float strokeFactor = (expand) ? 4 : 2;
             // strokeWeight(1 + ((float) index) / SPEC_SIZE * strokeFactor);
             strokeWeight(1.5);
+
             if (particles) {
                 beginShape(POINTS);
             } else {
@@ -120,14 +150,14 @@ class Droplet extends Visualizer {
                 } else {
                     setColor(curr.topColors);
                 }
+
                 if (particles) {
                     strokeWeight(max(abs(curr.pos.y / 10), 1));
                 }
-
                 vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
                 vertex(next.pos.x, next.pos.y * ydir, next.pos.z);
 
-                Point oneDeeper = points[i % points.length].next;
+                Point oneDeeper = points[i % points.length].oneDeeper;
                 if (this.index != 0) {
                     vertex(curr.pos.x, curr.pos.y * ydir, curr.pos.z);
                     if (ydir > 0) {
@@ -159,6 +189,12 @@ class Droplet extends Visualizer {
             }
 
             endShape();
+
+            float baseY = points[0].pos.y;
+            float[] c = (ydir > 0) ? points[0].botColors : points[0].topColors;
+            for (HighlightPoint hp : hpoints) {
+                hp.drawHighlightPoint(baseY, ydir, c, baseFade);
+            }
         }
     }
     
@@ -171,22 +207,22 @@ class Droplet extends Visualizer {
         // expandedY will just hold the natural y position
         float naturalY;
 
-        Point next;
-        int index;
-
         // we are re-using the same samples to draw both bottom and top - but bottom and top need
         // different NON-COMPLEMENTARY colors. so each point keeps track of the two set of colors
         // it will display as
         float[] botColors;
         float[] topColors;
-        
+
+        Point oneDeeper;
+        int index;
+ 
         Point(EPVector pos, int index) {
             this.pos = pos;
             naturalY = pos.y;
             this.index = index;
-            next = null;
+            oneDeeper = null; 
             botColors = new float[4];
-            topColors = new float[4];
+            topColors = new float[4];   
         }
         
         void update(int index, int expandTick) {
@@ -227,6 +263,46 @@ class Droplet extends Visualizer {
                 return naturalY - currExpand * amp * sin(time) - currExpand * amp;
             } else {
                 return naturalY;
+            }
+        }
+    }
+
+    class HighlightPoint {
+        float speed, size;
+        EPVector pos;
+        boolean continueHighlighting;
+
+        HighlightPoint(EPVector pos, float speed, float size) {
+            this.speed = speed;
+            this.size = size;
+            this.pos = pos;
+        }
+
+        void update(float intensity) {
+            if (continueHighlighting) {
+                pos.y -= intensity;
+                pos.y -= speed;
+            }
+            if (abs(pos.y) >= HIGHLIGHT_POINT_STOP) {
+                if (!highlight) {
+                    continueHighlighting = false;
+                }
+                pos.y = 0;
+                float angle = random(0, TWO_PI);
+                pos.rotateY(angle);
+            }
+        }
+
+        void drawHighlightPoint(float baseY, float ydir, float[] colors, float baseFade) {
+            if (continueHighlighting) {
+                float fade = 1 - abs(pos.y) / HIGHLIGHT_POINT_STOP;
+                fade *= baseFade;
+                stroke((255 - colors[0]) * fade, (255 - colors[1]) * fade, (255 - colors[2]) * fade);
+
+                pushMatrix();
+                translate(pos.x, (baseY + pos.y) * ydir, pos.z);
+                box(size);
+                popMatrix();
             }
         }
     }
@@ -306,6 +382,11 @@ class Droplet extends Visualizer {
 
     @Override
     void highlight() {
+        for (Ring r : rings) {
+            for (HighlightPoint hp : r.hpoints) {
+                hp.continueHighlighting = true;
+            }
+        }
         highlight = !highlight;
     }
 
@@ -325,8 +406,8 @@ class Droplet extends Visualizer {
     
     @Override
     void frontView() {
-        camera.initMoveCamera(new PVector(0, 0, 400), (int) frameRate);
-        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
+        camera.initMoveCamera(new PVector(0, 0, 400), (int) frameRate * 2);
+        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate * 2);
     }
     
     @Override
@@ -336,16 +417,13 @@ class Droplet extends Visualizer {
     
     @Override
     void topView() { 
-        camera.initMoveCamera(new PVector(0, -400, 0), (int) frameRate);
-        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
+        camera.initMoveCamera(new PVector(0, -400, 0), (int) frameRate * 2);
+        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate * 2);
     }
- 
+    
+    @Override
     void keyPressed() {
         super.keyPressed();
-        switch (key) {
-            case ' ':
-                println(currExpand);
-        }
         switch (keyCode) {
             case 38:
                 dropletSize += 2;
