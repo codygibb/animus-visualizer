@@ -49,7 +49,7 @@ class Fluid extends Visualizer {
     }
 
     class Point {
-        float x, y, z, intensity;
+        float x, y, z;
 
         // we are re-using the same samples to draw both bottom and top - but bottom and top need
         // different NON-COMPLEMENTARY colors. so each point keeps track of the two set of colors
@@ -98,7 +98,7 @@ class Fluid extends Visualizer {
                 for (int i = 0; i < points.length; i++) {
                     int fftIndex = abs(points.length / 2 - i);
                     points[i].y = getIntensity(fftIndex);
-                    points[i].intensity = getIntensity(fftIndex);
+                    intensity = getIntensity(fftIndex);
 
                     // see comment inside Point (above botColors and topColors)
                     // for explanation on wtf is going on here
