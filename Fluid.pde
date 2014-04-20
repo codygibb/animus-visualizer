@@ -49,7 +49,7 @@ class Fluid extends Visualizer {
     }
 
     class Point {
-        float x, y, z;
+        float x, y, z, intensity;
 
         // we are re-using the same samples to draw both bottom and top - but bottom and top need
         // different NON-COMPLEMENTARY colors. so each point keeps track of the two set of colors
@@ -70,7 +70,6 @@ class Fluid extends Visualizer {
         float pos, speed, stop;
         int index;
         Point[] points;
-        float intensity;
 
         HorizSample(float initPos, float speed, float stop) {
             this.speed = speed;
@@ -98,7 +97,7 @@ class Fluid extends Visualizer {
                 for (int i = 0; i < points.length; i++) {
                     int fftIndex = abs(points.length / 2 - i);
                     points[i].y = getIntensity(fftIndex);
-                    intensity = getIntensity(fftIndex);
+                    points[i].intensity = getIntensity(fftIndex);
 
                     // see comment inside Point (above botColors and topColors)
                     // for explanation on wtf is going on here
@@ -138,7 +137,7 @@ class Fluid extends Visualizer {
                     float yStart = currSample.points[i].y * ydir;
                     float yEnd = prevSample.points[i].y * ydir;
                     if (particles) {
-                        strokeWeight(max(abs(currSample.intensity*2)*volumeScale, 1));
+                        strokeWeight(max(abs(currSample.points[i].intensity), 1));
                     }
 
                     if (ydir > 0) {
