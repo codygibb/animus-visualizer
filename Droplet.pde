@@ -51,7 +51,9 @@ class Droplet extends Visualizer {
     void setupDroplet(){
         for (int i = 0; i < rings.length; i++) {
             int radius = SPEC_WIDTH * (i + 1);
-            int pointNum = dropletSize * (i + 1);
+
+            int pointNum = (particles) ? dropletSize : dropletSize * (i + 1);
+
             rings[i] = new Ring(radius, i, pointNum);  
         }
         for (int i = rings.length - 1; i >= 0; i--) {
@@ -378,6 +380,7 @@ class Droplet extends Visualizer {
     @Override
     void particles() {
         particles = !particles;
+        setupDroplet();
     }
 
     @Override
