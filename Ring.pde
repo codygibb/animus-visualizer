@@ -17,10 +17,9 @@ class Ring extends Visualizer {
     final float INIT_DIST = 20; // 10
     final float MAX_TIME = 2000; //in milliseconds
     final float MAX_SPEED = 0.2;
-    RotationTracker rotater;
     EPVector rotationVector; //handles rotating the verticies when revolve is turned on
     float xRot;
-    float yRot;
+    float zRot;
     
     float deltaRotation = PI / 2000;
     
@@ -38,7 +37,6 @@ class Ring extends Visualizer {
         super(input, "Ring");
         tracker = new ColorTracker(0.1, 0.8);
         tracker2 = new ColorTracker(0.1, 0.8);
-        rotater = new RotationTracker();
         camera.viewingMode = false;
         camera.pos = new PVector(0, 0, -800);
         camera.setOuterBounds(-1000, -1000, -1000, 1000, 1000, 1000);
@@ -123,10 +121,10 @@ class Ring extends Visualizer {
                 
                 if (revolve) {
                     xRot += .000001;
-                    yRot += .00001;
+                    zRot += .00001;
                 } else {
                     xRot = 0;
-                    yRot = 0;
+                    zRot = 0;
                 }                    
                 
                 if (particles) {
@@ -197,14 +195,14 @@ class Ring extends Visualizer {
             float theta = (10 * PI * index) / samples.length;
 
             rotationVector.set(pos.x, pos.y, pos.z);
-            rotationVector.rotateX(theta * rotater.xRot);
-            rotationVector.rotateY(theta * rotater.yRot);
+            rotationVector.rotateX(theta * xRot);
+            rotationVector.rotateZ(theta * zRot);
 
             vertex(rotationVector.x, rotationVector.y, rotationVector.z); 
 
             rotationVector.set(prevPos.x, prevPos.y, prevPos.z);
-            rotationVector.rotateX(theta * rotater.xRot);
-            rotationVector.rotateY(theta * rotater.yRot);
+            rotationVector.rotateX(theta * xRot);
+            rotationVector.rotateZ(theta * zRot);
 
             vertex(rotationVector.x, rotationVector.y, rotationVector.z);
         }
@@ -223,7 +221,6 @@ class Ring extends Visualizer {
         pushMatrix();
 
         camera.update();
-        rotater.update();
         // scale(2);
         stroke(255);
         
@@ -287,10 +284,6 @@ class Ring extends Visualizer {
     @Override
     void revolve(){
         revolve = !revolve;
-        rotater.autoSwitch();
-        if (!revolve) {
-            rotater.initRotate(0, 0, (int) frameRate * 10);    
-        }
     }
     
     @Override
