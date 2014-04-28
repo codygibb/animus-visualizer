@@ -189,7 +189,7 @@ class Ring extends Visualizer {
             PVector prevPos = prevPoint.pos;
             float theta = (10 * PI * index) / samples.length;
             if(expand){
-                explodeVal = lerp(explodeVal, PI, .1); 
+                explodeVal = lerp(explodeVal, PI, .1);
             } else{
                 explodeVal = lerp(explodeVal, 0, .1);
             }
@@ -199,7 +199,8 @@ class Ring extends Visualizer {
             rotationVector.rotateX(theta * xRot);
             rotationVector.rotateZ(theta * zRot);
 
-            vertex(rotationVector.x, rotationVector.y, rotationVector.z); 
+            vertex(rotationVector.x, rotationVector.y, rotationVector.z);
+
 
             rotationVector.set(prevPos.x, prevPos.y, prevPos.z);
             rotationVector.rotateX(theta * xRot);

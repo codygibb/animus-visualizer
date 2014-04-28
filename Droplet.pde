@@ -17,7 +17,7 @@ class Droplet extends Visualizer {
     final float EXPAND_RATE = 0.02;
     final float HIGHLIGHT_POINT_STOP = 80;
 
-    int dropletSize = 6;
+    int dropletSize = 2;
     
     float currExpand = 0;
 
@@ -52,7 +52,7 @@ class Droplet extends Visualizer {
         for (int i = 0; i < rings.length; i++) {
             int radius = SPEC_WIDTH * (i + 1);
 
-            int pointNum = (particles) ? dropletSize : dropletSize * (i + 1);
+            int pointNum = dropletSize * (i + 1);
 
             rings[i] = new Ring(radius, i, pointNum);  
         }
@@ -302,8 +302,9 @@ class Droplet extends Visualizer {
                 stroke((255 - colors[0]) * fade, (255 - colors[1]) * fade, (255 - colors[2]) * fade);
 
                 pushMatrix();
-                translate(pos.x, (baseY + pos.y) * ydir, pos.z);
-                box(size);
+                strokeWeight(size*4);
+                point(pos.x, (baseY + pos.y) * ydir, pos.z);
+                
                 popMatrix();
             }
         }
@@ -380,7 +381,7 @@ class Droplet extends Visualizer {
     @Override
     void particles() {
         particles = !particles;
-        setupDroplet();
+//        setupDroplet();
     }
 
     @Override

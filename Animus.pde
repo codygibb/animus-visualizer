@@ -188,7 +188,7 @@ void guiSetup(ControlFont font){
     interfaceLabel = cp5.addTextlabel("label")
             .setText("PRESS [h] TO HIDE INTERFACE")
             .setFont(font)
-            .setPosition(width-214, 10);
+            .setPosition(width-216, 20);
     interfaceLabel.getCaptionLabel().setSize(14);
             
     volSlider.captionLabel().setFont(font).setSize(14);
@@ -202,14 +202,14 @@ void guiSetup(ControlFont font){
      buttons[7] = autoPan = cp5.addCheckBox("autoPan").addItem("Autopan Camera [a]", 0);
      buttons[8] = viewing = cp5.addCheckBox("viewing").addItem("Follow Mouse [m]", 0);
      buttons[9] = blur = cp5.addCheckBox("blur").addItem("Blur [b]", 0);
-     float startHeight = 10;
+     float startHeight = 20;
      for(int i = 0; i < buttons.length; i++){
         if(i == 4){
             startHeight = 30;
         } else if(i == 9) {
-            startHeight = 50;
+            startHeight = 40;
         }
-            buttons[i].setPosition(width-210, startHeight+(1+i)*30)
+            buttons[i].setPosition(width-212, startHeight+(1+i)*30)
                    .setColorForeground(color(120))
                    .setColorActive(color(255))
                    .setColorLabel(color(255))

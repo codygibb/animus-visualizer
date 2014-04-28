@@ -73,6 +73,7 @@ public abstract class Visualizer {
         fft.forward(input.mix);
         volumeScale = pow(10, sliderVal);
     }
+    
 
     // Call at the beginning of draw to setup background
     // backgroundColor is on gray scale from 0 to 255
@@ -234,7 +235,8 @@ public abstract class Visualizer {
     }
 
     void mPressed(){
-        camera.viewSwitch(); 
+        camera.viewSwitch();
+        
         rearView = false;
         topView = false;
         frontView = false;

@@ -190,9 +190,8 @@ public class Camera {
     //must be called every frame
     void update() {        
         if (viewingMode) {
-            pos.x = map(mouseX, 0, width, -width*3, width*3);
-            pos.y = map(mouseY, 0, height, -height*3, height*3);
-//            pos.z = height/2.0; 
+            pos.x = map(mouseX, 0, width, leftOuterBounds.x, rightOuterBounds.x);
+            pos.y = map(mouseY, 0, height, leftOuterBounds.y, rightOuterBounds.y);
         }
         
         if (autoPanningMode && !movingCamera) {

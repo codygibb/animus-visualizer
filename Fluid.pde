@@ -45,7 +45,7 @@ class Fluid extends Visualizer {
         }
         camera.viewingMode = false;
         camera.pos = new PVector(SPEC_SIZE * SPEC_WIDTH, 0, -130);
-        camera.setOuterBounds(0, -200, -200, SPEC_SIZE * SPEC_WIDTH, 200, REFRESH * HORIZ_SAMPLE_NUM);
+        camera.setOuterBounds(0, -200, -200, SPEC_SIZE * SPEC_WIDTH*2, 200, REFRESH * HORIZ_SAMPLE_NUM);
     }
 
     class Point {
@@ -351,6 +351,7 @@ class Fluid extends Visualizer {
         camera.initMoveCamera(new PVector(camX, 0, 300), (int)frameRate);
         camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
     }
+    
     
     @Override
     void topView() { 
