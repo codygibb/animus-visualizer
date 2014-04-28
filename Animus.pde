@@ -4,6 +4,7 @@ import java.util.*;
 
 final float PHI = (1.0 + sqrt(5.0)) / 2.0;
 final int FONT_SIZE = 12;
+final int TEXT_OFFSET = 20;
 
 Minim minim;
 AudioInput input;
@@ -29,10 +30,9 @@ int contrast;
 void setup() {
     size(displayWidth, displayHeight, P3D);
     minim = new Minim(this); 
-    font = loadFont("AndaleMono-" + FONT_SIZE + ".vlw");
-    PFont pfont = createFont("AndaleMono-" + FONT_SIZE + ".vlw", FONT_SIZE, true);
+    PFont pfont = createFont("whitrabt.ttf", FONT_SIZE, true);
     ControlFont cFont = new ControlFont(pfont, FONT_SIZE);
-    textFont(font);
+    textFont(pfont);
     showInterface = true;
     Visualizer ring, fluid, droplet;
     
@@ -48,7 +48,7 @@ void setup() {
     ellipseMode(CENTER);
     ellipseMode(RADIUS);
     dots = new PageDot[visualizers.length];
-    float dist = 10;
+    float dist = 13;
     for (int i = 0; i < dots.length; i++) {
         float w = (dots.length) * dist - (dist / 2);
         float dx = (width / 2 - w) + (2 * dist * i + (dist / 2));
@@ -76,11 +76,12 @@ void draw() {
     noLights();
 
     contrast = visualizers[select].contrast;
-    checkMouse();
+    
     if (showInterface) {
+        cursor(cp5.isMouseOver() ? HAND : ARROW);
         volSlider.setVisible(true);
         interfaceLabel.setVisible(true);
-        for(int i = 0; i< buttons.length; i++){
+        for (int i = 0; i < buttons.length; i++) {
             buttons[i].setVisible(true);
         }
         for (int i = 0; i < dots.length; i++) {
@@ -89,20 +90,25 @@ void draw() {
             } else {
                 fill(contrast);
             }
+            dots[i].update();
             if (dots[i].overDot) {
-                textSize(FONT_SIZE);
+                // textSize(FONT_SIZE);
+                cursor(HAND);
                 textAlign(CENTER, TOP);
                 fill(255 - contrast);
-                text(dots[i].name, dots[i].x, dots[i].y - 20);
+                text(dots[i].name, dots[i].x, dots[i].y - TEXT_OFFSET - dots[i].radius);
             }
-            dots[i].update();
         }
+        textAlign(CENTER, TOP);
+        fill(255 - contrast);
+        text(visualizers[select].name, displayWidth / 2, TEXT_OFFSET);
         if (debugMode) {
             visualizers[select].displayDebugText();
         }
     } else {
+        checkMouse();
         volSlider.setVisible(false);
-        for(int i = 0; i< buttons.length; i++) {
+        for(int i = 0; i < buttons.length; i++) {
             buttons[i].setVisible(false);
         }
         volSlider.setVisible(false);
@@ -132,7 +138,7 @@ class PageDot {
             strokeWeight(3);
         } else {
             overDot = false;
-            strokeWeight(1);
+            strokeWeight(1.2);
         }
         ellipse(x, y, radius, radius);
     }
@@ -152,7 +158,7 @@ void checkMouse() {
         lastMouseX = mouseX;
         lastMouseY = mouseY;
         lastMillis = millis();
-        cursor();
+        cursor(ARROW);
     } else if (millis() - lastMillis > 1500) {
         noCursor();
     } 
@@ -184,61 +190,67 @@ void guiSetup(ControlFont font){
            .setLabel("Input Volume")
            .setRange(-2.0, 2.0)
            .setValue(0)
-           .setPosition(15, 15)
+           .setPosition(TEXT_OFFSET, TEXT_OFFSET)
            .setSize(250, FONT_SIZE);
     interfaceLabel = cp5.addTextlabel("label")
             .setText("PRESS [H] TO HIDE INTERFACE")
             .setFont(font)
-            .setPosition(width - 216, 15);
+            .setPosition(width - 216, TEXT_OFFSET);
     interfaceLabel.getCaptionLabel().setSize(FONT_SIZE);
             
     volSlider.captionLabel().setFont(font).setSize(FONT_SIZE);
-     buttons[0] = highlight = cp5.addCheckBox("highlight").addItem("highlight [1]", 0);
-     buttons[1] = expand = cp5.addCheckBox("expand").addItem("expand [2]", 0);
-     buttons[2] = revolve = cp5.addCheckBox("revolve").addItem("revolve [3]", 0);
-     buttons[3] = particles = cp5.addCheckBox("particles").addItem("particles [p]", 0);
-     buttons[4] = front = cp5.addCheckBox("front").addItem("front view [f]", 0);
-     buttons[5] = rear = cp5.addCheckBox("rear").addItem("rear view [r]", 0);
-     buttons[6] = top = cp5.addCheckBox("top").addItem("top view [t]" , 0);
-     buttons[7] = autoPan = cp5.addCheckBox("autoPan").addItem("autopan camera [a]", 0);
-     buttons[8] = viewing = cp5.addCheckBox("viewing").addItem("follow mouse [m]", 0);
-     buttons[9] = blur = cp5.addCheckBox("blur").addItem("blur [b]", 0);
-     float startHeight = 20;
-     for(int i = 0; i < buttons.length; i++){
-        if(i == 4){
-            startHeight = 30;
-        } else if(i == 9) {
-            startHeight = 40;
+    buttons[0] = highlight = cp5.addCheckBox("highlight").addItem("highlight [1]", 0);
+    buttons[1] = expand = cp5.addCheckBox("expand").addItem("expand [2]", 0);
+    buttons[2] = revolve = cp5.addCheckBox("revolve").addItem("revolve [3]", 0);
+    buttons[3] = particles = cp5.addCheckBox("particles").addItem("particles [p]", 0);
+    buttons[4] = front = cp5.addCheckBox("front").addItem("front view [f]", 0);
+    buttons[5] = rear = cp5.addCheckBox("rear").addItem("rear view [r]", 0);
+    buttons[6] = top = cp5.addCheckBox("top").addItem("top view [t]" , 0);
+    buttons[7] = autoPan = cp5.addCheckBox("autoPan").addItem("autopan camera [a]", 0);
+    buttons[8] = viewing = cp5.addCheckBox("viewing").addItem("follow mouse [m]", 0);
+    buttons[9] = blur = cp5.addCheckBox("blur").addItem("blur [b]", 0);
+    float startHeight = TEXT_OFFSET;
+    for (int i = 0; i < buttons.length; i++) {
+        if (i == 4) {
+            startHeight = TEXT_OFFSET + 10;
+        } else if (i == 9) {
+            startHeight = TEXT_OFFSET + 20;
         }
         buttons[i].setPosition(width - 212, startHeight + (1 + i) * 17)
-               .setColorForeground(color(120))
-               .setColorActive(color(255))
-               .setColorLabel(color(255))
-               .setSize(15, 15);
+                .setSize(15, 15);
         buttons[i].getItem(0).captionLabel().setFont(font).setSize(FONT_SIZE);
-     }
+    }
+    setGuiColors();
+}
+
+void setGuiColors() {
+    for (CheckBox button : buttons) {
+        button.setColorLabel(color(255 - contrast));
+    }
+    volSlider.setColorLabel(color(255 - contrast));
+    interfaceLabel.setColor(color(255 - contrast));
 }
 
 void controlEvent(ControlEvent theEvent) {
     if (theEvent.isFrom(highlight)) {
         visualizers[select].highlight();
-    } else if(theEvent.isFrom(expand)) {
+    } else if (theEvent.isFrom(expand)) {
         visualizers[select].expand();
-    } else if(theEvent.isFrom(revolve)) {
+    } else if (theEvent.isFrom(revolve)) {
         visualizers[select].revolve();
-    } else if(theEvent.isFrom(particles)) {
+    } else if (theEvent.isFrom(particles)) {
         visualizers[select].particles();
-    } else if(theEvent.isFrom(front)) {
+    } else if (theEvent.isFrom(front)) {
         visualizers[select].fPressed();
-    } else if(theEvent.isFrom(rear)) {
+    } else if (theEvent.isFrom(rear)) {
         visualizers[select].rPressed();
-    } else if(theEvent.isFrom(top)) {
+    } else if (theEvent.isFrom(top)) {
         visualizers[select].tPressed();
-    } else if(theEvent.isFrom(autoPan)) {
+    } else if (theEvent.isFrom(autoPan)) {
         visualizers[select].aPressed();
-    } else if(theEvent.isFrom(viewing)) {
+    } else if (theEvent.isFrom(viewing)) {
         visualizers[select].mPressed();
-    } else if(theEvent.isFrom(blur)) {
+    } else if (theEvent.isFrom(blur)) {
         visualizers[select].blur = !visualizers[select].blur;
     }
 }
@@ -250,6 +262,10 @@ void keyPressed() {
             break;
         case 'h':
             showInterface = !showInterface;
+            break;
+        case 'd':
+            contrast = 255 - contrast;
+            setGuiColors();
             break;
         default:
             break;
