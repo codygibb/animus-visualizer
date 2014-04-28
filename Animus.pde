@@ -3,6 +3,7 @@ import controlP5.*;
 import java.util.*;
 
 final float PHI = (1.0 + sqrt(5.0)) / 2.0;
+final int FONT_SIZE = 12;
 
 Minim minim;
 AudioInput input;
@@ -28,9 +29,9 @@ int contrast;
 void setup() {
     size(displayWidth, displayHeight, P3D);
     minim = new Minim(this); 
-    font = loadFont("AndaleMono-14.vlw");
-    PFont pfont = createFont("AndaleMono-14.vlw",14,true);
-    ControlFont cFont = new ControlFont(pfont,14);
+    font = loadFont("AndaleMono-" + FONT_SIZE + ".vlw");
+    PFont pfont = createFont("AndaleMono-" + FONT_SIZE + ".vlw", FONT_SIZE, true);
+    ControlFont cFont = new ControlFont(pfont, FONT_SIZE);
     textFont(font);
     showInterface = true;
     Visualizer ring, fluid, droplet;
@@ -47,7 +48,7 @@ void setup() {
     ellipseMode(CENTER);
     ellipseMode(RADIUS);
     dots = new PageDot[visualizers.length];
-    float dist = 15;
+    float dist = 10;
     for (int i = 0; i < dots.length; i++) {
         float w = (dots.length) * dist - (dist / 2);
         float dx = (width / 2 - w) + (2 * dist * i + (dist / 2));
@@ -89,14 +90,14 @@ void draw() {
                 fill(contrast);
             }
             if (dots[i].overDot) {
-                textSize(14);
+                textSize(FONT_SIZE);
                 textAlign(CENTER, TOP);
                 fill(255 - contrast);
-                text(dots[i].name, dots[i].x, dots[i].y - 30);
+                text(dots[i].name, dots[i].x, dots[i].y - 20);
             }
             dots[i].update();
         }
-        if(debugMode){
+        if (debugMode) {
             visualizers[select].displayDebugText();
         }
     } else {
@@ -166,42 +167,42 @@ void updateGui() {
     // visualizers[select].expand ? new int{1}: new int{0}
     float[] on = new float[]{1};
     float[] off = new float[]{0};
-    buttons[0].setArrayValue(visualizers[select].highlight? on: off);
-    buttons[1].setArrayValue(visualizers[select].expand? on: off);
-    buttons[2].setArrayValue(visualizers[select].revolve? on: off);
-    buttons[3].setArrayValue(visualizers[select].particles? on: off);
-    buttons[4].setArrayValue(visualizers[select].frontView? on: off);
-    buttons[5].setArrayValue(visualizers[select].rearView? on: off);
-    buttons[6].setArrayValue(visualizers[select].topView? on: off);
-    buttons[7].setArrayValue(visualizers[select].camera.autoPanningMode? on: off);
-    buttons[8].setArrayValue(visualizers[select].camera.viewingMode? on: off);
-    buttons[9].setArrayValue(visualizers[select].blur? on: off);
+    buttons[0].setArrayValue(visualizers[select].highlight ? on : off);
+    buttons[1].setArrayValue(visualizers[select].expand ? on : off);
+    buttons[2].setArrayValue(visualizers[select].revolve ? on : off);
+    buttons[3].setArrayValue(visualizers[select].particles ? on : off);
+    buttons[4].setArrayValue(visualizers[select].frontView ? on : off);
+    buttons[5].setArrayValue(visualizers[select].rearView ? on : off);
+    buttons[6].setArrayValue(visualizers[select].topView ? on : off);
+    buttons[7].setArrayValue(visualizers[select].camera.autoPanningMode ? on : off);
+    buttons[8].setArrayValue(visualizers[select].camera.viewingMode ? on : off);
+    buttons[9].setArrayValue(visualizers[select].blur ? on : off);
 }
 
 void guiSetup(ControlFont font){
     volSlider = cp5.addSlider("sliderVal")
            .setLabel("Input Volume")
-           .setRange(-2.0,2.0)
+           .setRange(-2.0, 2.0)
            .setValue(0)
-           .setPosition(20,20)
-           .setSize(300,17);
+           .setPosition(15, 15)
+           .setSize(250, FONT_SIZE);
     interfaceLabel = cp5.addTextlabel("label")
-            .setText("PRESS [h] TO HIDE INTERFACE")
+            .setText("PRESS [H] TO HIDE INTERFACE")
             .setFont(font)
-            .setPosition(width-216, 20);
-    interfaceLabel.getCaptionLabel().setSize(14);
+            .setPosition(width - 216, 15);
+    interfaceLabel.getCaptionLabel().setSize(FONT_SIZE);
             
-    volSlider.captionLabel().setFont(font).setSize(14);
-     buttons[0] = highlight = cp5.addCheckBox("highlight").addItem("Highlight [1]", 0);
-     buttons[1] = expand = cp5.addCheckBox("expand").addItem("Expand [2]", 0);
-     buttons[2] = revolve = cp5.addCheckBox("revolve").addItem("Revolve [3]", 0);
-     buttons[3] = particles = cp5.addCheckBox("particles").addItem("Particles [p]", 0);
-     buttons[4] = front = cp5.addCheckBox("front").addItem("Front View [f]", 0);
-     buttons[5] = rear = cp5.addCheckBox("rear").addItem("Rear View [r]", 0);
-     buttons[6] = top = cp5.addCheckBox("top").addItem("Top View [t]" , 0);
-     buttons[7] = autoPan = cp5.addCheckBox("autoPan").addItem("Autopan Camera [a]", 0);
-     buttons[8] = viewing = cp5.addCheckBox("viewing").addItem("Follow Mouse [m]", 0);
-     buttons[9] = blur = cp5.addCheckBox("blur").addItem("Blur [b]", 0);
+    volSlider.captionLabel().setFont(font).setSize(FONT_SIZE);
+     buttons[0] = highlight = cp5.addCheckBox("highlight").addItem("highlight [1]", 0);
+     buttons[1] = expand = cp5.addCheckBox("expand").addItem("expand [2]", 0);
+     buttons[2] = revolve = cp5.addCheckBox("revolve").addItem("revolve [3]", 0);
+     buttons[3] = particles = cp5.addCheckBox("particles").addItem("particles [p]", 0);
+     buttons[4] = front = cp5.addCheckBox("front").addItem("front view [f]", 0);
+     buttons[5] = rear = cp5.addCheckBox("rear").addItem("rear view [r]", 0);
+     buttons[6] = top = cp5.addCheckBox("top").addItem("top view [t]" , 0);
+     buttons[7] = autoPan = cp5.addCheckBox("autoPan").addItem("autopan camera [a]", 0);
+     buttons[8] = viewing = cp5.addCheckBox("viewing").addItem("follow mouse [m]", 0);
+     buttons[9] = blur = cp5.addCheckBox("blur").addItem("blur [b]", 0);
      float startHeight = 20;
      for(int i = 0; i < buttons.length; i++){
         if(i == 4){
@@ -209,35 +210,35 @@ void guiSetup(ControlFont font){
         } else if(i == 9) {
             startHeight = 40;
         }
-            buttons[i].setPosition(width-212, startHeight+(1+i)*30)
-                   .setColorForeground(color(120))
-                   .setColorActive(color(255))
-                   .setColorLabel(color(255))
-                   .setSize(25, 25);
-            buttons[i].getItem(0).captionLabel().setFont(font).setSize(14);
+        buttons[i].setPosition(width - 212, startHeight + (1 + i) * 17)
+               .setColorForeground(color(120))
+               .setColorActive(color(255))
+               .setColorLabel(color(255))
+               .setSize(15, 15);
+        buttons[i].getItem(0).captionLabel().setFont(font).setSize(FONT_SIZE);
      }
 }
 
 void controlEvent(ControlEvent theEvent) {
     if (theEvent.isFrom(highlight)) {
         visualizers[select].highlight();
-    } else if(theEvent.isFrom(expand)){
+    } else if(theEvent.isFrom(expand)) {
         visualizers[select].expand();
-    } else if(theEvent.isFrom(revolve)){
+    } else if(theEvent.isFrom(revolve)) {
         visualizers[select].revolve();
-    } else if(theEvent.isFrom(particles)){
+    } else if(theEvent.isFrom(particles)) {
         visualizers[select].particles();
-    } else if(theEvent.isFrom(front)){
+    } else if(theEvent.isFrom(front)) {
         visualizers[select].fPressed();
-    } else if(theEvent.isFrom(rear)){
+    } else if(theEvent.isFrom(rear)) {
         visualizers[select].rPressed();
-    } else if(theEvent.isFrom(top)){
+    } else if(theEvent.isFrom(top)) {
         visualizers[select].tPressed();
-    } else if(theEvent.isFrom(autoPan)){
+    } else if(theEvent.isFrom(autoPan)) {
         visualizers[select].aPressed();
-    } else if(theEvent.isFrom(viewing)){
+    } else if(theEvent.isFrom(viewing)) {
         visualizers[select].mPressed();
-    } else if(theEvent.isFrom(blur)){
+    } else if(theEvent.isFrom(blur)) {
         visualizers[select].blur = !visualizers[select].blur;
     }
 }
