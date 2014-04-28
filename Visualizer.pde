@@ -18,6 +18,7 @@ public abstract class Visualizer {
     boolean flashingMode;
     float volumeScale;
     boolean blur;
+    float opacityFade;
     
     
     // visualizers must return what their optimal frame rate is. this is so that
@@ -70,7 +71,7 @@ public abstract class Visualizer {
     void retrieveSound() {
         beat.detect(input.mix);
         fft.forward(input.mix);
-        volumeScale = pow(10, volSlider.getValueF());
+        volumeScale = pow(10, sliderVal);
     }
 
     // Call at the beginning of draw to setup background
@@ -89,8 +90,8 @@ public abstract class Visualizer {
         if (flashingMode) {
             opacity = 10;
         }
-
-        fill(backgroundColor, opacity);
+        opacityFade = lerp(opacityFade, opacity, .05);
+        fill(backgroundColor, (int)opacityFade);
         rect(0, 0, width, height);
         hint(ENABLE_DEPTH_TEST);
         fill(255);
@@ -198,46 +199,65 @@ public abstract class Visualizer {
         return greatestMag;
     }
 
+    void fPressed(){
+        if (frontView) return;
+        camera.disableAllModes();
+        frontView = !frontView;
+        frontView();
+        rearView = false;
+        topView = false;
+    }
+
+    void aPressed(){
+        camera.autoPanSwitch();
+        camera.dirSwitch();
+        rearView = false;
+        topView = false;
+        frontView = false;        
+    }
+    void rPressed(){
+        if (rearView) return;
+        camera.disableAllModes();
+        rearView = !rearView;
+        rearView();
+        topView = false;
+        frontView = false;
+    }
+
+    void tPressed(){
+        if (topView) return;
+        camera.disableAllModes();
+        topView = !topView;
+        topView();
+        rearView = false;
+        frontView = false;        
+    }
+
+    void vPressed(){
+        camera.viewSwitch(); 
+        rearView = false;
+        topView = false;
+        frontView = false;
+    }
+
     void keyPressed() {
         switch (key) {
             // showInterface toggle handled in Animus due to not being able to
             // use static variables (processing fucking sucks!)
             case 'v':
-                camera.viewSwitch(); 
-                rearView = false;
-                topView = false;
-                frontView = false;
+                vPressed();
                 break;
             case 'a':
-                camera.autoPanSwitch();
-                camera.dirSwitch();
-                rearView = false;
-                topView = false;
-                frontView = false;
+                aPressed();
                 break;
             case 'f':
-                if (frontView) break;
-                camera.disableAllModes();
-                frontView = !frontView;
-                frontView();
-                rearView = false;
-                topView = false;
+                fPressed();
                 break;
             case 'r':
-                if (rearView) break;
-                camera.disableAllModes();
-                rearView = !rearView;
-                rearView();
-                topView = false;
-                frontView = false;
+                rPressed();
                 break;
             case 't':
-                if (topView) break;
-                camera.disableAllModes();
-                topView = !topView;
-                topView();
-                rearView = false;
-                frontView = false;
+                tPressed();
                 break;
             case 'd':
                 contrast = 255 - contrast;

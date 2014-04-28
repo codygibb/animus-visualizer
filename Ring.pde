@@ -20,6 +20,7 @@ class Ring extends Visualizer {
     EPVector rotationVector; //handles rotating the verticies when revolve is turned on
     float xRot;
     float zRot;
+    float explodeVal;
     
     float deltaRotation = PI / 2000;
     
@@ -84,8 +85,8 @@ class Ring extends Visualizer {
             if (pos >= stop) {
                 pos = 0;
                 isNewPoint = true;
-                if (expand) {
-                    greatestMag = getGreatestMag(50);
+                if (highlight) {
+                    greatestMag = getGreatestMag(100);
                 }
             }
             
@@ -99,10 +100,10 @@ class Ring extends Visualizer {
                     temp2d.rotate(p.rot);
                     p.pos = new PVector(temp2d.x, temp2d.y, 0);
                     p.updateSnd(greatestMag);
-                    if (expand) {
-                        p.strokeWeight = min(0.3 + p.size, 7);
+                    if (highlight) {
+                        p.strokeWeight = min(0.3 + p.size, 8);
                     } else {
-                        p.strokeWeight = min(0.3 + p.size * 3, 25);
+                        p.strokeWeight = min(0.3 + p.size * 3, 30);
                     }   
                 }
             } 
@@ -174,7 +175,7 @@ class Ring extends Visualizer {
             
             if (prevPoint.pos.z == 0) {
                 PVector p = new PVector(pos.x, pos.y);             
-                if (expand) {
+                if (highlight) {
                     float mag = origMag + abs(greatestMag);
                     p.setMag(mag);
                 }
@@ -183,17 +184,17 @@ class Ring extends Visualizer {
             } else {
                 pos.setMag(pos.mag() + magnitude);
             }
-            
-            // if (expand) {
-            //     strokeWeight(min(0.3 + size, 7));
-            // } else {
-            //     strokeWeight(min(0.3 + size * 3, 25));
-            // }
+
             strokeWeight(strokeWeight);
-            // fill(tracker.red, tracker.green, tracker.blue, size * 10);
             PVector prevPos = prevPoint.pos;
             float theta = (10 * PI * index) / samples.length;
-
+            if(expand){
+                explodeVal = lerp(explodeVal, PI, .1); 
+            } else{
+                explodeVal = lerp(explodeVal, 0, .1);
+            }
+            pos.y -= explodeVal*(float(index)/SAMPLE_NUM)*20;
+            prevPos.y -= explodeVal*(index/SAMPLE_NUM)*20;
             rotationVector.set(pos.x, pos.y, pos.z);
             rotationVector.rotateX(theta * xRot);
             rotationVector.rotateZ(theta * zRot);

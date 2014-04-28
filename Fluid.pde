@@ -137,7 +137,7 @@ class Fluid extends Visualizer {
                     float yStart = currSample.points[i].y * ydir;
                     float yEnd = prevSample.points[i].y * ydir;
                     if (particles) {
-                        strokeWeight(max(abs(currSample.points[i].intensity), 1));
+                        strokeWeight(max(abs(currSample.points[i].intensity * 1.5), 1));
                     }
 
                     if (ydir > 0) {

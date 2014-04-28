@@ -1,5 +1,5 @@
 import ddf.minim.*;
-import g4p_controls.*;
+import controlP5.*;
 import java.util.*;
 
 final float PHI = (1.0 + sqrt(5.0)) / 2.0;
@@ -11,10 +11,17 @@ int select;
 float lastMouseX;
 float lastMouseY;
 float lastMillis;
-GCustomSlider volSlider;
+//Gui
+ControlP5 cp5;
+CheckBox[] buttons;
+CheckBox highlight, expand, revolve, particles, front, rear, top, autoPan, viewing, blur;
+Slider volSlider;
+float sliderVal;
+
 PFont font;
 PageDot[] dots;
 boolean showInterface;
+boolean debugMode;
 int contrast;
 
 void setup() {
@@ -22,7 +29,6 @@ void setup() {
     minim = new Minim(this); 
     font = loadFont("AndaleMono-14.vlw");
     textFont(font);
-    background(0);
     showInterface = true;
     Visualizer ring, fluid, droplet;
     
@@ -38,25 +44,26 @@ void setup() {
     ellipseMode(CENTER);
     ellipseMode(RADIUS);
     dots = new PageDot[visualizers.length];
-    float dist = 10;
+    float dist = 15;
     for (int i = 0; i < dots.length; i++) {
         float w = (dots.length) * dist - (dist / 2);
         float dx = (width / 2 - w) + (2 * dist * i + (dist / 2));
         dots[i] = new PageDot(dx, height - dist * 2, dist / 2, visualizers[i].name);
     }
-    
-    volSlider = new GCustomSlider(this, 20, 20, 300, 10, "blue18px");
-    volSlider.setLimits(0.0, -2.0, 2.0);
-    
+    buttons = new CheckBox[10];
+    cp5 = new ControlP5(this);
+    guiSetup();
     visualizers[select].setup();
 }
 
 void draw() {
+    smooth(8);
     pushStyle();
     pushMatrix();
     
     visualizers[select].retrieveSound();
     visualizers[select].draw();
+    updateGui();
     blendMode(BLEND);
         
     popMatrix();
@@ -65,8 +72,12 @@ void draw() {
     noLights();
 
     contrast = visualizers[select].contrast;
+    checkMouse();
     if (showInterface) {
         volSlider.setVisible(true);
+        for(int i = 0; i< buttons.length; i++){
+            buttons[i].setVisible(true);
+        }
         for (int i = 0; i < dots.length; i++) {
             if (i == select) {
                 fill(255 - contrast);
@@ -74,16 +85,21 @@ void draw() {
                 fill(contrast);
             }
             if (dots[i].overDot) {
-                textSize(12);
+                textSize(14);
                 textAlign(CENTER, TOP);
                 fill(255 - contrast);
-                text(dots[i].name, dots[i].x, dots[i].y - 20);
+                text(dots[i].name, dots[i].x, dots[i].y - 30);
             }
             dots[i].update();
         }
-        visualizers[select].displayHelpMenu(showInterface);
-        visualizers[select].displayDebugText();
+        if(debugMode){
+            visualizers[select].displayDebugText();
+        }
     } else {
+        volSlider.setVisible(false);
+        for(int i = 0; i< buttons.length; i++) {
+            buttons[i].setVisible(false);
+        }
         volSlider.setVisible(false);
     }
 }
@@ -141,8 +157,83 @@ void switchVisualizer() {
     frameRate(visualizers[select].getOptimalFrameRate());
 }
 
+void updateGui() {
+    // visualizers[select].expand ? new int{1}: new int{0}
+    float[] on = new float[]{1};
+    float[] off = new float[]{0};
+    buttons[0].setArrayValue(visualizers[select].highlight? on: off);
+    buttons[1].setArrayValue(visualizers[select].expand? on: off);
+    buttons[2].setArrayValue(visualizers[select].revolve? on: off);
+    buttons[3].setArrayValue(visualizers[select].particles? on: off);
+    buttons[4].setArrayValue(visualizers[select].frontView? on: off);
+    buttons[5].setArrayValue(visualizers[select].rearView? on: off);
+    buttons[6].setArrayValue(visualizers[select].topView? on: off);
+    buttons[7].setArrayValue(visualizers[select].camera.autoPanningMode? on: off);
+    buttons[8].setArrayValue(visualizers[select].camera.viewingMode? on: off);
+    buttons[9].setArrayValue(visualizers[select].blur? on: off);
+}
+
+void guiSetup(){
+    volSlider = cp5.addSlider("sliderVal")
+           .setLabel("Input Volume")
+           .setRange(-2.0,2.0)
+           .setValue(0)
+           .setPosition(20,20)
+           .setSize(300,17);
+     buttons[0] = highlight = cp5.addCheckBox("highlight").addItem("Highlight", 0);
+     buttons[1] = expand = cp5.addCheckBox("expand").addItem("Expand", 0);
+     buttons[2] = revolve = cp5.addCheckBox("revolve").addItem("Revolve", 0);
+     buttons[3] = particles = cp5.addCheckBox("particles").addItem("Particles", 0);
+     buttons[4] = front = cp5.addCheckBox("front").addItem("Front View", 0);
+     buttons[5] = rear = cp5.addCheckBox("rear").addItem("Rear View", 0);
+     buttons[6] = top = cp5.addCheckBox("top").addItem("Top View", 0);
+     buttons[7] = autoPan = cp5.addCheckBox("autoPan").addItem("Autopan Camera", 0);
+     buttons[8] = viewing = cp5.addCheckBox("viewing").addItem("Follow Mouse", 0);
+     buttons[9] = blur = cp5.addCheckBox("blur").addItem("Blur", 0);
+     float startHeight = 10;
+     for(int i = 0; i < buttons.length; i++){
+        if(i == 4){
+            startHeight = 30;
+        } else if(i == 9) {
+            startHeight = 50;
+        }
+            buttons[i].setPosition(width-200, startHeight+(1+i)*30)
+                   .setColorForeground(color(120))
+                   .setColorActive(color(255))
+                   .setColorLabel(color(255))
+                   .setSize(25, 25);
+     }
+}
+
+void controlEvent(ControlEvent theEvent) {
+    if (theEvent.isFrom(highlight)) {
+        visualizers[select].highlight();
+    } else if(theEvent.isFrom(expand)){
+        visualizers[select].expand();
+    } else if(theEvent.isFrom(revolve)){
+        visualizers[select].revolve();
+    } else if(theEvent.isFrom(particles)){
+        visualizers[select].particles();
+    } else if(theEvent.isFrom(front)){
+        visualizers[select].fPressed();
+    } else if(theEvent.isFrom(rear)){
+        visualizers[select].rPressed();
+    } else if(theEvent.isFrom(top)){
+        visualizers[select].tPressed();
+    } else if(theEvent.isFrom(autoPan)){
+        visualizers[select].aPressed();
+    } else if(theEvent.isFrom(viewing)){
+        visualizers[select].vPressed();
+    } else if(theEvent.isFrom(blur)){
+        visualizers[select].blur = !visualizers[select].blur;
+    }
+}
+
 void keyPressed() {
     switch (key) {
+        case 'D':
+            debugMode = !debugMode;
+            break;
         case 'h':
             showInterface = !showInterface;
             break;
