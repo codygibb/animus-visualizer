@@ -15,6 +15,7 @@ float lastMillis;
 ControlP5 cp5;
 CheckBox[] buttons;
 CheckBox highlight, expand, revolve, particles, front, rear, top, autoPan, viewing, blur;
+Textlabel interfaceLabel;
 Slider volSlider;
 float sliderVal;
 
@@ -29,7 +30,7 @@ void setup() {
     minim = new Minim(this); 
     font = loadFont("AndaleMono-14.vlw");
     PFont pfont = createFont("AndaleMono-14.vlw",14,true);
-    ControlFont cFont = new ControlFont(pfont,241);
+    ControlFont cFont = new ControlFont(pfont,14);
     textFont(font);
     showInterface = true;
     Visualizer ring, fluid, droplet;
@@ -77,6 +78,7 @@ void draw() {
     checkMouse();
     if (showInterface) {
         volSlider.setVisible(true);
+        interfaceLabel.setVisible(true);
         for(int i = 0; i< buttons.length; i++){
             buttons[i].setVisible(true);
         }
@@ -103,6 +105,7 @@ void draw() {
             buttons[i].setVisible(false);
         }
         volSlider.setVisible(false);
+        interfaceLabel.setVisible(false);
     }
 }
 
@@ -182,6 +185,12 @@ void guiSetup(ControlFont font){
            .setValue(0)
            .setPosition(20,20)
            .setSize(300,17);
+    interfaceLabel = cp5.addTextlabel("label")
+            .setText("PRESS [h] TO HIDE INTERFACE")
+            .setFont(font)
+            .setPosition(width-214, 10);
+    interfaceLabel.getCaptionLabel().setSize(14);
+            
     volSlider.captionLabel().setFont(font).setSize(14);
      buttons[0] = highlight = cp5.addCheckBox("highlight").addItem("Highlight [1]", 0);
      buttons[1] = expand = cp5.addCheckBox("expand").addItem("Expand [2]", 0);
@@ -200,7 +209,7 @@ void guiSetup(ControlFont font){
         } else if(i == 9) {
             startHeight = 50;
         }
-            buttons[i].setPosition(width-200, startHeight+(1+i)*30)
+            buttons[i].setPosition(width-210, startHeight+(1+i)*30)
                    .setColorForeground(color(120))
                    .setColorActive(color(255))
                    .setColorLabel(color(255))

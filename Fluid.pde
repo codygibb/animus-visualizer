@@ -360,11 +360,13 @@ class Fluid extends Visualizer {
             camZ = HORIZ_SAMPLE_NUM*REFRESH/2.1;
             camY = 150;
         }
-        camera.initMoveCamera(new PVector(150, camY, camZ), (int) frameRate * 2);
+        
         
         if(revolve){
+            camera.initMoveCamera(new PVector(-150, camY, camZ), (int) frameRate * 2);
             camera.initMoveCenter(0, 0, HORIZ_SAMPLE_NUM*REFRESH/2, (int)frameRate/2);
         } else{
+            camera.initMoveCamera(new PVector(150, camY, camZ), (int) frameRate * 2);
             camera.initMoveCenter(SPEC_SIZE * SPEC_WIDTH, 0, HORIZ_SAMPLE_NUM*REFRESH/2, (int)frameRate);
         }
         camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
