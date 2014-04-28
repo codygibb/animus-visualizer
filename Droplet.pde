@@ -51,10 +51,10 @@ class Droplet extends Visualizer {
     void setupDroplet(){
         for (int i = 0; i < rings.length; i++) {
             int radius = SPEC_WIDTH * (i + 1);
+            int pointNum = (particles) ?  dropletSize : dropletSize * (i + 1);
+            int hpointNum = dropletSize * (i + 1) / 10;
 
-            int pointNum = dropletSize * (i + 1);
-
-            rings[i] = new Ring(radius, i, pointNum);  
+            rings[i] = new Ring(radius, i, pointNum, hpointNum);
         }
         for (int i = rings.length - 1; i >= 0; i--) {
             for (int j = 0; j < rings[i].points.length; j++) {
@@ -75,7 +75,7 @@ class Droplet extends Visualizer {
         float baseFade;
         
         // 0 index Ring has a boost in detail
-        Ring(int radius, int index, int pointNum) {
+        Ring(int radius, int index, int pointNum, int hpointNum) {
             this.index = index;
             expandTick = index;
 
@@ -87,7 +87,7 @@ class Droplet extends Visualizer {
                 points[i] = new Point(pos, index);
             }
 
-            hpoints = new HighlightPoint[pointNum / 10];
+            hpoints = new HighlightPoint[hpointNum];
             for (int i = 0; i < hpoints.length; i++) {
                 float angle = random(0, TWO_PI);
                 EPVector pos = new EPVector(radius, 0, 0);
@@ -302,8 +302,10 @@ class Droplet extends Visualizer {
                 stroke((255 - colors[0]) * fade, (255 - colors[1]) * fade, (255 - colors[2]) * fade);
 
                 pushMatrix();
-                strokeWeight(size*4);
-                point(pos.x, (baseY + pos.y) * ydir, pos.z);
+                // strokeWeight(size * 4);
+                // point(pos.x, (baseY + pos.y) * ydir, pos.z);
+                translate(pos.x, (baseY + pos.y) * ydir, pos.z);
+                box(size);
                 
                 popMatrix();
             }
@@ -381,7 +383,7 @@ class Droplet extends Visualizer {
     @Override
     void particles() {
         particles = !particles;
-//        setupDroplet();
+        setupDroplet();
     }
 
     @Override
