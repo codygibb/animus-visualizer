@@ -127,6 +127,16 @@ public abstract class Visualizer {
         return result;
     }    
 
+    float bindRange(float k, float min, float max) {
+        if (k < min) {
+            return min;
+        } else if (k > max) {
+            return max;
+        } else {
+            return k;
+        }
+    }
+
     void displayDebugText() {
         textSize(TEXT_SIZE);
         textAlign(LEFT, TOP);
@@ -170,10 +180,6 @@ public abstract class Visualizer {
             text(textKey, TEXT_OFFSET, i * TEXT_SEPARATION);
             i++;
         }
-
-        textAlign(CENTER, TOP);
-        fill(255 - contrast);
-        text(name, displayWidth / 2, TEXT_SEPARATION);
     }
 
     void toggleTextColor(boolean toggled) {

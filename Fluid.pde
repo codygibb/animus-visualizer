@@ -14,6 +14,9 @@ class Fluid extends Visualizer {
     final int VERT_SAMPLE_NUM = 30;
     final int REFRESH = 3;
     final float ANGLE_INC = 0.001;
+    final int PARTICLE_DETAIL_LOSS = 2;
+    final float MIN_PARTICLE_SIZE = 2;
+    final float MAX_PARTICLE_SIZE = 20;
 
     // since we need 4 different color trackers -- base and peak colors for both
     // bottom and top halves -- stored all dem in an array
@@ -36,16 +39,22 @@ class Fluid extends Visualizer {
         }
         camera.setCenter(SPEC_SIZE * SPEC_WIDTH, 0, 0);
         horizSamples = new HorizSample[HORIZ_SAMPLE_NUM];
-        for (int i = 0; i < HORIZ_SAMPLE_NUM; i++) {
+        vertSamples = new VertSample[VERT_SAMPLE_NUM];
+        for (int i = 0; i < horizSamples.length; i++) {
             horizSamples[i] = new HorizSample(i * REFRESH, REFRESH, HORIZ_SAMPLE_NUM * REFRESH);
         }
-        vertSamples = new VertSample[VERT_SAMPLE_NUM];
-        for (int i = 0; i < VERT_SAMPLE_NUM; i++) {
+        for (int i = 0; i < vertSamples.length; i++) {
             vertSamples[i] = new VertSample(i * REFRESH, REFRESH, VERT_SAMPLE_NUM * REFRESH);
         }
+        setupFluid(REFRESH, HORIZ_SAMPLE_NUM, VERT_SAMPLE_NUM);
         camera.viewingMode = false;
         camera.pos = new PVector(SPEC_SIZE * SPEC_WIDTH, 0, -130);
-        camera.setOuterBounds(0, -200, -200, SPEC_SIZE * SPEC_WIDTH*2, 200, REFRESH * HORIZ_SAMPLE_NUM);
+        camera.setOuterBounds(0, -200, -200, SPEC_SIZE * SPEC_WIDTH * 2, 200, REFRESH * HORIZ_SAMPLE_NUM);
+        noFill();
+    }
+
+    void setupFluid(int refresh, int horizSampleNum, int vertSampleNum) {
+        
     }
 
     class Point {
@@ -122,10 +131,10 @@ class Fluid extends Visualizer {
                 }
 
                 HorizSample prevSample = horizSamples[prevIndex];
-                if (particles) {
-                    beginShape(POINTS);
-                    noFill();
-                } else {
+
+                // strokeWeight cannot being changed while inside beginShape/endShape,
+                // so we must use point() instead of vertex() when drawing particles
+                if (!particles) {
                     beginShape(QUAD_STRIP);
                 }
 
@@ -136,20 +145,28 @@ class Fluid extends Visualizer {
                     float xEnd = prevSample.points[i].x;
                     float yStart = currSample.points[i].y * ydir;
                     float yEnd = prevSample.points[i].y * ydir;
-                    if (particles) {
-                        strokeWeight(max(abs(currSample.points[i].intensity * 1.5), 1));
-                    }
-
+                    
                     if (ydir > 0) {
                         setColor(fade, points[i].botColors);
                     } else {
                         setColor(fade, points[i].topColors);
                     }
 
-                    vertex(xStart, yStart, zStart);
-                    vertex(xEnd, yEnd, zEnd);
+                    if (!particles) {
+                        vertex(xStart, yStart, zStart);
+                        vertex(xEnd, yEnd, zEnd);
+                    } else if (i % PARTICLE_DETAIL_LOSS == 0) {
+                        strokeWeight(bindRange(currSample.points[i].intensity * 2, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
+                        point(xStart, yStart, zStart);
+
+                        strokeWeight(bindRange(prevSample.points[i].intensity * 2, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
+                        point(xEnd, yEnd, zEnd);
+                    }
                 }  
-                endShape();
+
+                if (!particles) {
+                    endShape();
+                }
             } 
             popMatrix();
         }
@@ -176,7 +193,7 @@ class Fluid extends Visualizer {
             if (pos >= stop) {
                 for (int i = 0; i < points.length; i++) {
                     int fftIndex = abs(points.length / 2 - i);
-                    points[i].y = getIntensity(fftIndex) * 0.6;
+                    points[i].y = getIntensity(fftIndex);
                 }
                 pos = 0;
                 if (highlight) {
@@ -199,8 +216,8 @@ class Fluid extends Visualizer {
             }
 
             for (int i = 0; i < points.length - 1; i++) {
-                float weight = min((points[i].y + points[i + 1].y) / 20, 6);
-                if(particles){
+                float weight = max(min((points[i].y + points[i + 1].y) / 20, 6), 1);
+                if (particles) {
                     weight *= 5;
                 }
                 strokeWeight(weight);
@@ -221,7 +238,7 @@ class Fluid extends Visualizer {
 
     @Override
     void draw() {
-        if(blur) {
+        if (blur) {
             setBackground(contrast, 60);
         } else {
             setBackground(contrast, 150);
@@ -288,8 +305,10 @@ class Fluid extends Visualizer {
             } else {
                 fade = 1 - s.pos / (HORIZ_SAMPLE_NUM * REFRESH);
             }
-            s.drawLines(1, fade);
-            s.drawLines(-1, fade);  
+            if (!particles || ((int) s.pos) % PARTICLE_DETAIL_LOSS == 0) {
+                s.drawLines(1, fade);
+                s.drawLines(-1, fade);  
+            }
 
             if (revolve) {
                rotateZ(-currRot * relativeIndex);
@@ -355,20 +374,19 @@ class Fluid extends Visualizer {
     
     @Override
     void topView() { 
-        float camZ = HORIZ_SAMPLE_NUM*REFRESH/1.99;
+        float camZ = HORIZ_SAMPLE_NUM * REFRESH/ 1.99;
         float camY = -150;
-        if(frontView){
-            camZ = HORIZ_SAMPLE_NUM*REFRESH/2.1;
+        if (frontView) {
+            camZ = HORIZ_SAMPLE_NUM * REFRESH / 2.1;
             camY = 150;
         }
         
-        
-        if(revolve){
+        if (revolve) {
             camera.initMoveCamera(new PVector(-150, camY, camZ), (int) frameRate * 2);
-            camera.initMoveCenter(0, 0, HORIZ_SAMPLE_NUM*REFRESH/2, (int)frameRate/2);
-        } else{
+            camera.initMoveCenter(0, 0, HORIZ_SAMPLE_NUM * REFRESH / 2, (int) frameRate / 2);
+        } else {
             camera.initMoveCamera(new PVector(150, camY, camZ), (int) frameRate * 2);
-            camera.initMoveCenter(SPEC_SIZE * SPEC_WIDTH, 0, HORIZ_SAMPLE_NUM*REFRESH/2, (int)frameRate);
+            camera.initMoveCenter(SPEC_SIZE * SPEC_WIDTH, 0, HORIZ_SAMPLE_NUM * REFRESH / 2, (int) frameRate);
         }
         camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
     }
