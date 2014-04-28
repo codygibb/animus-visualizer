@@ -180,16 +180,16 @@ void guiSetup(){
            .setValue(0)
            .setPosition(20,20)
            .setSize(300,17);
-     buttons[0] = highlight = cp5.addCheckBox("highlight").addItem("Highlight", 0);
-     buttons[1] = expand = cp5.addCheckBox("expand").addItem("Expand", 0);
-     buttons[2] = revolve = cp5.addCheckBox("revolve").addItem("Revolve", 0);
-     buttons[3] = particles = cp5.addCheckBox("particles").addItem("Particles", 0);
-     buttons[4] = front = cp5.addCheckBox("front").addItem("Front View", 0);
-     buttons[5] = rear = cp5.addCheckBox("rear").addItem("Rear View", 0);
-     buttons[6] = top = cp5.addCheckBox("top").addItem("Top View", 0);
-     buttons[7] = autoPan = cp5.addCheckBox("autoPan").addItem("Autopan Camera", 0);
-     buttons[8] = viewing = cp5.addCheckBox("viewing").addItem("Follow Mouse", 0);
-     buttons[9] = blur = cp5.addCheckBox("blur").addItem("Blur", 0);
+     buttons[0] = highlight = cp5.addCheckBox("highlight").addItem("Highlight [1]", 0);
+     buttons[1] = expand = cp5.addCheckBox("expand").addItem("Expand [2]", 0);
+     buttons[2] = revolve = cp5.addCheckBox("revolve").addItem("Revolve [3]", 0);
+     buttons[3] = particles = cp5.addCheckBox("particles").addItem("Particles [p]", 0);
+     buttons[4] = front = cp5.addCheckBox("front").addItem("Front View [f]", 0);
+     buttons[5] = rear = cp5.addCheckBox("rear").addItem("Rear View [r]", 0);
+     buttons[6] = top = cp5.addCheckBox("top").addItem("Top View [t]" , 0);
+     buttons[7] = autoPan = cp5.addCheckBox("autoPan").addItem("Autopan Camera [a]", 0);
+     buttons[8] = viewing = cp5.addCheckBox("viewing").addItem("Follow Mouse [m]", 0);
+     buttons[9] = blur = cp5.addCheckBox("blur").addItem("Blur [b]", 0);
      float startHeight = 10;
      for(int i = 0; i < buttons.length; i++){
         if(i == 4){
@@ -223,7 +223,7 @@ void controlEvent(ControlEvent theEvent) {
     } else if(theEvent.isFrom(autoPan)){
         visualizers[select].aPressed();
     } else if(theEvent.isFrom(viewing)){
-        visualizers[select].vPressed();
+        visualizers[select].mPressed();
     } else if(theEvent.isFrom(blur)){
         visualizers[select].blur = !visualizers[select].blur;
     }

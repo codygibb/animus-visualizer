@@ -233,7 +233,7 @@ public abstract class Visualizer {
         frontView = false;        
     }
 
-    void vPressed(){
+    void mPressed(){
         camera.viewSwitch(); 
         rearView = false;
         topView = false;
@@ -244,8 +244,8 @@ public abstract class Visualizer {
         switch (key) {
             // showInterface toggle handled in Animus due to not being able to
             // use static variables (processing fucking sucks!)
-            case 'v':
-                vPressed();
+            case 'm':
+                mPressed();
                 break;
             case 'a':
                 aPressed();
