@@ -33,7 +33,7 @@ class Droplet extends Visualizer {
     RotationTracker rotater;
 
     Droplet(AudioInput input) {
-        super(input, "Droplet");
+        super(input, "DROPLET");
         camera.pos = new PVector(0, 0, 400);
         float n = SPEC_SIZE * SPEC_WIDTH;
         camera.setOuterBounds(-n, -n * 1.2, -n, n, n * 1.2, n);

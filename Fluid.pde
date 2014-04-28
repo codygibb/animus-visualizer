@@ -29,7 +29,7 @@ class Fluid extends Visualizer {
     float currRot = 0;
     
     Fluid(AudioInput input) {
-        super(input, "Fluid");
+        super(input, "FLUID");
         colorTrackers = new ColorTracker[4];
         for (int i = 0; i < colorTrackers.length; i++) {
             colorTrackers[i] = new ColorTracker(0.5, 4);   

@@ -35,7 +35,7 @@ class Ring extends Visualizer {
     
     
     public Ring(AudioInput input) {
-        super(input, "Ring");
+        super(input, "RING");
         tracker = new ColorTracker(0.1, 0.8);
         tracker2 = new ColorTracker(0.1, 0.8);
         camera.viewingMode = false;

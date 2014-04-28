@@ -28,6 +28,8 @@ void setup() {
     size(displayWidth, displayHeight, P3D);
     minim = new Minim(this); 
     font = loadFont("AndaleMono-14.vlw");
+    PFont pfont = createFont("AndaleMono-14.vlw",14,true);
+    ControlFont cFont = new ControlFont(pfont,241);
     textFont(font);
     showInterface = true;
     Visualizer ring, fluid, droplet;
@@ -52,7 +54,7 @@ void setup() {
     }
     buttons = new CheckBox[10];
     cp5 = new ControlP5(this);
-    guiSetup();
+    guiSetup(cFont);
     visualizers[select].setup();
 }
 
@@ -173,13 +175,14 @@ void updateGui() {
     buttons[9].setArrayValue(visualizers[select].blur? on: off);
 }
 
-void guiSetup(){
+void guiSetup(ControlFont font){
     volSlider = cp5.addSlider("sliderVal")
            .setLabel("Input Volume")
            .setRange(-2.0,2.0)
            .setValue(0)
            .setPosition(20,20)
            .setSize(300,17);
+    volSlider.captionLabel().setFont(font).setSize(14);
      buttons[0] = highlight = cp5.addCheckBox("highlight").addItem("Highlight [1]", 0);
      buttons[1] = expand = cp5.addCheckBox("expand").addItem("Expand [2]", 0);
      buttons[2] = revolve = cp5.addCheckBox("revolve").addItem("Revolve [3]", 0);
@@ -202,6 +205,7 @@ void guiSetup(){
                    .setColorActive(color(255))
                    .setColorLabel(color(255))
                    .setSize(25, 25);
+            buttons[i].getItem(0).captionLabel().setFont(font).setSize(14);
      }
 }
 
