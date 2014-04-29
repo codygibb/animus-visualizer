@@ -258,6 +258,8 @@ class Fluid extends Visualizer {
 
         if (revolve) {
             currRot += ANGLE_INC;
+        } else {
+            currRot = lerp(currRot, 0, PHI * 40 * ANGLE_INC);
         }
         
         for (int i = 0; i < VERT_SAMPLE_NUM; i++) {
@@ -266,9 +268,7 @@ class Fluid extends Visualizer {
         for (int i = 0; i < VERT_SAMPLE_NUM; i++) {
             VertSample s = vertSamples[i];
             if (s.continueSampling) {
-                if (revolve) {
                     rotateZ(currRot);
-                }
                 float fade = 1 - s.pos / (VERT_SAMPLE_NUM * REFRESH);
                 setComplementaryColor(fade, colorTrackers[0]);
                 s.drawLines(1);
@@ -289,11 +289,7 @@ class Fluid extends Visualizer {
             HorizSample s = horizSamples[i];
 
             int relativeIndex = (int) (s.pos / REFRESH);
-
-            if (revolve) {
                rotateZ(currRot * relativeIndex);
-            }
-
             if (expand) {
                 float weight = map(s.pos, 0, s.stop, 0.8, 5);
                 strokeWeight(weight);
@@ -309,10 +305,7 @@ class Fluid extends Visualizer {
                 s.drawLines(1, fade);
                 s.drawLines(-1, fade);  
             }
-
-            if (revolve) {
                rotateZ(-currRot * relativeIndex);
-            }
         }
 
         popMatrix();
@@ -340,7 +333,9 @@ class Fluid extends Visualizer {
     @Override
     void revolve() { 
         revolve = !revolve;
-        currRot = 0;
+        if (!revolve && currRot >= .082) {
+            currRot = .082; //sets revolve to 1 full rotation
+        }
         fPressed();
         frontView();
     }
