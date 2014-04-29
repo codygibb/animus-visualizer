@@ -341,9 +341,7 @@ class Fluid extends Visualizer {
     void revolve() { 
         revolve = !revolve;
         currRot = 0;
-        frontView = true;
-        rearView = false;
-        topView = false;
+        fPressed();
         frontView();
     }
 

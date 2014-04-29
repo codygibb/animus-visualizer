@@ -16,7 +16,7 @@ float lastMillis;
 //Gui
 ControlP5 cp5;
 CheckBox[] buttons;
-CheckBox highlight, expand, revolve, particles, front, rear, top, autoPan, viewing, blur;
+CheckBox highlight, expand, revolve, particles, front, rear, top, autoPan, viewing, blur, invert;
 Textlabel interfaceLabel;
 Slider volSlider;
 float sliderVal;
@@ -26,6 +26,7 @@ PageDot[] dots;
 boolean showInterface;
 boolean debugMode;
 int contrast;
+
 
 void setup() {
     size(displayWidth, displayHeight, P3D);
@@ -54,7 +55,7 @@ void setup() {
         float dx = (width / 2 - w) + (2 * dist * i + (dist / 2));
         dots[i] = new PageDot(dx, height - dist * 2, dist / 2, visualizers[i].name);
     }
-    buttons = new CheckBox[10];
+    buttons = new CheckBox[11];
     cp5 = new ControlP5(this);
     guiSetup(cFont);
     visualizers[select].setup();
@@ -78,7 +79,10 @@ void draw() {
     contrast = visualizers[select].contrast;
     
     if (showInterface) {
-        cursor(cp5.isMouseOver() ? HAND : ARROW);
+        boolean handOn = false;
+        if (cp5.isMouseOver()) {
+            handOn = true;
+        }
         volSlider.setVisible(true);
         interfaceLabel.setVisible(true);
         for (int i = 0; i < buttons.length; i++) {
@@ -93,7 +97,7 @@ void draw() {
             dots[i].update();
             if (dots[i].overDot) {
                 // textSize(FONT_SIZE);
-                cursor(HAND);
+                handOn = true;
                 textAlign(CENTER, TOP);
                 fill(255 - contrast);
                 text(dots[i].name, dots[i].x, dots[i].y - TEXT_OFFSET - dots[i].radius);
@@ -104,6 +108,11 @@ void draw() {
         text(visualizers[select].name, displayWidth / 2, TEXT_OFFSET);
         if (debugMode) {
             visualizers[select].displayDebugText();
+        }
+        if (handOn) {
+            cursor(HAND);
+        } else {
+            cursor(ARROW);
         }
     } else {
         checkMouse();
@@ -209,6 +218,7 @@ void guiSetup(ControlFont font){
     buttons[7] = autoPan = cp5.addCheckBox("autoPan").addItem("autopan camera [a]", 0);
     buttons[8] = viewing = cp5.addCheckBox("viewing").addItem("follow mouse [m]", 0);
     buttons[9] = blur = cp5.addCheckBox("blur").addItem("blur [b]", 0);
+    buttons[10] = invert = cp5.addCheckBox("invert").addItem("invert [i]", 0);
     float startHeight = TEXT_OFFSET;
     for (int i = 0; i < buttons.length; i++) {
         if (i == 4) {
@@ -252,6 +262,10 @@ void controlEvent(ControlEvent theEvent) {
         visualizers[select].mPressed();
     } else if (theEvent.isFrom(blur)) {
         visualizers[select].blur = !visualizers[select].blur;
+    } else if (theEvent.isFrom(invert)) {
+        visualizers[select].contrast = 255 - contrast;
+        contrast = 255 - contrast;
+        setGuiColors();
     }
 }
 
@@ -263,7 +277,7 @@ void keyPressed() {
         case 'h':
             showInterface = !showInterface;
             break;
-        case 'd':
+        case 'i':
             contrast = 255 - contrast;
             setGuiColors();
             break;

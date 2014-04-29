@@ -267,7 +267,7 @@ public abstract class Visualizer {
             case 't':
                 tPressed();
                 break;
-            case 'd':
+            case 'i':
                 contrast = 255 - contrast;
                 break;
             case 'b':

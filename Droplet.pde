@@ -11,7 +11,7 @@ class Droplet extends Visualizer {
     final int SPEC_SIZE = 50;
     final int SPEC_WIDTH = 7;
     final int DETAIL = 6;
-    final int PART_DETAIL = 12;
+    final int PART_DETAIL = 14;
     final float DECAY = 0.25; // DECAY = -y per frame
     final int MAX_DECAY = 100;
     final int PEAK = 40;
