@@ -1,11 +1,9 @@
 import ddf.minim.*; 
 
 class Ring extends Visualizer {
-    final int OPTIMAL_FRAME_RATE = 48;
-    
     @Override
     int getOptimalFrameRate() {
-        return OPTIMAL_FRAME_RATE;
+        return 48;
     }
     
     final int SAMPLE_NUM = 180;
@@ -17,10 +15,17 @@ class Ring extends Visualizer {
     final float INIT_DIST = 20; // 10
     final float MAX_TIME = 2000; //in milliseconds
     final float MAX_SPEED = 0.2;
+    final float MIN_PART_SIZE = 2;
+    final float MAX_PART_SIZE = 20;
+
     EPVector rotationVector; //handles rotating the verticies when revolve is turned on
     float xRot;
     float zRot;
     float explodeVal;
+
+    // we will sample the framerate and adjust this as needed when particle mode is
+    // initiated
+    float particleDetailLoss = 1;
     
     float deltaRotation = PI / 2000;
     
@@ -32,7 +37,8 @@ class Ring extends Visualizer {
     float stop = 0;
     float averageSpeed = 0;
     boolean throttlingOn = false;
-    
+
+    boolean sampleParticleMode = false;
     
     public Ring(AudioInput input) {
         super(input, "RING");
@@ -128,15 +134,15 @@ class Ring extends Visualizer {
                     zRot = 0;
                 }                    
                 
-                if (particles) {
-                   beginShape(POINTS); 
-                } else { 
+                if (!particles) {
                     beginShape(LINES);
                 }
                 for (int i = 0; i < points.length; i++) {
-                    points[i].drawPoint(pos, stop, prevSample.points[i], i);  
+                    points[i].drawPoint(pos, stop, prevSample.points[i], index);
                 }
-                endShape();   
+                if (!particles) {
+                    endShape();
+                } 
             } 
         }
     }
@@ -166,7 +172,7 @@ class Ring extends Visualizer {
             colors = getColor(pos.mag(), 200, tracker, tracker2);
         }
         
-        void drawPoint(float zpos, float stop, Point prevPoint, int index) {
+        void drawPoint(float zpos, float stop, Point prevPoint, int sampleIndex) {
             float fade = pow((stop - zpos) / stop, 5.0 / 6.0);
 
             stroke(colors[0] * fade, colors[1] * fade, colors[2] * fade);
@@ -187,26 +193,31 @@ class Ring extends Visualizer {
 
             strokeWeight(strokeWeight);
             PVector prevPos = prevPoint.pos;
-            float theta = (10 * PI * index) / samples.length;
-            if(expand){
-                explodeVal = lerp(explodeVal, PI, .1);
-            } else{
-                explodeVal = lerp(explodeVal, 0, .1);
+            float theta = TWO_PI * index / SPEC_SIZE;
+            if (expand) {
+                pos.y -= index / 3.0;
             }
-            pos.y -= explodeVal*(float(index)/SAMPLE_NUM)*20;
-            prevPos.y -= explodeVal*(index/SAMPLE_NUM)*20;
             rotationVector.set(pos.x, pos.y, pos.z);
             rotationVector.rotateX(theta * xRot);
             rotationVector.rotateZ(theta * zRot);
 
-            vertex(rotationVector.x, rotationVector.y, rotationVector.z);
-
+            if (!particles) {
+                vertex(rotationVector.x, rotationVector.y, rotationVector.z);
+            } else if (sampleIndex % particleDetailLoss == 0) {
+                strokeWeight(bindRange(size * 10, MIN_PART_SIZE, MAX_PART_SIZE));
+                point(rotationVector.x, rotationVector.y, rotationVector.z);
+            }
 
             rotationVector.set(prevPos.x, prevPos.y, prevPos.z);
             rotationVector.rotateX(theta * xRot);
             rotationVector.rotateZ(theta * zRot);
 
-            vertex(rotationVector.x, rotationVector.y, rotationVector.z);
+            if (!particles) {
+                vertex(rotationVector.x, rotationVector.y, rotationVector.z);
+            } // else if (sampleIndex % particleDetailLoss == 0) {
+                // strokeWeight(bindRange(size * 10, MIN_PART_SIZE, MAX_PART_SIZE));
+                // point(rotationVector.x, rotationVector.y, rotationVector.z);
+            // }
         }
     }
 
@@ -216,15 +227,18 @@ class Ring extends Visualizer {
         } else { 
             setBackground(contrast, 150);
         }
-        
+        if (sampleParticleMode) {
+            float avgFr = sampleFrameRate();
+            if (avgFr > 0) {
+                adjustDetail(avgFr);
+            }
+        }
         hint(ENABLE_DEPTH_MASK);
         tracker.incrementColor();
         tracker2.incrementColor();
         pushMatrix();
 
         camera.update();
-        // scale(2);
-        stroke(255);
         
         if (millis() - start < stop) {
             averageSpeed = incrRot(deltaRotation);
@@ -251,7 +265,19 @@ class Ring extends Visualizer {
         for (int i = 0; i < samples.length; i++) {
             samples[i].drawSample();
         }
+
         popMatrix();
+    }
+
+    void adjustDetail(float avgFr) {
+        println(avgFr);
+        if (avgFr < 30) {
+            particleDetailLoss = 8;
+        } else if (avgFr < 40) {
+            particleDetailLoss = 6;
+        } else if (avgFr < 45) {
+            particleDetailLoss = 3;
+        }
     }
 
     // returns avg rotation of all points
@@ -271,6 +297,9 @@ class Ring extends Visualizer {
     @Override
     void particles() {
         particles = !particles;
+        if (!sampleParticleMode) {
+            sampleParticleMode = true;
+        }
     }
 
     @Override

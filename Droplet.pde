@@ -1,17 +1,15 @@
 import ddf.minim.*;
 
 class Droplet extends Visualizer {
-    final int OPTIMAL_FRAME_RATE = 35;
-
     @Override
     int getOptimalFrameRate() {
-        return OPTIMAL_FRAME_RATE;
+        return 35;
     }
  
     final int SPEC_SIZE = 50;
     final int SPEC_WIDTH = 7;
     final int DETAIL = 6;
-    final int PART_DETAIL = 14;
+    final int PART_DETAIL = 12;
     final float DECAY = 0.25; // DECAY = -y per frame
     final int MAX_DECAY = 100;
     final int PEAK = 40;
@@ -218,7 +216,8 @@ class Droplet extends Visualizer {
         }
 
         void drawParticle(Point p, int ydir) {
-            strokeWeight(bindRange(abs(p.naturalY) * PART_SCALE, MIN_PART_SIZE, MAX_PART_SIZE));
+            float weight = abs(p.naturalY) + abs(p.pos.y) * currExpand * 0.25;
+            strokeWeight(bindRange(weight * PART_SCALE, MIN_PART_SIZE, MAX_PART_SIZE));
             point(p.pos.x, p.pos.y * ydir, p.pos.z);
         }
     }

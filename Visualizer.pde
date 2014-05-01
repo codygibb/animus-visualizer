@@ -7,6 +7,7 @@ public abstract class Visualizer {
     final int TEXT_OFFSET = displayWidth - 200;
     final int TEXT_SEPARATION = 15;
     final int TEXT_SIZE = 14;
+    final float TOTAL_SAMPLE_TIME = 1000;
 
     AudioInput input;
     AudioSource src;
@@ -19,7 +20,10 @@ public abstract class Visualizer {
     float volumeScale;
     boolean blur;
     float opacityFade;
-    
+
+    float samplerStartTime;
+    float totalFrameRate;
+    int frameRateSampleNum;
     
     // visualizers must return what their optimal frame rate is. this is so that
     // faster computers will not go crazy and update the visualizer way too fast
@@ -100,6 +104,29 @@ public abstract class Visualizer {
             blendMode(SCREEN);
         } else {
             blendMode(DIFFERENCE);
+        }
+    }
+
+    // calculates avg frame rate over TOTAL_SAMPLE_TIME. returns avg frame rate when done
+    // sampling. returns 0 if still sampling. returns -1 if has already sampled.
+    float sampleFrameRate() {
+        
+        if (samplerStartTime == -1) {
+            return -1;
+        }
+
+        if (samplerStartTime == 0) {
+            samplerStartTime = millis();
+        }
+
+        if (samplerStartTime + TOTAL_SAMPLE_TIME >= millis()) {
+            frameRateSampleNum++;
+            totalFrameRate += frameRate;
+            return -1;
+        } else {
+            samplerStartTime = -1;
+            println("avg particle framerate: " + totalFrameRate / frameRateSampleNum);
+            return totalFrameRate / frameRateSampleNum;
         }
     }
     

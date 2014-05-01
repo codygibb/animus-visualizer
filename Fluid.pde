@@ -1,11 +1,9 @@
 import ddf.minim.*; 
 
 class Fluid extends Visualizer {
-    final int OPTIMAL_FRAME_RATE = 40;
-
     @Override
     int getOptimalFrameRate() {
-        return OPTIMAL_FRAME_RATE;
+        return 40;
     }
 
     final int SPEC_SIZE = 30;
@@ -156,11 +154,11 @@ class Fluid extends Visualizer {
                         vertex(xStart, yStart, zStart);
                         vertex(xEnd, yEnd, zEnd);
                     } else if (i % PARTICLE_DETAIL_LOSS == 0) {
-                        strokeWeight(bindRange(currSample.points[i].intensity * 2, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
+                        strokeWeight(bindRange(currSample.points[i].intensity, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
                         point(xStart, yStart, zStart);
 
-                        strokeWeight(bindRange(prevSample.points[i].intensity * 2, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
-                        point(xEnd, yEnd, zEnd);
+                        // strokeWeight(bindRange(prevSample.points[i].intensity, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
+                        // point(xEnd, yEnd, zEnd);
                     }
                 }  
 
@@ -239,7 +237,7 @@ class Fluid extends Visualizer {
     @Override
     void draw() {
         if (blur) {
-            setBackground(contrast, 60);
+            setBackground(contrast, 80);
         } else {
             setBackground(contrast, 150);
         }
@@ -289,7 +287,7 @@ class Fluid extends Visualizer {
             HorizSample s = horizSamples[i];
 
             int relativeIndex = (int) (s.pos / REFRESH);
-               rotateZ(currRot * relativeIndex);
+            rotateZ(currRot * relativeIndex);
             if (expand) {
                 float weight = map(s.pos, 0, s.stop, 0.8, 5);
                 strokeWeight(weight);
@@ -301,11 +299,11 @@ class Fluid extends Visualizer {
             } else {
                 fade = 1 - s.pos / (HORIZ_SAMPLE_NUM * REFRESH);
             }
-            if (!particles || ((int) s.pos) % PARTICLE_DETAIL_LOSS == 0) {
-                s.drawLines(1, fade);
-                s.drawLines(-1, fade);  
-            }
-               rotateZ(-currRot * relativeIndex);
+
+            s.drawLines(1, fade);
+            s.drawLines(-1, fade);  
+
+            rotateZ(-currRot * relativeIndex);
         }
 
         popMatrix();
