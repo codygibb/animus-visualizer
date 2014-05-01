@@ -199,7 +199,7 @@ class Ring extends Visualizer {
             }
             rotationVector.set(pos.x, pos.y, pos.z);
             rotationVector.rotateX(theta * xRot);
-            rotationVector.rotateZ(theta * zRot);
+            rotationVector.rotateY(theta * zRot);
 
             if (!particles) {
                 vertex(rotationVector.x, rotationVector.y, rotationVector.z);
@@ -210,7 +210,7 @@ class Ring extends Visualizer {
 
             rotationVector.set(prevPos.x, prevPos.y, prevPos.z);
             rotationVector.rotateX(theta * xRot);
-            rotationVector.rotateZ(theta * zRot);
+            rotationVector.rotateY(theta * zRot);
 
             if (!particles) {
                 vertex(rotationVector.x, rotationVector.y, rotationVector.z);
@@ -223,7 +223,7 @@ class Ring extends Visualizer {
 
     synchronized void draw() {
         if (blur) {
-            setBackground(contrast, 10);
+            setBackground(contrast, 40);
         } else { 
             setBackground(contrast, 150);
         }
@@ -315,6 +315,9 @@ class Ring extends Visualizer {
     @Override
     void revolve(){
         revolve = !revolve;
+        if(topView){
+            camera.initMoveCamera(new PVector(0, -REFRESH * SAMPLE_NUM - 600, 0), (int)frameRate*2);
+        }
     }
     
     @Override
@@ -330,7 +333,11 @@ class Ring extends Visualizer {
     }
     
     @Override
-    void topView() { 
-        // TODO
+    void topView() {
+        if(revolve) {
+            camera.initMoveCamera(new PVector(0, -REFRESH * SAMPLE_NUM - 600, 0), (int)frameRate);
+        } else {
+            camera.initMoveCamera(new PVector(0, -285 , -5 ), (int)frameRate);
+        }
     }
 }
