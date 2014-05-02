@@ -406,6 +406,13 @@ class Droplet extends Visualizer {
     void particles() {
         particles = !particles;
         setupDroplet();
+        if (highlight) {
+            for (Ring r : rings) {
+                for (HighlightPoint hp : r.hpoints) {
+                    hp.continueHighlighting = true;
+                }
+            }
+        }
     }
 
     @Override
