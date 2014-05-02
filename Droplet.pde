@@ -323,11 +323,11 @@ class Droplet extends Visualizer {
                 fade *= baseFade;
                 stroke((255 - colors[0]) * fade, (255 - colors[1]) * fade, (255 - colors[2]) * fade);
 
-                pushMatrix();
-                // strokeWeight(size * 4);
-                // point(pos.x, (baseY + pos.y) * ydir, pos.z);
-                translate(pos.x, (baseY + pos.y) * ydir, pos.z);
-                box(size);
+                // pushMatrix();
+                strokeWeight(size * 4);
+                point(pos.x, (baseY + pos.y) * ydir, pos.z);
+                // translate(pos.x, (baseY + pos.y) * ydir, pos.z);
+                // box(size);
                 
                 popMatrix();
             }
@@ -403,6 +403,11 @@ class Droplet extends Visualizer {
     }
 
     @Override
+    void adjustDetail(float avgFr) {
+        // TODO
+    }
+
+    @Override
     void particles() {
         particles = !particles;
         setupDroplet();
@@ -440,31 +445,13 @@ class Droplet extends Visualizer {
     
     @Override
     void rearView() {
-        // TODO
+        camera.initMoveCamera(new PVector(400, -300, 0), (int) frameRate * 2);
+        camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate * 2);
     }
     
     @Override
     void topView() { 
         camera.initMoveCamera(new PVector(0, -400, 0), (int) frameRate * 2);
         camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate * 2);
-    }
-    
-    @Override
-    void keyPressed() {
-        super.keyPressed();
-        switch (keyCode) {
-            // case 38:
-            //     dropletSize += 2;
-            //     setupDroplet(dropletSize);
-            //     break;
-            // case 40:
-            //     if (dropletSize > 2) {
-            //         dropletSize -= 2;
-            //         setupDroplet(dropletSize);
-            //     }
-            //     break;
-            default:
-                break;
-        }
     }
 }

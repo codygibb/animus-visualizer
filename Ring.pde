@@ -37,8 +37,6 @@ class Ring extends Visualizer {
     float stop = 0;
     float averageSpeed = 0;
     boolean throttlingOn = false;
-
-    boolean sampleParticleMode = false;
     
     public Ring(AudioInput input) {
         super(input, "RING");
@@ -214,10 +212,7 @@ class Ring extends Visualizer {
 
             if (!particles) {
                 vertex(rotationVector.x, rotationVector.y, rotationVector.z);
-            } // else if (sampleIndex % particleDetailLoss == 0) {
-                // strokeWeight(bindRange(size * 10, MIN_PART_SIZE, MAX_PART_SIZE));
-                // point(rotationVector.x, rotationVector.y, rotationVector.z);
-            // }
+            }
         }
     }
 
@@ -226,12 +221,6 @@ class Ring extends Visualizer {
             setBackground(contrast, 40);
         } else { 
             setBackground(contrast, 150);
-        }
-        if (sampleParticleMode) {
-            float avgFr = sampleFrameRate();
-            if (avgFr > 0) {
-                adjustDetail(avgFr);
-            }
         }
         hint(ENABLE_DEPTH_MASK);
         tracker.incrementColor();
@@ -269,17 +258,6 @@ class Ring extends Visualizer {
         popMatrix();
     }
 
-    void adjustDetail(float avgFr) {
-        println(avgFr);
-        if (avgFr < 30) {
-            particleDetailLoss = 8;
-        } else if (avgFr < 40) {
-            particleDetailLoss = 6;
-        } else if (avgFr < 45) {
-            particleDetailLoss = 3;
-        }
-    }
-
     // returns avg rotation of all points
     float incrRot(float increment) {
         float total = 0;
@@ -295,11 +273,19 @@ class Ring extends Visualizer {
     }
 
     @Override
+    void adjustDetail(float avgFr) {
+        if (avgFr < 30) {
+            particleDetailLoss = 8;
+        } else if (avgFr < 40) {
+            particleDetailLoss = 6;
+        } else if (avgFr < 45) {
+            particleDetailLoss = 3;
+        }
+    }
+
+    @Override
     void particles() {
         particles = !particles;
-        if (!sampleParticleMode) {
-            sampleParticleMode = true;
-        }
     }
 
     @Override

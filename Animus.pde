@@ -27,7 +27,6 @@ boolean showInterface;
 boolean debugMode;
 int contrast;
 
-
 void setup() {
     size(displayWidth, displayHeight, P3D);
     minim = new Minim(this); 
@@ -59,6 +58,34 @@ void setup() {
     cp5 = new ControlP5(this);
     guiSetup(cFont);
     visualizers[select].setup();
+}
+
+class PageDot {
+    float x, y, radius;
+    String name;
+    boolean overDot;
+
+    PageDot(float x, float y, float radius, String name) {
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.name = name; 
+        overDot = false;
+    }    
+    
+    void update() {
+        float dx = x - mouseX;
+        float dy = y - mouseY;
+        stroke(255 - contrast);
+        if (sqrt(sq(dx) + sq(dy)) < (radius + 2)) {
+            overDot = true;
+            strokeWeight(3);
+        } else {
+            overDot = false;
+            strokeWeight(1.2);
+        }
+        ellipse(x, y, radius, radius);
+    }
 }
 
 void draw() {
@@ -123,33 +150,11 @@ void draw() {
         volSlider.setVisible(false);
         interfaceLabel.setVisible(false);
     }
-}
-
-class PageDot {
-    float x, y, radius;
-    String name;
-    boolean overDot;
-
-    PageDot(float x, float y, float radius, String name) {
-        this.x = x;
-        this.y = y;
-        this.radius = radius;
-        this.name = name; 
-        overDot = false;
-    }    
-    
-    void update() {
-        float dx = x - mouseX;
-        float dy = y - mouseY;
-        stroke(255 - contrast);
-        if (sqrt(sq(dx) + sq(dy)) < (radius + 2)) {
-            overDot = true;
-            strokeWeight(3);
-        } else {
-            overDot = false;
-            strokeWeight(1.2);
+    if (visualizers[select].sampleParticleMode) {
+        float avgFr = visualizers[select].sampleFrameRate();
+        if (avgFr > 0) {
+            visualizers[select].adjustDetail(avgFr);
         }
-        ellipse(x, y, radius, radius);
     }
 }
 
