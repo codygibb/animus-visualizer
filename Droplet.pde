@@ -405,6 +405,7 @@ class Droplet extends Visualizer {
     @Override
     void particles() {
         particles = !particles;
+        blur = particles;
         setupDroplet();
         if (highlight) {
             for (Ring r : rings) {

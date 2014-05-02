@@ -6,9 +6,9 @@ class Ring extends Visualizer {
         return 48;
     }
     
-    final int SAMPLE_NUM = 180;
+    final int SAMPLE_NUM = 180; // 180
     final int SPEC_SIZE = 50;
-    final float REFRESH = 1;
+    final float REFRESH = 1;// 1
     final float ROT_SPEED = PI / 2800;
     final float DIST = PHI * 2; //PHI
     final float ADD_DIST = -10; //-10
@@ -286,13 +286,14 @@ class Ring extends Visualizer {
     @Override
     void particles() {
         particles = !particles;
+        blur = particles;
     }
 
     @Override
     void highlight() {
         highlight = !highlight;
     }
-
+ 
     @Override
     void expand() {
         expand = !expand;
@@ -301,8 +302,9 @@ class Ring extends Visualizer {
     @Override
     void revolve(){
         revolve = !revolve;
-        if(topView){
-            camera.initMoveCamera(new PVector(0, -REFRESH * SAMPLE_NUM - 600, 0), (int)frameRate*2);
+        blur = revolve;
+        if (topView) {
+            camera.initMoveCamera(new PVector(0, -REFRESH * SAMPLE_NUM - 600, 0), (int)frameRate * 2);
         }
     }
     

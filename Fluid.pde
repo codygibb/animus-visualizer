@@ -331,6 +331,7 @@ class Fluid extends Visualizer {
     @Override
     void particles() {
         particles = !particles;
+        blur = particles;
     }
 
     @Override

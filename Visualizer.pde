@@ -309,10 +309,6 @@ public abstract class Visualizer {
                     sampleParticleMode = true;
                 }
                 break;
-            case 'x':
-                flashingMode = !flashingMode;
-                blur = flashingMode;
-                break;
             case '1':
                 highlight();
                 break;
