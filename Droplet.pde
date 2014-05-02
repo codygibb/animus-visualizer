@@ -323,13 +323,8 @@ class Droplet extends Visualizer {
                 fade *= baseFade;
                 stroke((255 - colors[0]) * fade, (255 - colors[1]) * fade, (255 - colors[2]) * fade);
 
-                // pushMatrix();
                 strokeWeight(size * 4);
                 point(pos.x, (baseY + pos.y) * ydir, pos.z);
-                // translate(pos.x, (baseY + pos.y) * ydir, pos.z);
-                // box(size);
-                
-                popMatrix();
             }
         }
     }
