@@ -25,7 +25,6 @@ PFont font;
 PageDot[] dots;
 boolean showInterface;
 boolean debugMode;
-int contrast;
 
 void setup() {
     size(displayWidth, displayHeight, P3D);
@@ -76,7 +75,7 @@ class PageDot {
     void update() {
         float dx = x - mouseX;
         float dy = y - mouseY;
-        stroke(255 - contrast);
+        stroke(255 - visualizers[select].contrast);
         if (sqrt(sq(dx) + sq(dy)) < (radius + 2)) {
             overDot = true;
             strokeWeight(3);
@@ -102,8 +101,6 @@ void draw() {
     popStyle();
     
     noLights();
-
-    contrast = visualizers[select].contrast;
     
     if (showInterface) {
         boolean handOn = false;
@@ -117,21 +114,21 @@ void draw() {
         }
         for (int i = 0; i < dots.length; i++) {
             if (i == select) {
-                fill(255 - contrast);
+                fill(255 - visualizers[select].contrast);
             } else {
-                fill(contrast);
+                fill(visualizers[select].contrast);
             }
             dots[i].update();
             if (dots[i].overDot) {
                 // textSize(FONT_SIZE);
                 handOn = true;
                 textAlign(CENTER, TOP);
-                fill(255 - contrast);
+                fill(255 - visualizers[select].contrast);
                 text(dots[i].name, dots[i].x, dots[i].y - TEXT_OFFSET - dots[i].radius);
             }
         }
         textAlign(CENTER, TOP);
-        fill(255 - contrast);
+        fill(255 - visualizers[select].contrast);
         text(visualizers[select].name, displayWidth / 2, TEXT_OFFSET);
         if (debugMode) {
             visualizers[select].displayDebugText();
@@ -162,6 +159,7 @@ void mousePressed() {
     for (int i = 0; i < dots.length; i++) {
         if (dots[i].overDot) {
             select = i;
+            switchVisualizer();
             break;
         }
     }        
@@ -181,6 +179,7 @@ void checkMouse() {
 void switchVisualizer() {
     visualizers[select].setup();
     frameRate(visualizers[select].getOptimalFrameRate());
+    setGuiColors();
 }
 
 void updateGui() {
@@ -240,10 +239,10 @@ void guiSetup(ControlFont font){
 
 void setGuiColors() {
     for (CheckBox button : buttons) {
-        button.setColorLabel(color(255 - contrast));
+        button.setColorLabel(color(255 - visualizers[select].contrast));
     }
-    volSlider.setColorLabel(color(255 - contrast));
-    interfaceLabel.setColor(color(255 - contrast));
+    volSlider.setColorLabel(color(255 - visualizers[select].contrast));
+    interfaceLabel.setColor(color(255 - visualizers[select].contrast));
 }
 
 void controlEvent(ControlEvent theEvent) {
@@ -268,8 +267,7 @@ void controlEvent(ControlEvent theEvent) {
     } else if (theEvent.isFrom(blur)) {
         visualizers[select].blur = !visualizers[select].blur;
     } else if (theEvent.isFrom(invert)) {
-        visualizers[select].contrast = 255 - contrast;
-        contrast = 255 - contrast;
+        visualizers[select].contrast = 255 - visualizers[select].contrast;
         setGuiColors();
     }
 }
@@ -283,7 +281,7 @@ void keyPressed() {
             showInterface = !showInterface;
             break;
         case 'i':
-            contrast = 255 - contrast;
+            visualizers[select].contrast = 255 - visualizers[select].contrast;
             setGuiColors();
             break;
         default:
