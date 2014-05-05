@@ -282,6 +282,7 @@ public abstract class Visualizer {
         switch (key) {
             // showInterface toggle handled in Animus due to not being able to
             // use static variables (processing fucking sucks!)
+            // invert toggle handled in Animus
             case 'm':
                 mPressed();
                 break;
@@ -296,9 +297,6 @@ public abstract class Visualizer {
                 break;
             case 't':
                 tPressed();
-                break;
-            case 'i':
-                contrast = 255 - contrast;
                 break;
             case 'b':
                 blur = !blur;
