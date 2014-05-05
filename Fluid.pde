@@ -205,10 +205,10 @@ class Fluid extends Visualizer {
             }
 
             for (int i = 0; i < points.length - 1; i++) {
-                float weight = bindRange((points[i].y + points[i + 1].y) / 20, 0.1, 6);
-                if (particles) {
-                    weight *= 5;
-                }
+                float weight = (!particles)
+                    ? bindRange((points[i].y + points[i + 1].y) / 20, 1, 6)
+                    : bindRange(points[i].y / 2, 1, MAX_PARTICLE_SIZE);
+
                 strokeWeight(weight);
                 if (!particles) {
                     vertex(points[i].x, points[i].y * ydir);
