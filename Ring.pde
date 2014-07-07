@@ -6,9 +6,15 @@ class Ring extends Visualizer {
         return 40;
     }
     
+<<<<<<< HEAD
     int SAMPLE_NUM = 180;
     final int SPEC_SIZE = 50;
     float REFRESH = 2;
+=======
+    final int SAMPLE_NUM = 180; // 180
+    final int SPEC_SIZE = 50;
+    final float REFRESH = 1;// 1
+>>>>>>> FETCH_HEAD
     final float ROT_SPEED = PI / 2800;
     final float DIST = PHI * 2; //PHI
     final float ADD_DIST = -10; //-10
@@ -37,8 +43,6 @@ class Ring extends Visualizer {
     float stop = 0;
     float averageSpeed = 0;
     boolean throttlingOn = false;
-
-    boolean sampleParticleMode = false;
     
     public Ring(AudioInput input) {
         super(input, "RING");
@@ -218,9 +222,12 @@ class Ring extends Visualizer {
 
             if (!particles) {
                 vertex(rotationVector.x, rotationVector.y, rotationVector.z);
+<<<<<<< HEAD
             } else if (sampleIndex % particleDetailLoss == 0) {
                 strokeWeight(bindRange(size * 10, MIN_PART_SIZE, MAX_PART_SIZE));
                 point(rotationVector.x, rotationVector.y, rotationVector.z);
+=======
+>>>>>>> FETCH_HEAD
             }
         }
     }
@@ -231,12 +238,15 @@ class Ring extends Visualizer {
         } else { 
             setBackground(contrast, 150);
         }
+<<<<<<< HEAD
        if (sampleParticleMode) {
            float avgFr = sampleFrameRate();
            if (avgFr > 0) {
                adjustDetail(avgFr);
            }
        }
+=======
+>>>>>>> FETCH_HEAD
         hint(ENABLE_DEPTH_MASK);
         tracker.incrementColor();
         tracker2.incrementColor();
@@ -274,17 +284,6 @@ class Ring extends Visualizer {
         popMatrix();
     }
 
-    void adjustDetail(float avgFr) {
-        println(avgFr);
-        if (avgFr < 30) {
-            particleDetailLoss = 8;
-        } else if (avgFr < 40) {
-            particleDetailLoss = 6;
-        } else if (avgFr < 45) {
-            particleDetailLoss = 3;
-        }
-    }
-
     // returns avg rotation of all points
     float incrRot(float increment) {
         float total = 0;
@@ -300,11 +299,20 @@ class Ring extends Visualizer {
     }
 
     @Override
+    void adjustDetail(float avgFr) {
+        if (avgFr < 30) {
+            particleDetailLoss = 8;
+        } else if (avgFr < 40) {
+            particleDetailLoss = 6;
+        } else if (avgFr < 45) {
+            particleDetailLoss = 3;
+        }
+    }
+
+    @Override
     void particles() {
         particles = !particles;
-        if (!sampleParticleMode) {
-            sampleParticleMode = true;
-        }
+        blur = particles;
     }
 
     @Override
@@ -323,7 +331,7 @@ class Ring extends Visualizer {
         // }
         setupRing();     
     }
-
+ 
     @Override
     void expand() {
         expand = !expand;
@@ -333,8 +341,14 @@ class Ring extends Visualizer {
     @Override
     void revolve(){
         revolve = !revolve;
+<<<<<<< HEAD
         if(topView){
             // camera.initMoveCamera(new PVector(0, 1300, 0), (int)frameRate*2);
+=======
+        blur = revolve;
+        if (topView) {
+            camera.initMoveCamera(new PVector(0, -REFRESH * SAMPLE_NUM - 600, 0), (int)frameRate * 2);
+>>>>>>> FETCH_HEAD
         }
     }
     

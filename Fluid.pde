@@ -12,7 +12,6 @@ class Fluid extends Visualizer {
     final int VERT_SAMPLE_NUM = 30;
     final int REFRESH = 3;
     final float ANGLE_INC = 0.001;
-    final int PARTICLE_DETAIL_LOSS = 2;
     final float MIN_PARTICLE_SIZE = 2;
     final float MAX_PARTICLE_SIZE = 20;
 
@@ -30,6 +29,8 @@ class Fluid extends Visualizer {
     float fluidXRot, fluidYRot;
     
     float currRot = 0;
+
+    int particleDetailLoss = 1;
     
     Fluid(AudioInput input) {
         super(input, "FLUID");
@@ -46,15 +47,10 @@ class Fluid extends Visualizer {
         for (int i = 0; i < vertSamples.length; i++) {
             vertSamples[i] = new VertSample(i * REFRESH, REFRESH, VERT_SAMPLE_NUM * REFRESH);
         }
-        setupFluid(REFRESH, HORIZ_SAMPLE_NUM, VERT_SAMPLE_NUM);
         camera.viewingMode = false;
         camera.pos = new PVector(SPEC_SIZE * SPEC_WIDTH, 0, -130);
         camera.setOuterBounds(0, -200, -200, SPEC_SIZE * SPEC_WIDTH * 2, 200, REFRESH * HORIZ_SAMPLE_NUM);
         noFill();
-    }
-
-    void setupFluid(int refresh, int horizSampleNum, int vertSampleNum) {
-        
     }
 
     class Point {
@@ -163,6 +159,7 @@ class Fluid extends Visualizer {
                     if (!particles) {
                         vertex(xStart, yStart, zStart);
                         vertex(xEnd, yEnd, zEnd);
+<<<<<<< HEAD
                     } else if (i % PARTICLE_DETAIL_LOSS == 0) {
                         if(!expand) {
                             strokeWeight(bindRange(currSample.points[i].intensity, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
@@ -171,6 +168,11 @@ class Fluid extends Visualizer {
 
                         strokeWeight(bindRange(prevSample.points[i].intensity, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
                         point(xEnd, yEnd, zEnd);
+=======
+                    } else if (i % particleDetailLoss == 0) {
+                        strokeWeight(bindRange(currSample.points[i].intensity, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
+                        point(xStart, yStart, zStart);
+>>>>>>> FETCH_HEAD
                     }
                 }  
 
@@ -219,28 +221,36 @@ class Fluid extends Visualizer {
 
             translate(0, pos * ydir, 0);
 
-            if(particles){
-                beginShape(POINTS);
-            } else {
+            if (!particles) {
                 beginShape(LINES);
             }
 
             for (int i = 0; i < points.length - 1; i++) {
-                float weight = max(min((points[i].y + points[i + 1].y) / 20, 6), 1);
-                if (particles) {
-                    weight *= 5;
-                }
+                float weight = (!particles)
+                    ? bindRange((points[i].y + points[i + 1].y) / 20, 1, 6)
+                    : bindRange(points[i].y / 2, 1, MAX_PARTICLE_SIZE);
+
                 strokeWeight(weight);
-   
-                vertex(points[i].x, points[i].y * ydir);
-                vertex(points[i + 1].x, points[i + 1].y * ydir);
+                if (!particles) {
+                    vertex(points[i].x, points[i].y * ydir);
+                    vertex(points[i + 1].x, points[i + 1].y * ydir);
+                } else {
+                    point(points[i].x, points[i].y * ydir);
+                }
             }
 
             float weight = min((points[points.length - 2].y + points[points.length - 1].y) / 20, 6);
             strokeWeight(weight);
-            vertex(points[points.length - 2].x, points[points.length - 2].y * ydir);
-            vertex(points[points.length - 1].x, points[points.length - 1].y * ydir);
-            endShape();
+            if (!particles) {
+                vertex(points[points.length - 2].x, points[points.length - 2].y * ydir);
+                vertex(points[points.length - 1].x, points[points.length - 1].y * ydir);
+            } else {
+                point(points[points.length - 2].x, points[points.length - 2].y * ydir);
+            }
+
+            if (!particles) {
+                endShape();
+            }
 
             popMatrix();
         }
@@ -249,8 +259,12 @@ class Fluid extends Visualizer {
     @Override
     void draw() {
         if (blur) {
+<<<<<<< HEAD
 
             setBackground(contrast, 80);
+=======
+            setBackground(contrast, 50);
+>>>>>>> FETCH_HEAD
         } else {
             setBackground(contrast, 255);
         }
@@ -361,8 +375,23 @@ class Fluid extends Visualizer {
     }
 
     @Override
+    void adjustDetail(float avgFr) {
+        if (avgFr < 25) {
+            particleDetailLoss = 5;
+        } else if (avgFr < 40) {
+            particleDetailLoss = 4;
+        } else if (avgFr < 35) {
+            particleDetailLoss = 3;
+        } else if (avgFr < 38) {
+            particleDetailLoss = 2;
+        }
+        println(particleDetailLoss);
+    }
+
+    @Override
     void particles() {
         particles = !particles;
+        blur = particles;
     }
 
     @Override
