@@ -27,14 +27,10 @@ PFont font;
 PageDot[] dots;
 boolean showInterface;
 boolean debugMode;
-<<<<<<< HEAD
 float showIntro = 255;
 float interfaceT;
 int contrast;
 PImage cam;
-
-=======
->>>>>>> FETCH_HEAD
 
 void setup() {
     size(displayWidth, displayHeight, P3D);
@@ -114,15 +110,12 @@ void draw() {
     popStyle();
     
     noLights();
-<<<<<<< HEAD
 
     contrast = visualizers[select].contrast;
     if(showIntro == 0) {
         image(cam, width - 171, 208);
     }
-=======
     
->>>>>>> FETCH_HEAD
     if (showInterface) {
         interfaceT = lerp(interfaceT, 255, .01);
         tint(255, (int)interfaceT);
@@ -223,12 +216,8 @@ void checkMouse() {
 
 void switchVisualizer() {
     visualizers[select].setup();
-<<<<<<< HEAD
-//    frameRate(visualizers[select].getOptimalFrameRate());
-=======
     frameRate(visualizers[select].getOptimalFrameRate());
     setGuiColors();
->>>>>>> FETCH_HEAD
 }
 
 void updateGui() {
@@ -323,16 +312,11 @@ void setGuiColors() {
     for (CheckBox button : buttons) {
         button.setColorLabel(color(255 - visualizers[select].contrast));
     }
-<<<<<<< HEAD
     for (Textlabel label : buttonLabels) {  
         label.setColorLabel(color(255 - contrast));
     }
     volSlider.setColorLabel(color(255 - contrast));
     interfaceLabel.setColor(color(255 - contrast));
-=======
-    volSlider.setColorLabel(color(255 - visualizers[select].contrast));
-    interfaceLabel.setColor(color(255 - visualizers[select].contrast));
->>>>>>> FETCH_HEAD
 }
 
 void controlEvent(ControlEvent theEvent) {

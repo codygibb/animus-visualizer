@@ -284,15 +284,12 @@ public abstract class Visualizer {
         switch (key) {
             // showInterface toggle handled in Animus due to not being able to
             // use static variables (processing fucking sucks!)
-<<<<<<< HEAD
             case ' ':
                 pause();
                 mouseX = width/2;
                 mouseY = height/2;
                 break;
-=======
             // invert toggle handled in Animus
->>>>>>> FETCH_HEAD
             case 'm':
                 mPressed();
                 break;

@@ -456,12 +456,8 @@ class Droplet extends Visualizer {
     
     @Override
     void rearView() {
-<<<<<<< HEAD
-        // TODO
         camera.initMoveCamera(new PVector(10, 180, 0.001), (int) frameRate * 2);
-=======
-        camera.initMoveCamera(new PVector(400, -300, 0), (int) frameRate * 2);
->>>>>>> FETCH_HEAD
+        // camera.initMoveCamera(new PVector(400, -300, 0), (int) frameRate * 2);
         camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate * 2);
     }
     
@@ -470,7 +466,6 @@ class Droplet extends Visualizer {
         camera.initMoveCamera(new PVector(.001, -400, 0), (int) frameRate * 2);
         camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate * 2);
     }
-<<<<<<< HEAD
 
     @Override
     void pause() {
@@ -495,6 +490,4 @@ class Droplet extends Visualizer {
                 break;
         }
     }
-=======
->>>>>>> FETCH_HEAD
 }

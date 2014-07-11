@@ -159,8 +159,7 @@ class Fluid extends Visualizer {
                     if (!particles) {
                         vertex(xStart, yStart, zStart);
                         vertex(xEnd, yEnd, zEnd);
-<<<<<<< HEAD
-                    } else if (i % PARTICLE_DETAIL_LOSS == 0) {
+                    } else if (i % particleDetailLoss == 0) {
                         if(!expand) {
                             strokeWeight(bindRange(currSample.points[i].intensity, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
                         }
@@ -168,11 +167,9 @@ class Fluid extends Visualizer {
 
                         strokeWeight(bindRange(prevSample.points[i].intensity, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
                         point(xEnd, yEnd, zEnd);
-=======
-                    } else if (i % particleDetailLoss == 0) {
-                        strokeWeight(bindRange(currSample.points[i].intensity, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
-                        point(xStart, yStart, zStart);
->>>>>>> FETCH_HEAD
+                    // } else if (i % particleDetailLoss == 0) {
+                    //     strokeWeight(bindRange(currSample.points[i].intensity, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
+                    //     point(xStart, yStart, zStart);
                     }
                 }  
 
@@ -259,12 +256,7 @@ class Fluid extends Visualizer {
     @Override
     void draw() {
         if (blur) {
-<<<<<<< HEAD
-
             setBackground(contrast, 80);
-=======
-            setBackground(contrast, 50);
->>>>>>> FETCH_HEAD
         } else {
             setBackground(contrast, 255);
         }
@@ -378,7 +370,7 @@ class Fluid extends Visualizer {
     void adjustDetail(float avgFr) {
         if (avgFr < 25) {
             particleDetailLoss = 5;
-        } else if (avgFr < 40) {
+        } else if (avgFr < 30) {
             particleDetailLoss = 4;
         } else if (avgFr < 35) {
             particleDetailLoss = 3;

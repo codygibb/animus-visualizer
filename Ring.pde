@@ -6,15 +6,9 @@ class Ring extends Visualizer {
         return 40;
     }
     
-<<<<<<< HEAD
-    int SAMPLE_NUM = 180;
+    final int SAMPLE_NUM = 180;
     final int SPEC_SIZE = 50;
-    float REFRESH = 2;
-=======
-    final int SAMPLE_NUM = 180; // 180
-    final int SPEC_SIZE = 50;
-    final float REFRESH = 1;// 1
->>>>>>> FETCH_HEAD
+    final float REFRESH = 2;
     final float ROT_SPEED = PI / 2800;
     final float DIST = PHI * 2; //PHI
     final float ADD_DIST = -10; //-10
@@ -222,12 +216,12 @@ class Ring extends Visualizer {
 
             if (!particles) {
                 vertex(rotationVector.x, rotationVector.y, rotationVector.z);
-<<<<<<< HEAD
-            } else if (sampleIndex % particleDetailLoss == 0) {
-                strokeWeight(bindRange(size * 10, MIN_PART_SIZE, MAX_PART_SIZE));
-                point(rotationVector.x, rotationVector.y, rotationVector.z);
-=======
->>>>>>> FETCH_HEAD
+// <<<<<<< HEAD
+//             } else if (sampleIndex % particleDetailLoss == 0) {
+//                 strokeWeight(bindRange(size * 10, MIN_PART_SIZE, MAX_PART_SIZE));
+//                 point(rotationVector.x, rotationVector.y, rotationVector.z);
+// =======
+// >>>>>>> FETCH_HEAD
             }
         }
     }
@@ -238,15 +232,12 @@ class Ring extends Visualizer {
         } else { 
             setBackground(contrast, 150);
         }
-<<<<<<< HEAD
        if (sampleParticleMode) {
            float avgFr = sampleFrameRate();
            if (avgFr > 0) {
                adjustDetail(avgFr);
            }
        }
-=======
->>>>>>> FETCH_HEAD
         hint(ENABLE_DEPTH_MASK);
         tracker.incrementColor();
         tracker2.incrementColor();
@@ -341,14 +332,10 @@ class Ring extends Visualizer {
     @Override
     void revolve(){
         revolve = !revolve;
-<<<<<<< HEAD
-        if(topView){
             // camera.initMoveCamera(new PVector(0, 1300, 0), (int)frameRate*2);
-=======
         blur = revolve;
         if (topView) {
             camera.initMoveCamera(new PVector(0, -REFRESH * SAMPLE_NUM - 600, 0), (int)frameRate * 2);
->>>>>>> FETCH_HEAD
         }
     }
     
@@ -390,25 +377,5 @@ class Ring extends Visualizer {
         super.keyPressed();
         if(key == 'l')
             leftView();
-        switch (keyCode) {
-             case 38:
-                 REFRESH++;
-                 for(int i = 0; i < samples.length; i++){
-                     samples[i].pos = i * REFRESH;
-                     samples[i].stop = SAMPLE_NUM * REFRESH;
-                 }
-                 break;
-             case 40:
-                 if (REFRESH > 1) {
-                     REFRESH--;
-                 }
-                  for(int i = 0; i < samples.length; i++){
-                     samples[i].pos = i * REFRESH;
-                     samples[i].stop = SAMPLE_NUM * REFRESH;
-                 }
-                 break;
-            default:
-                break;
-        }
     }
 }
