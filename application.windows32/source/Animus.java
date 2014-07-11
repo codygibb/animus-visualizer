@@ -59,7 +59,6 @@ float interfaceT;
 int contrast;
 PImage cam;
 
-
 public void setup() {
     size(displayWidth, displayHeight, P3D);
     minim = new Minim(this); 
@@ -96,6 +95,34 @@ public void setup() {
     background(0);
 }
 
+class PageDot {
+    float x, y, radius;
+    String name;
+    boolean overDot;
+
+    PageDot(float x, float y, float radius, String name) {
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.name = name; 
+        overDot = false;
+    }    
+    
+    public void update() {
+        float dx = x - mouseX;
+        float dy = y - mouseY;
+        stroke(255 - visualizers[select].contrast);
+        if (sqrt(sq(dx) + sq(dy)) < (radius + 2)) {
+            overDot = true;
+            strokeWeight(3);
+        } else {
+            overDot = false;
+            strokeWeight(1.2f);
+        }
+        ellipse(x, y, radius, radius);
+    }
+}
+
 public void draw() {
     smooth(8);
     pushStyle();
@@ -115,6 +142,7 @@ public void draw() {
     if(showIntro == 0) {
         image(cam, width - 171, 208);
     }
+    
     if (showInterface) {
         interfaceT = lerp(interfaceT, 255, .01f);
         tint(255, (int)interfaceT);
@@ -135,20 +163,20 @@ public void draw() {
 
         for (int i = 0; i < dots.length; i++) {
             if (i == select) {
-                fill(255 - contrast);
+                fill(255 - visualizers[select].contrast);
             } else {
-                fill(contrast);
+                fill(visualizers[select].contrast);
             }
             dots[i].update();
             if (dots[i].overDot) {
                 handOn = true;
                 textAlign(CENTER, TOP);
-                fill(255 - contrast);
+                fill(255 - visualizers[select].contrast);
                 text(dots[i].name, dots[i].x, dots[i].y - TEXT_OFFSET - dots[i].radius);
             }
         }
         textAlign(CENTER, TOP);
-        fill(255 - contrast);
+        fill(255 - visualizers[select].contrast);
         text(visualizers[select].name, displayWidth / 2, TEXT_OFFSET);
         if (debugMode) {
             visualizers[select].displayDebugText();
@@ -184,33 +212,11 @@ public void draw() {
             showInterface = true;
         }
     }
-}
-
-class PageDot {
-    float x, y, radius;
-    String name;
-    boolean overDot;
-
-    PageDot(float x, float y, float radius, String name) {
-        this.x = x;
-        this.y = y;
-        this.radius = radius;
-        this.name = name; 
-        overDot = false;
-    }    
-    
-    public void update() {
-        float dx = x - mouseX;
-        float dy = y - mouseY;
-        stroke(255 - contrast);
-        if (sqrt(sq(dx) + sq(dy)) < (radius + 2)) {
-            overDot = true;
-            strokeWeight(3);
-        } else {
-            overDot = false;
-            strokeWeight(1.2f);
+    if (visualizers[select].sampleParticleMode) {
+        float avgFr = visualizers[select].sampleFrameRate();
+        if (avgFr > 0) {
+            visualizers[select].adjustDetail(avgFr);
         }
-        ellipse(x, y, radius, radius);
     }
 }
 
@@ -218,6 +224,7 @@ public void mousePressed() {
     for (int i = 0; i < dots.length; i++) {
         if (dots[i].overDot) {
             select = i;
+            switchVisualizer();
             break;
         }
     }        
@@ -236,7 +243,8 @@ public void checkMouse() {
 
 public void switchVisualizer() {
     visualizers[select].setup();
-//    frameRate(visualizers[select].getOptimalFrameRate());
+    frameRate(visualizers[select].getOptimalFrameRate());
+    setGuiColors();
 }
 
 public void updateGui() {
@@ -329,7 +337,7 @@ public void guiSetup(ControlFont font){
 
 public void setGuiColors() {
     for (CheckBox button : buttons) {
-        button.setColorLabel(color(255 - contrast));
+        button.setColorLabel(color(255 - visualizers[select].contrast));
     }
     for (Textlabel label : buttonLabels) {  
         label.setColorLabel(color(255 - contrast));
@@ -360,8 +368,7 @@ public void controlEvent(ControlEvent theEvent) {
     } else if (theEvent.isFrom(blur)) {
         visualizers[select].blur = !visualizers[select].blur;
     } else if (theEvent.isFrom(invert)) {
-        visualizers[select].contrast = 255 - contrast;
-        contrast = 255 - contrast;
+        visualizers[select].contrast = 255 - visualizers[select].contrast;
         setGuiColors();
     }
 }
@@ -410,7 +417,7 @@ public void keyPressed() {
             showInterface = !showInterface;
             break;
         case 'i':
-            contrast = 255 - contrast;
+            visualizers[select].contrast = 255 - visualizers[select].contrast;
             setGuiColors();
             break;
         default:
@@ -1107,13 +1114,8 @@ class Droplet extends Visualizer {
                 fade *= baseFade;
                 stroke((255 - colors[0]) * fade, (255 - colors[1]) * fade, (255 - colors[2]) * fade);
 
-                pushMatrix();
-                // strokeWeight(size * 4);
-                // point(pos.x, (baseY + pos.y) * ydir, pos.z);
-                translate(pos.x, (baseY + pos.y) * ydir, pos.z);
-                box(size);
-                
-                popMatrix();
+                strokeWeight(size * 4);
+                point(pos.x, (baseY + pos.y) * ydir, pos.z);
             }
         }
     }
@@ -1191,9 +1193,22 @@ class Droplet extends Visualizer {
     }
 
     public @Override
+    void adjustDetail(float avgFr) {
+        // TODO
+    }
+
+    public @Override
     void particles() {
         particles = !particles;
+        blur = particles;
         setupDroplet();
+        if (highlight) {
+            for (Ring r : rings) {
+                for (HighlightPoint hp : r.hpoints) {
+                    hp.continueHighlighting = true;
+                }
+            }
+        }
     }
 
     public @Override
@@ -1229,8 +1244,8 @@ class Droplet extends Visualizer {
     
     public @Override
     void rearView() {
-        // TODO
         camera.initMoveCamera(new PVector(10, 180, 0.001f), (int) frameRate * 2);
+        // camera.initMoveCamera(new PVector(400, -300, 0), (int) frameRate * 2);
         camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate * 2);
     }
     
@@ -1305,7 +1320,6 @@ class EPVector extends PVector {
         super.y = y;
         super.z = z;
     }
-    
 }
  
 
@@ -1321,7 +1335,6 @@ class Fluid extends Visualizer {
     final int VERT_SAMPLE_NUM = 30;
     final int REFRESH = 3;
     final float ANGLE_INC = 0.001f;
-    final int PARTICLE_DETAIL_LOSS = 2;
     final float MIN_PARTICLE_SIZE = 2;
     final float MAX_PARTICLE_SIZE = 20;
 
@@ -1339,6 +1352,8 @@ class Fluid extends Visualizer {
     float fluidXRot, fluidYRot;
     
     float currRot = 0;
+
+    int particleDetailLoss = 1;
     
     Fluid(AudioInput input) {
         super(input, "FLUID");
@@ -1355,15 +1370,10 @@ class Fluid extends Visualizer {
         for (int i = 0; i < vertSamples.length; i++) {
             vertSamples[i] = new VertSample(i * REFRESH, REFRESH, VERT_SAMPLE_NUM * REFRESH);
         }
-        setupFluid(REFRESH, HORIZ_SAMPLE_NUM, VERT_SAMPLE_NUM);
         camera.viewingMode = false;
         camera.pos = new PVector(SPEC_SIZE * SPEC_WIDTH, 0, -130);
         camera.setOuterBounds(0, -200, -200, SPEC_SIZE * SPEC_WIDTH * 2, 200, REFRESH * HORIZ_SAMPLE_NUM);
         noFill();
-    }
-
-    public void setupFluid(int refresh, int horizSampleNum, int vertSampleNum) {
-        
     }
 
     class Point {
@@ -1472,7 +1482,7 @@ class Fluid extends Visualizer {
                     if (!particles) {
                         vertex(xStart, yStart, zStart);
                         vertex(xEnd, yEnd, zEnd);
-                    } else if (i % PARTICLE_DETAIL_LOSS == 0) {
+                    } else if (i % particleDetailLoss == 0) {
                         if(!expand) {
                             strokeWeight(bindRange(currSample.points[i].intensity, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
                         }
@@ -1480,6 +1490,9 @@ class Fluid extends Visualizer {
 
                         strokeWeight(bindRange(prevSample.points[i].intensity, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
                         point(xEnd, yEnd, zEnd);
+                    // } else if (i % particleDetailLoss == 0) {
+                    //     strokeWeight(bindRange(currSample.points[i].intensity, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
+                    //     point(xStart, yStart, zStart);
                     }
                 }  
 
@@ -1528,28 +1541,36 @@ class Fluid extends Visualizer {
 
             translate(0, pos * ydir, 0);
 
-            if(particles){
-                beginShape(POINTS);
-            } else {
+            if (!particles) {
                 beginShape(LINES);
             }
 
             for (int i = 0; i < points.length - 1; i++) {
-                float weight = max(min((points[i].y + points[i + 1].y) / 20, 6), 1);
-                if (particles) {
-                    weight *= 5;
-                }
+                float weight = (!particles)
+                    ? bindRange((points[i].y + points[i + 1].y) / 20, 1, 6)
+                    : bindRange(points[i].y / 2, 1, MAX_PARTICLE_SIZE);
+
                 strokeWeight(weight);
-   
-                vertex(points[i].x, points[i].y * ydir);
-                vertex(points[i + 1].x, points[i + 1].y * ydir);
+                if (!particles) {
+                    vertex(points[i].x, points[i].y * ydir);
+                    vertex(points[i + 1].x, points[i + 1].y * ydir);
+                } else {
+                    point(points[i].x, points[i].y * ydir);
+                }
             }
 
             float weight = min((points[points.length - 2].y + points[points.length - 1].y) / 20, 6);
             strokeWeight(weight);
-            vertex(points[points.length - 2].x, points[points.length - 2].y * ydir);
-            vertex(points[points.length - 1].x, points[points.length - 1].y * ydir);
-            endShape();
+            if (!particles) {
+                vertex(points[points.length - 2].x, points[points.length - 2].y * ydir);
+                vertex(points[points.length - 1].x, points[points.length - 1].y * ydir);
+            } else {
+                point(points[points.length - 2].x, points[points.length - 2].y * ydir);
+            }
+
+            if (!particles) {
+                endShape();
+            }
 
             popMatrix();
         }
@@ -1558,7 +1579,6 @@ class Fluid extends Visualizer {
     public @Override
     void draw() {
         if (blur) {
-
             setBackground(contrast, 80);
         } else {
             setBackground(contrast, 255);
@@ -1670,8 +1690,23 @@ class Fluid extends Visualizer {
     }
 
     public @Override
+    void adjustDetail(float avgFr) {
+        if (avgFr < 25) {
+            particleDetailLoss = 5;
+        } else if (avgFr < 30) {
+            particleDetailLoss = 4;
+        } else if (avgFr < 35) {
+            particleDetailLoss = 3;
+        } else if (avgFr < 38) {
+            particleDetailLoss = 2;
+        }
+        println(particleDetailLoss);
+    }
+
+    public @Override
     void particles() {
         particles = !particles;
+        blur = particles;
     }
 
     public @Override
@@ -1757,9 +1792,9 @@ class Ring extends Visualizer {
         return 40;
     }
     
-    int SAMPLE_NUM = 180;
+    final int SAMPLE_NUM = 180;
     final int SPEC_SIZE = 50;
-    float REFRESH = 2;
+    final float REFRESH = 2;
     final float ROT_SPEED = PI / 2800;
     final float DIST = PHI * 2; //PHI
     final float ADD_DIST = -10; //-10
@@ -1788,8 +1823,6 @@ class Ring extends Visualizer {
     float stop = 0;
     float averageSpeed = 0;
     boolean throttlingOn = false;
-
-    boolean sampleParticleMode = false;
     
     public Ring(AudioInput input) {
         super(input, "RING");
@@ -1969,9 +2002,12 @@ class Ring extends Visualizer {
 
             if (!particles) {
                 vertex(rotationVector.x, rotationVector.y, rotationVector.z);
-            } else if (sampleIndex % particleDetailLoss == 0) {
-                strokeWeight(bindRange(size * 10, MIN_PART_SIZE, MAX_PART_SIZE));
-                point(rotationVector.x, rotationVector.y, rotationVector.z);
+// <<<<<<< HEAD
+//             } else if (sampleIndex % particleDetailLoss == 0) {
+//                 strokeWeight(bindRange(size * 10, MIN_PART_SIZE, MAX_PART_SIZE));
+//                 point(rotationVector.x, rotationVector.y, rotationVector.z);
+// =======
+// >>>>>>> FETCH_HEAD
             }
         }
     }
@@ -2025,17 +2061,6 @@ class Ring extends Visualizer {
         popMatrix();
     }
 
-    public void adjustDetail(float avgFr) {
-        println(avgFr);
-        if (avgFr < 30) {
-            particleDetailLoss = 8;
-        } else if (avgFr < 40) {
-            particleDetailLoss = 6;
-        } else if (avgFr < 45) {
-            particleDetailLoss = 3;
-        }
-    }
-
     // returns avg rotation of all points
     public float incrRot(float increment) {
         float total = 0;
@@ -2051,11 +2076,20 @@ class Ring extends Visualizer {
     }
 
     public @Override
+    void adjustDetail(float avgFr) {
+        if (avgFr < 30) {
+            particleDetailLoss = 8;
+        } else if (avgFr < 40) {
+            particleDetailLoss = 6;
+        } else if (avgFr < 45) {
+            particleDetailLoss = 3;
+        }
+    }
+
+    public @Override
     void particles() {
         particles = !particles;
-        if (!sampleParticleMode) {
-            sampleParticleMode = true;
-        }
+        blur = particles;
     }
 
     public @Override
@@ -2074,7 +2108,7 @@ class Ring extends Visualizer {
         // }
         setupRing();     
     }
-
+ 
     public @Override
     void expand() {
         expand = !expand;
@@ -2084,8 +2118,10 @@ class Ring extends Visualizer {
     public @Override
     void revolve(){
         revolve = !revolve;
-        if(topView){
             // camera.initMoveCamera(new PVector(0, 1300, 0), (int)frameRate*2);
+        blur = revolve;
+        if (topView) {
+            camera.initMoveCamera(new PVector(0, -REFRESH * SAMPLE_NUM - 600, 0), (int)frameRate * 2);
         }
     }
     
@@ -2127,26 +2163,6 @@ class Ring extends Visualizer {
         super.keyPressed();
         if(key == 'l')
             leftView();
-        switch (keyCode) {
-             case 38:
-                 REFRESH++;
-                 for(int i = 0; i < samples.length; i++){
-                     samples[i].pos = i * REFRESH;
-                     samples[i].stop = SAMPLE_NUM * REFRESH;
-                 }
-                 break;
-             case 40:
-                 if (REFRESH > 1) {
-                     REFRESH--;
-                 }
-                  for(int i = 0; i < samples.length; i++){
-                     samples[i].pos = i * REFRESH;
-                     samples[i].stop = SAMPLE_NUM * REFRESH;
-                 }
-                 break;
-            default:
-                break;
-        }
     }
 }
 class RotationTracker {
@@ -2250,7 +2266,6 @@ public abstract class Visualizer {
     float volumeScale;
     boolean blur;
     float opacityFade;
-
     float samplerStartTime;
     float totalFrameRate;
     int frameRateSampleNum;
@@ -2274,11 +2289,17 @@ public abstract class Visualizer {
     public abstract void topView();
 
     
-    // implements particle mode (should just be switching boolean particles on/off in 
-    // addition to reducing the detail of a visualizer as needed - particles are expensive
-    // to render!)
+    // implements particle mode (should just be switching boolean particles on/off)
     boolean particles;
     public abstract void particles();
+
+    // particle mode can be a little too intense for some computers, so the first time
+    // particle mode is called for each visualizer, Animus will sample 1000ms of 
+    // the framerate (at the max particle num), then call adjustDetail, passing in the
+    // average framerate. You can then use that info, in adjustDetail, to lower the number
+    // of particles in a specific visualizers implementation of particle-mode
+    boolean sampleParticleMode;
+    public abstract void adjustDetail(float avgFr);
 
     // the following 3 methods must implement the 3 basic "drop levels" of a visualizer.
     // usually this is just switching the booleans highlight, expand, and revolve on/off,
@@ -2309,7 +2330,28 @@ public abstract class Visualizer {
         fft.forward(input.mix);
         volumeScale = pow(10, sliderVal);
     }
-    
+
+    // calculates avg frame rate over TOTAL_SAMPLE_TIME. returns avg frame rate when done
+    // sampling. returns 0 if still sampling. returns -1 if has already sampled.
+    public float sampleFrameRate() {
+        if (samplerStartTime == -1) {
+            return -1;
+        }
+
+        if (samplerStartTime == 0) {
+            samplerStartTime = millis();
+        }
+
+        if (samplerStartTime + TOTAL_SAMPLE_TIME >= millis()) {
+            frameRateSampleNum++;
+            totalFrameRate += frameRate;
+            return -1;
+        } else {
+            samplerStartTime = -1;
+            println("avg particle framerate: " + totalFrameRate / frameRateSampleNum + " (" + name + ")");
+            return totalFrameRate / frameRateSampleNum;
+        }
+    }
 
     // Call at the beginning of draw to setup background
     // backgroundColor is on gray scale from 0 to 255
@@ -2336,29 +2378,6 @@ public abstract class Visualizer {
             blendMode(SCREEN);
         } else {
             blendMode(DIFFERENCE);
-        }
-    }
-
-    // calculates avg frame rate over TOTAL_SAMPLE_TIME. returns avg frame rate when done
-    // sampling. returns 0 if still sampling. returns -1 if has already sampled.
-    public float sampleFrameRate() {
-        
-        if (samplerStartTime == -1) {
-            return -1;
-        }
-
-        if (samplerStartTime == 0) {
-            samplerStartTime = millis();
-        }
-
-        if (samplerStartTime + TOTAL_SAMPLE_TIME >= millis()) {
-            frameRateSampleNum++;
-            totalFrameRate += frameRate;
-            return -1;
-        } else {
-            samplerStartTime = -1;
-            println("avg particle framerate: " + totalFrameRate / frameRateSampleNum);
-            return totalFrameRate / frameRateSampleNum;
         }
     }
     
@@ -2516,6 +2535,7 @@ public abstract class Visualizer {
                 mouseX = width/2;
                 mouseY = height/2;
                 break;
+            // invert toggle handled in Animus
             case 'm':
                 mPressed();
                 break;
@@ -2531,18 +2551,14 @@ public abstract class Visualizer {
             case 't':
                 tPressed();
                 break;
-            case 'i':
-                contrast = 255 - contrast;
-                break;
             case 'b':
                 blur = !blur;
                 break;
             case 'p':
                 particles();
-                break;
-            case 'x':
-                flashingMode = !flashingMode;
-                blur = flashingMode;
+                if (!sampleParticleMode) {
+                    sampleParticleMode = true;
+                }
                 break;
             case '1':
                 highlight();

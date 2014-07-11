@@ -20,7 +20,6 @@ public abstract class Visualizer {
     float volumeScale;
     boolean blur;
     float opacityFade;
-
     float samplerStartTime;
     float totalFrameRate;
     int frameRateSampleNum;
@@ -44,11 +43,17 @@ public abstract class Visualizer {
     abstract void topView();
 
     
-    // implements particle mode (should just be switching boolean particles on/off in 
-    // addition to reducing the detail of a visualizer as needed - particles are expensive
-    // to render!)
+    // implements particle mode (should just be switching boolean particles on/off)
     boolean particles;
     abstract void particles();
+
+    // particle mode can be a little too intense for some computers, so the first time
+    // particle mode is called for each visualizer, Animus will sample 1000ms of 
+    // the framerate (at the max particle num), then call adjustDetail, passing in the
+    // average framerate. You can then use that info, in adjustDetail, to lower the number
+    // of particles in a specific visualizers implementation of particle-mode
+    boolean sampleParticleMode;
+    abstract void adjustDetail(float avgFr);
 
     // the following 3 methods must implement the 3 basic "drop levels" of a visualizer.
     // usually this is just switching the booleans highlight, expand, and revolve on/off,
@@ -79,7 +84,28 @@ public abstract class Visualizer {
         fft.forward(input.mix);
         volumeScale = pow(10, sliderVal);
     }
-    
+
+    // calculates avg frame rate over TOTAL_SAMPLE_TIME. returns avg frame rate when done
+    // sampling. returns 0 if still sampling. returns -1 if has already sampled.
+    float sampleFrameRate() {
+        if (samplerStartTime == -1) {
+            return -1;
+        }
+
+        if (samplerStartTime == 0) {
+            samplerStartTime = millis();
+        }
+
+        if (samplerStartTime + TOTAL_SAMPLE_TIME >= millis()) {
+            frameRateSampleNum++;
+            totalFrameRate += frameRate;
+            return -1;
+        } else {
+            samplerStartTime = -1;
+            println("avg particle framerate: " + totalFrameRate / frameRateSampleNum + " (" + name + ")");
+            return totalFrameRate / frameRateSampleNum;
+        }
+    }
 
     // Call at the beginning of draw to setup background
     // backgroundColor is on gray scale from 0 to 255
@@ -106,29 +132,6 @@ public abstract class Visualizer {
             blendMode(SCREEN);
         } else {
             blendMode(DIFFERENCE);
-        }
-    }
-
-    // calculates avg frame rate over TOTAL_SAMPLE_TIME. returns avg frame rate when done
-    // sampling. returns 0 if still sampling. returns -1 if has already sampled.
-    float sampleFrameRate() {
-        
-        if (samplerStartTime == -1) {
-            return -1;
-        }
-
-        if (samplerStartTime == 0) {
-            samplerStartTime = millis();
-        }
-
-        if (samplerStartTime + TOTAL_SAMPLE_TIME >= millis()) {
-            frameRateSampleNum++;
-            totalFrameRate += frameRate;
-            return -1;
-        } else {
-            samplerStartTime = -1;
-            println("avg particle framerate: " + totalFrameRate / frameRateSampleNum);
-            return totalFrameRate / frameRateSampleNum;
         }
     }
     
@@ -286,6 +289,7 @@ public abstract class Visualizer {
                 mouseX = width/2;
                 mouseY = height/2;
                 break;
+            // invert toggle handled in Animus
             case 'm':
                 mPressed();
                 break;
@@ -301,18 +305,14 @@ public abstract class Visualizer {
             case 't':
                 tPressed();
                 break;
-            case 'i':
-                contrast = 255 - contrast;
-                break;
             case 'b':
                 blur = !blur;
                 break;
             case 'p':
                 particles();
-                break;
-            case 'x':
-                flashingMode = !flashingMode;
-                blur = flashingMode;
+                if (!sampleParticleMode) {
+                    sampleParticleMode = true;
+                }
                 break;
             case '1':
                 highlight();

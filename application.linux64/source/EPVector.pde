@@ -39,5 +39,4 @@ class EPVector extends PVector {
         super.y = y;
         super.z = z;
     }
-    
 }
