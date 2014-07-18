@@ -25,7 +25,6 @@ class Fluid extends Visualizer {
     
     HorizSample[] horizSamples;
     VertSample[] vertSamples;
-    boolean pause;
     float fluidXRot, fluidYRot;
     
     float currRot = 0;
@@ -269,7 +268,7 @@ class Fluid extends Visualizer {
         } else {
             translate(SPEC_SIZE*SPEC_WIDTH, 0, HORIZ_SAMPLE_NUM * REFRESH/2);
         }
-        if (pause) {
+        if (followMouse) {
             fluidXRot = lerp(fluidXRot, map(mouseY/2, 0, height/2, -PI, PI), .05);
             fluidYRot = lerp(fluidYRot, map(mouseX/2, 0, width/2, -PI, PI), .05);
         } else {

@@ -59,7 +59,7 @@ public abstract class Visualizer {
     // usually this is just switching the booleans highlight, expand, and revolve on/off,
     // then using these booleans in the code that draws the Visualizer to determine what
     // should be drawn every frame
-    boolean highlight, expand, revolve, pause;
+    boolean highlight, expand, revolve, pause, followMouse;
     abstract void highlight();
     abstract void expand();
     abstract void revolve();
@@ -245,6 +245,7 @@ public abstract class Visualizer {
         frontView();
         rearView = false;
         topView = false;
+        followMouse = false;
     }
 
     void aPressed(){
@@ -252,7 +253,8 @@ public abstract class Visualizer {
         camera.dirSwitch();
         rearView = false;
         topView = false;
-        frontView = false;        
+        frontView = false; 
+        followMouse = false;       
     }
     void rPressed(){
         if (rearView) return;
@@ -261,6 +263,7 @@ public abstract class Visualizer {
         rearView();
         topView = false;
         frontView = false;
+        followMouse = false;
     }
 
     void tPressed(){
@@ -269,11 +272,13 @@ public abstract class Visualizer {
         topView = !topView;
         topView();
         rearView = false;
-        frontView = false;        
+        frontView = false;    
+        followMouse = false;    
     }
 
     void mPressed(){
-        camera.viewSwitch();
+        followMouse = !followMouse;
+        // camera.viewSwitch();
         
         rearView = false;
         topView = false;
@@ -286,6 +291,7 @@ public abstract class Visualizer {
             // use static variables (processing fucking sucks!)
             case ' ':
                 pause();
+                followMouse = pause;
                 mouseX = width/2;
                 mouseY = height/2;
                 break;
@@ -308,12 +314,6 @@ public abstract class Visualizer {
             case 'b':
                 blur = !blur;
                 break;
-            case 'p':
-                particles();
-                if (!sampleParticleMode) {
-                    sampleParticleMode = true;
-                }
-                break;
             case '1':
                 highlight();
                 break;
@@ -322,6 +322,12 @@ public abstract class Visualizer {
                 break;
             case '3':
                 revolve(); 
+                break;
+            case '4':
+                particles();
+                if (!sampleParticleMode) {
+                    sampleParticleMode = true;
+                }
                 break;
             default:
                 break;

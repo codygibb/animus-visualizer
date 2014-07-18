@@ -19,6 +19,7 @@ class Droplet extends Visualizer {
     final float MAX_PART_SIZE = 20;
     final float PART_SCALE = 0.5;
     int dropletSize = 4;
+    float dropletXRot, dropletYRot;
     
     float currExpand = 0;
 
@@ -356,18 +357,27 @@ class Droplet extends Visualizer {
 
         pushMatrix();
         
-            rotater.update();
-            camera.update();
 
-            for (ColorTracker ct : colorTrackers) {
-                ct.incrementColor();
-            }
+        camera.update();
+
+        for (ColorTracker ct : colorTrackers) {
+            ct.incrementColor();
+        }
         if (!pause) {
             for (int i = 0; i < rings.length; i++) {
                 rings[i].update();
             }
         }
-        
+        if (followMouse) {
+            dropletXRot = lerp(dropletXRot, map(mouseY/2, 0, height/2, -PI, PI), .05);
+            dropletYRot = lerp(dropletYRot, map(mouseX/2, 0, width/2, -PI, PI), .05);
+        } else {
+            dropletXRot = lerp(dropletXRot, 0, .05);
+            dropletYRot = lerp(dropletYRot, 0, .05);
+            rotater.update();
+        }
+        rotateX(dropletXRot);
+        rotateY(dropletYRot);         
         // if the camera is above the figure, the bottom rings are drawn last. If the camera is below the figure,
         // the top rings are drawn last.
         if (camera.pos.y > 0) { 
@@ -394,7 +404,7 @@ class Droplet extends Visualizer {
                 mult = i;
             } else {
                 mult = 5;
-            }
+            }           
 //            rotateZ(PI/2);
             rotateX(rotater.xRot * mult);
             rotateY(rotater.yRot * mult);
@@ -412,7 +422,11 @@ class Droplet extends Visualizer {
     @Override
     void particles() {
         particles = !particles;
-        blur = particles;
+        if(particles){
+            dropletSize = dropletSize >= 2 ? dropletSize -1: dropletSize;
+        } else {
+            dropletSize++;
+        }
         setupDroplet();
         if (highlight) {
             for (Ring r : rings) {
