@@ -32,7 +32,7 @@ class Fluid extends Visualizer {
     int particleDetailLoss = 1;
     
     Fluid(AudioInput input) {
-        super(input, "FLUID");
+        super(input, "TERRAIN");
         colorTrackers = new ColorTracker[4];
         for (int i = 0; i < colorTrackers.length; i++) {
             colorTrackers[i] = new ColorTracker(0.5, 4);   
@@ -49,7 +49,7 @@ class Fluid extends Visualizer {
         camera.viewingMode = false;
         camera.pos = new PVector(SPEC_SIZE * SPEC_WIDTH, 0, -130);
         camera.setOuterBounds(0, -200, -200, SPEC_SIZE * SPEC_WIDTH * 2, 200, REFRESH * HORIZ_SAMPLE_NUM);
-        noFill();
+        // noFill();
     }
 
     class Point {
@@ -258,10 +258,11 @@ class Fluid extends Visualizer {
             setBackground(contrast, 80);
         } else {
             setBackground(contrast, 255);
+            // setBackground(contrast, 150);
         }
-        
+
+        // hint(DISABLE_DEPTH_MASK);
         camera.update();
-    
         // --------------------------------------------------- Rotate Fluid
         if(revolve) {
             translate(0, 0, HORIZ_SAMPLE_NUM * REFRESH/2);
@@ -308,7 +309,7 @@ class Fluid extends Visualizer {
         for (int i = 0; i < VERT_SAMPLE_NUM; i++) {
             VertSample s = vertSamples[i];
             if (s.continueSampling) {
-                    rotateZ(currRot);
+                rotateZ(currRot);
                 float fade = 1 - s.pos / (VERT_SAMPLE_NUM * REFRESH);
                 setComplementaryColor(fade, colorTrackers[0]);
                 s.drawLines(1);
@@ -357,7 +358,7 @@ class Fluid extends Visualizer {
             rotateZ(-currRot * relativeIndex);
             
         }
-
+        
         popMatrix();
     }
     

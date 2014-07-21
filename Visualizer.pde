@@ -133,6 +133,7 @@ public abstract class Visualizer {
         } else {
             blendMode(DIFFERENCE);
         }
+        hint(DISABLE_DEPTH_MASK);
     }
     
     // given an intensity, a peak (max intensity), and two ColorTrackers, calculates and returns an

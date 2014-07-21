@@ -40,7 +40,7 @@ class Ring extends Visualizer {
     boolean throttlingOn = false;
     
     public Ring(AudioInput input) {
-        super(input, "RING");
+        super(input, "VORTEX");
         tracker = new ColorTracker(0.1, 0.8);
         tracker2 = new ColorTracker(0.1, 0.8);
         camera.viewingMode = false;
@@ -224,21 +224,25 @@ class Ring extends Visualizer {
         }
     }
 
-    synchronized void draw() {
+    @Override
+    void draw() {
         if (blur) {
             setBackground(contrast, 40);
         } else { 
             setBackground(contrast, 150);
         }
-       if (sampleParticleMode) {
-           float avgFr = sampleFrameRate();
-           if (avgFr > 0) {
-               adjustDetail(avgFr);
-           }
-       }
-        hint(ENABLE_DEPTH_MASK);
+
+        if (sampleParticleMode) {
+            float avgFr = sampleFrameRate();
+            if (avgFr > 0) {
+                adjustDetail(avgFr);
+            }
+        }
+        // hint(ENABLE_DEPTH_MASK);
+
         tracker.incrementColor();
         tracker2.incrementColor();
+
         pushMatrix();
 
         camera.update();
@@ -265,7 +269,7 @@ class Ring extends Visualizer {
             }
         }
 
-        hint(DISABLE_DEPTH_MASK);
+        // hint(DISABLE_DEPTH_MASK);
         if (followMouse) {
             ringXRot = lerp(ringXRot, map(mouseY/2, 0, height/2, -PI, PI), .05);
             ringYRot = lerp(ringYRot, map(mouseX/2, 0, width/2, -PI, PI), .05);

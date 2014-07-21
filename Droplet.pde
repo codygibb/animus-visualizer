@@ -415,11 +415,6 @@ class Droplet extends Visualizer {
     }
 
     @Override
-    void adjustDetail(float avgFr) {
-        // TODO
-    }
-
-    @Override
     void particles() {
         particles = !particles;
         if(particles){
@@ -485,7 +480,23 @@ class Droplet extends Visualizer {
     void pause() {
         pause = !pause;
     }
-    
+ 
+    @Override
+    void adjustDetail(float avgFr) {
+        println(avgFr);
+        if (avgFr < 25) {
+            dropletSize = 1;
+        } else if (avgFr < 28) {
+            dropletSize = 2;
+        } else if (avgFr < 32) {
+            dropletSize = 3;
+        } else if (avgFr < 35) {
+           dropletSize = 4;
+        }
+        setupDroplet();
+        println(dropletSize);
+    }
+
     @Override
     void keyPressed() {
         super.keyPressed();
