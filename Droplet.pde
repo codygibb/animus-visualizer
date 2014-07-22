@@ -367,24 +367,6 @@ class Droplet extends Visualizer {
         
 
         camera.update();
-
-<<<<<<< HEAD
-        for (ColorTracker ct : colorTrackers) {
-            ct.incrementColor();
-        }
-        if (pause) {
-            // for (int i = 0; i < rings.length; i++) {
-            //     for(int j = 0; j < rings[i].points.length; j++) {
-            //         ring[i].points[j].botColors = getColor(-points[j].naturalY, PEAK, colorTrackers[0], colorTrackers[1]);
-            //         ring[i].points[j].topColors = getColor(-points[j].naturalY, PEAK, colorTrackers[2], colorTrackers[3]);
-            //     }
-            // }
-        } else {
-            for (int i = 0; i < rings.length; i++) {
-                rings[i].update();
-            }
-
-=======
         
         if (!pause) {
             for (int i = 0; i < rings.length; i++) {
@@ -393,7 +375,6 @@ class Droplet extends Visualizer {
             for (ColorTracker ct : colorTrackers) {
                 ct.incrementColor();
             }
->>>>>>> FETCH_HEAD
         }
         if (followMouse) {
             camera.pos.z = lerp(camera.pos.z, map(mouseY/2, 0, height/2, 160, 500), .05);

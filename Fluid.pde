@@ -263,11 +263,8 @@ class Fluid extends Visualizer {
             setBackground(contrast, 255);
             // setBackground(contrast, 150);
         }
-<<<<<<< HEAD
-=======
 
         // hint(DISABLE_DEPTH_MASK);
->>>>>>> FETCH_HEAD
         camera.update();
         // --------------------------------------------------- Rotate Fluid
         if(revolve) {

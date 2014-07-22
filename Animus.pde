@@ -48,13 +48,8 @@ void setup() {
     ring = new Ring(input);
     fluid = new Fluid(input);
     droplet = new Droplet(input);
-<<<<<<< HEAD
-    visualizers = new Visualizer[] {ring, fluid, droplet};
-    select = 1;
-=======
     visualizers = new Visualizer[] {fluid, ring, droplet};
     select = 0;
->>>>>>> FETCH_HEAD
     frameRate(visualizers[select].getOptimalFrameRate());
     ellipseMode(CENTER);
     ellipseMode(RADIUS);
