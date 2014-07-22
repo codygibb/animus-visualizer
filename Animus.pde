@@ -176,9 +176,6 @@ void draw() {
         tint(255, (int)interfaceT);
     }
 
-    // fill((int) abs(visualizers[select].contrast - interfaceT));
-    // text(visualizers[select].name, displayWidth / 2- visualizers[select].name.length() / 2, TEXT_OFFSET);
-
     volumeBar.visible = showInterface;
     if(showIntro != 0){
         for(int i = 0; i < buttons.length; i++) {

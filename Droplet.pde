@@ -443,6 +443,7 @@ class Droplet extends Visualizer {
                 }
             }
         }
+        blur = particles;
     }
 
     @Override
