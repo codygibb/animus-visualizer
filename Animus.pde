@@ -5,6 +5,7 @@ import java.util.*;
 final float PHI = (1.0 + sqrt(5.0)) / 2.0;
 final int FONT_SIZE = 14;
 final int TEXT_OFFSET = 20;
+final int INTERFACE_FADE_RATE = 10;
 
 Minim minim;
 AudioInput input;
@@ -35,10 +36,10 @@ PImage cam, modeBackground;
 void setup() {
     size(displayWidth, displayHeight, P3D);
     minim = new Minim(this); 
-    PFont pfont = createFont("Courier", FONT_SIZE, true);
+    PFont pfont = createFont("Andale Mono.ttf", FONT_SIZE, true);
     ControlFont cFont = new ControlFont(pfont, FONT_SIZE);
     textFont(pfont);
-    showInterface = true;
+    // showInterface = true;
     Visualizer ring, fluid, droplet;
     logo = loadImage("Logo.png");
     AudioInput input = minim.getLineIn(Minim.STEREO, 512);
@@ -47,8 +48,13 @@ void setup() {
     ring = new Ring(input);
     fluid = new Fluid(input);
     droplet = new Droplet(input);
+<<<<<<< HEAD
     visualizers = new Visualizer[] {ring, fluid, droplet};
     select = 1;
+=======
+    visualizers = new Visualizer[] {fluid, ring, droplet};
+    select = 0;
+>>>>>>> FETCH_HEAD
     frameRate(visualizers[select].getOptimalFrameRate());
     ellipseMode(CENTER);
     ellipseMode(RADIUS);
@@ -97,17 +103,20 @@ void setup() {
 
 void draw() {
     smooth(8);
+
     pushStyle();
     pushMatrix();
 
     visualizers[select].retrieveSound();
     visualizers[select].draw();
+
     blendMode(BLEND);
     popMatrix();
     popStyle();
     noLights();
-
+    
     updateGui();
+
     contrast = visualizers[select].contrast;
     if(showIntro == 0) {
         image(cam, width - 147, TEXT_OFFSET + 266);
@@ -117,20 +126,21 @@ void draw() {
     }
     
     if (showInterface) {
-        interfaceT = lerp(interfaceT, 255, .01);
+        // interfaceT = lerp(interfaceT, 255, .01);
+        if (interfaceT < 255) {
+            interfaceT += INTERFACE_FADE_RATE;
+            setGuiColors();
+        }
+        
         tint(255, (int)interfaceT);
      
         boolean handOn = false;
         if (cp5.isMouseOver()) {
             handOn = true;
         }
-        interfaceLabel.setVisible(true);
+        
         for (int i = 0; i < buttons.length; i++) {
             buttons[i].setVisible(true);
-        }
-        for(int i = 0; i < buttonLabels.length; i++){
-            buttonLabels[i].setVisible(true);
-
         }
 
         // for (int i = 0; i < dots.length; i++) {
@@ -148,8 +158,8 @@ void draw() {
         //     }
         // }
         textAlign(CENTER, TOP);
-        fill(255 - visualizers[select].contrast);
-        text(visualizers[select].name, displayWidth / 2, TEXT_OFFSET);
+        // fill(255 - visualizers[select].contrast);
+
         if (debugMode) {
             visualizers[select].displayDebugText();
         }
@@ -160,13 +170,20 @@ void draw() {
         }
     } else {
         checkMouse();
-        interfaceT = lerp(interfaceT, 0, .2);
-        tint(255, (int)interfaceT);
-        for(int i = 0; i < buttonLabels.length; i++){
-            buttonLabels[i].setVisible(false);
+        // interfaceT = lerp(interfaceT, 0, .2);
+        if (interfaceT > 0) {
+            interfaceT -= INTERFACE_FADE_RATE;
+            setGuiColors();
+        } else {
+            setInterfaceVisibility(false);
         }
-        interfaceLabel.setVisible(false);
+
+        tint(255, (int)interfaceT);
     }
+
+    fill((int) abs(visualizers[select].contrast - interfaceT));
+    text(visualizers[select].name, displayWidth / 2, TEXT_OFFSET);
+
     volumeBar.visible = showInterface;
     if(showIntro != 0){
         for(int i = 0; i < buttons.length; i++) {
@@ -178,8 +195,9 @@ void draw() {
         rect(0, 0, width, height);
         tint(255, (int)showIntro);
         image(logo, width / 2 - logo.width / 2, height / 2-logo.height / 2);
-        if(showIntro == 0) {
+        if (showIntro == 0) {
             showInterface = true;
+            setInterfaceVisibility(true);
         }
     }
     if (visualizers[select].sampleParticleMode) {
@@ -234,6 +252,7 @@ void updateGui() {
     buttons[11].setArrayValue(select == 0 ? on : off);
     buttons[12].setArrayValue(select == 1 ? on : off);
     buttons[13].setArrayValue(select == 2 ? on : off);
+
     // image(loadImage("Button.png"), mouseX, mouseY);
     // if(mousePressed){
     //     println(mouseX + " " + mouseY);
@@ -273,7 +292,7 @@ void guiSetup(ControlFont font){
     buttons[11] = ring = cp5.addCheckBox("ring").addItem("Ring", 0);
     buttonLabels[11] = cp5.addTextlabel("Mode").setText("Mode");
     buttons[12] = fluid = cp5.addCheckBox("fluid").addItem("Fluid", 0);
-    buttonLabels[12] = cp5.addTextlabel("Input Volume").setText("Input Volume");
+    buttonLabels[12] = cp5.addTextlabel("Sensitivity").setText("Sensitivity");
     buttons[13] = droplet = cp5.addCheckBox("droplet").addItem("Droplet", 0);
     buttonLabels[13] = cp5.addTextlabel(" ").setText(" ");
     
@@ -310,10 +329,16 @@ void guiSetup(ControlFont font){
 }
 
 void setGuiColors() {
+    interfaceT = visualizers[select].bindRange(interfaceT, 0.0, 255.0);
+    int textColor = (int) abs(visualizers[select].contrast - interfaceT);
+
     for(int i = 0; i < buttonLabels.length; i++) {
-        buttonLabels[i].setColor(color(255 - visualizers[select].contrast));
+        // buttonLabels[i].setColor(color(255 - visualizers[select].contrast));
+        buttonLabels[i].setColor(textColor);
     }
-    interfaceLabel.setColor(color(255 - visualizers[select].contrast));
+    // interfaceLabel.setColor(color(255 - visualizers[select].contrast));
+    // println("orig: " + (255 - visualizers[select].contrast) + ", interfaceT: " + interfaceT);
+    interfaceLabel.setColor(textColor);
 }
 
 void controlEvent(ControlEvent theEvent) {
@@ -398,9 +423,15 @@ void keyPressed() {
             break;
         case 'h':
             showInterface = !showInterface;
+            if (showInterface) {
+                setInterfaceVisibility(true);
+            }
             break;
         case 'H':
             showInterface = !showInterface;
+            if (showInterface) {
+                setInterfaceVisibility(true);
+            }
             break;            
         case 'i':
             visualizers[select].contrast = 255 - visualizers[select].contrast;
@@ -430,6 +461,13 @@ void keyPressed() {
             break;
     }
     visualizers[select].keyPressed();
+}
+
+void setInterfaceVisibility(boolean val) {
+    for (int i = 0; i < buttonLabels.length; i++) {
+        buttonLabels[i].setVisible(val);
+    }
+    interfaceLabel.setVisible(val);
 }
 
 void stop() {

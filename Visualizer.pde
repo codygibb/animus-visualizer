@@ -102,7 +102,7 @@ public abstract class Visualizer {
             return -1;
         } else {
             samplerStartTime = -1;
-            println("avg particle framerate: " + totalFrameRate / frameRateSampleNum + " (" + name + ")");
+            // println("avg particle framerate: " + totalFrameRate / frameRateSampleNum + " (" + name + ")");
             return totalFrameRate / frameRateSampleNum;
         }
     }
@@ -133,6 +133,7 @@ public abstract class Visualizer {
         } else {
             blendMode(DIFFERENCE);
         }
+        hint(DISABLE_DEPTH_MASK);
     }
     
     // given an intensity, a peak (max intensity), and two ColorTrackers, calculates and returns an
