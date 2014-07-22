@@ -344,6 +344,8 @@ class Droplet extends Visualizer {
             setBackground(contrast, 150);
         }
 
+        hint(DISABLE_DEPTH_MASK);
+
         if (expand && currExpand < 1) {
             currExpand += EXPAND_RATE;
         } else if (!expand && currExpand > 0) {
@@ -421,7 +423,7 @@ class Droplet extends Visualizer {
     @Override
     void particles() {
         particles = !particles;
-        if(particles){
+        if (particles) {
             if (particleDetail != -1) {
                 dropletSize = particleDetail;
             }
@@ -491,7 +493,7 @@ class Droplet extends Visualizer {
  
     @Override
     void adjustDetail(float avgFr) {
-        println(avgFr);
+        // println(avgFr);
         if (avgFr < 25) {
             particleDetail = 1;
         } else if (avgFr < 28) {
@@ -503,23 +505,23 @@ class Droplet extends Visualizer {
         }
         dropletSize = particleDetail;
         setupDroplet();
-        println(particleDetail);
+        // println(particleDetail);
     }
 
     @Override
     void keyPressed() {
         super.keyPressed();
         switch (keyCode) {
-             case 38:
-                 dropletSize++;;
-                 setupDroplet();
-                 break;
-             case 40:
-                 if (dropletSize > 1) {
-                     dropletSize--;
-                     setupDroplet();
-                 }
-                 break;
+             // case 38:
+             //     dropletSize++;;
+             //     setupDroplet();
+             //     break;
+             // case 40:
+             //     if (dropletSize > 1) {
+             //         dropletSize--;
+             //         setupDroplet();
+             //     }
+             //     break;
             default:
                 break;
         }
