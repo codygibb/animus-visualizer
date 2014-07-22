@@ -230,7 +230,8 @@ class Fluid extends Visualizer {
                 if (!particles) {
                     vertex(points[i].x, points[i].y * ydir);
                     vertex(points[i + 1].x, points[i + 1].y * ydir);
-                } else {
+                } else if (i % particleDetailLoss == 0) {
+                    strokeWeight(bindRange(weight, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
                     point(points[i].x, points[i].y * ydir);
                 }
             }
@@ -241,6 +242,7 @@ class Fluid extends Visualizer {
                 vertex(points[points.length - 2].x, points[points.length - 2].y * ydir);
                 vertex(points[points.length - 1].x, points[points.length - 1].y * ydir);
             } else {
+                strokeWeight(bindRange(weight, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
                 point(points[points.length - 2].x, points[points.length - 2].y * ydir);
             }
 
@@ -284,9 +286,10 @@ class Fluid extends Visualizer {
             translate(-SPEC_SIZE*SPEC_WIDTH, 0, -HORIZ_SAMPLE_NUM * REFRESH/2);
         }
 
-
-        for (ColorTracker ct : colorTrackers) {
-            ct.incrementColor();
+        if (!pause) {
+            for (ColorTracker ct : colorTrackers) {
+                ct.incrementColor();
+            }
         }
         noFill();
         pushMatrix();

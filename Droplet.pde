@@ -18,7 +18,10 @@ class Droplet extends Visualizer {
     final float MIN_PART_SIZE = 2;
     final float MAX_PART_SIZE = 20;
     final float PART_SCALE = 0.5;
-    int dropletSize = 4;
+    final int MAX_DROPLET_SIZE = 4;
+
+    int particleDetail = -1;
+    int dropletSize = MAX_DROPLET_SIZE;
     float dropletXRot, dropletYRot;
     
     float currExpand = 0;
@@ -360,12 +363,13 @@ class Droplet extends Visualizer {
 
         camera.update();
 
-        for (ColorTracker ct : colorTrackers) {
-            ct.incrementColor();
-        }
+        
         if (!pause) {
             for (int i = 0; i < rings.length; i++) {
                 rings[i].update();
+            }
+            for (ColorTracker ct : colorTrackers) {
+                ct.incrementColor();
             }
         }
         if (followMouse) {
@@ -418,9 +422,13 @@ class Droplet extends Visualizer {
     void particles() {
         particles = !particles;
         if(particles){
+            if (particleDetail != -1) {
+                dropletSize = particleDetail;
+            }
             dropletSize = dropletSize >= 2 ? dropletSize -1: dropletSize;
         } else {
-            dropletSize++;
+            // dropletSize++;
+            dropletSize = MAX_DROPLET_SIZE;
         }
         setupDroplet();
         if (highlight) {
@@ -485,16 +493,17 @@ class Droplet extends Visualizer {
     void adjustDetail(float avgFr) {
         println(avgFr);
         if (avgFr < 25) {
-            dropletSize = 1;
+            particleDetail = 1;
         } else if (avgFr < 28) {
-            dropletSize = 2;
+            particleDetail = MAX_DROPLET_SIZE - 2;
         } else if (avgFr < 32) {
-            dropletSize = 3;
+            particleDetail = MAX_DROPLET_SIZE - 1;
         } else if (avgFr < 35) {
-           dropletSize = 4;
+           particleDetail = MAX_DROPLET_SIZE;
         }
+        dropletSize = particleDetail;
         setupDroplet();
-        println(dropletSize);
+        println(particleDetail);
     }
 
     @Override

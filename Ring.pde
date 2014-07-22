@@ -239,10 +239,10 @@ class Ring extends Visualizer {
             }
         }
         // hint(ENABLE_DEPTH_MASK);
-
-        tracker.incrementColor();
-        tracker2.incrementColor();
-
+        if (!pause) {
+            tracker.incrementColor();
+            tracker2.incrementColor();
+        }
         pushMatrix();
 
         camera.update();
@@ -331,7 +331,7 @@ class Ring extends Visualizer {
         //      samples[i].stop = SAMPLE_NUM * REFRESH;
         //      samples[i].pos *= REFRESH;
         // }
-        setupRing();     
+        // setupRing();     
     }
  
     @Override
