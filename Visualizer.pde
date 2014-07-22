@@ -102,7 +102,7 @@ public abstract class Visualizer {
             return -1;
         } else {
             samplerStartTime = -1;
-            println("avg particle framerate: " + totalFrameRate / frameRateSampleNum + " (" + name + ")");
+            // println("avg particle framerate: " + totalFrameRate / frameRateSampleNum + " (" + name + ")");
             return totalFrameRate / frameRateSampleNum;
         }
     }

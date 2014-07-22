@@ -232,6 +232,8 @@ class Ring extends Visualizer {
             setBackground(contrast, 150);
         }
 
+        hint(DISABLE_DEPTH_MASK);
+
         if (sampleParticleMode) {
             float avgFr = sampleFrameRate();
             if (avgFr > 0) {
@@ -239,14 +241,14 @@ class Ring extends Visualizer {
             }
         }
         // hint(ENABLE_DEPTH_MASK);
-        if (!pause) {
-            tracker.incrementColor();
-            tracker2.incrementColor();
-        }
+
         pushMatrix();
 
         camera.update();
         if (!pause) {
+            tracker.incrementColor();
+            tracker2.incrementColor();
+
             if (millis() - start < stop) {
                 averageSpeed = incrRot(deltaRotation);
                 if (averageSpeed > MAX_SPEED || averageSpeed < -MAX_SPEED) {

@@ -285,12 +285,6 @@ class Fluid extends Visualizer {
         } else {
             translate(-SPEC_SIZE*SPEC_WIDTH, 0, -HORIZ_SAMPLE_NUM * REFRESH/2);
         }
-
-        if (!pause) {
-            for (ColorTracker ct : colorTrackers) {
-                ct.incrementColor();
-            }
-        }
         noFill();
         pushMatrix();
     
@@ -299,6 +293,10 @@ class Fluid extends Visualizer {
             translate(0, 0, 170);
         }
         if (!pause) {
+            for (ColorTracker ct : colorTrackers) {
+                ct.incrementColor();
+            }
+
             if (revolve) {
                 currRot += ANGLE_INC;
             } else {
@@ -380,7 +378,7 @@ class Fluid extends Visualizer {
         } else if (avgFr < 38) {
             particleDetailLoss = 2;
         }
-        println(particleDetailLoss);
+        // println(particleDetailLoss);
     }
 
     @Override
