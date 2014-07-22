@@ -176,8 +176,12 @@ void draw() {
         tint(255, (int)interfaceT);
     }
 
-    fill((int) abs(visualizers[select].contrast - interfaceT));
-    text(visualizers[select].name, displayWidth / 2, TEXT_OFFSET);
+    
+    if (interfaceT > 0) {
+        fill((int) abs(visualizers[select].contrast - interfaceT));
+        text(visualizers[select].name, displayWidth / 2, TEXT_OFFSET);
+    }
+    
 
     volumeBar.visible = showInterface;
     if(showIntro != 0){
