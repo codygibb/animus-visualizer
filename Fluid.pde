@@ -14,6 +14,7 @@ class Fluid extends Visualizer {
     final float ANGLE_INC = 0.001;
     final float MIN_PARTICLE_SIZE = 2;
     final float MAX_PARTICLE_SIZE = 20;
+    
 
     // since we need 4 different color trackers -- base and peak colors for both
     // bottom and top halves -- stored all dem in an array
@@ -259,7 +260,6 @@ class Fluid extends Visualizer {
         } else {
             setBackground(contrast, 255);
         }
-        
         camera.update();
     
         // --------------------------------------------------- Rotate Fluid
@@ -269,6 +269,7 @@ class Fluid extends Visualizer {
             translate(SPEC_SIZE*SPEC_WIDTH, 0, HORIZ_SAMPLE_NUM * REFRESH/2);
         }
         if (followMouse) {
+            // camera.pos.z = lerp(camera.pos.z, map(mouseY/2, 0, height/2, -PI, PI), .05);
             fluidXRot = lerp(fluidXRot, map(mouseY/2, 0, height/2, -PI, PI), .05);
             fluidYRot = lerp(fluidYRot, map(mouseX/2, 0, width/2, -PI, PI), .05);
         } else {

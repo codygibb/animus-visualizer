@@ -3,7 +3,7 @@ import ddf.minim.*;
 class Droplet extends Visualizer {
     @Override
     int getOptimalFrameRate() {
-        return 35;
+        return 40;
     }
  
     final int SPEC_SIZE = 50;
@@ -363,12 +363,21 @@ class Droplet extends Visualizer {
         for (ColorTracker ct : colorTrackers) {
             ct.incrementColor();
         }
-        if (!pause) {
+        if (pause) {
+            // for (int i = 0; i < rings.length; i++) {
+            //     for(int j = 0; j < rings[i].points.length; j++) {
+            //         ring[i].points[j].botColors = getColor(-points[j].naturalY, PEAK, colorTrackers[0], colorTrackers[1]);
+            //         ring[i].points[j].topColors = getColor(-points[j].naturalY, PEAK, colorTrackers[2], colorTrackers[3]);
+            //     }
+            // }
+        } else {
             for (int i = 0; i < rings.length; i++) {
                 rings[i].update();
             }
+
         }
         if (followMouse) {
+            camera.pos.z = lerp(camera.pos.z, map(mouseY/2, 0, height/2, 160, 500), .05);
             dropletXRot = lerp(dropletXRot, map(mouseY/2, 0, height/2, -PI, PI), .05);
             dropletYRot = lerp(dropletYRot, map(mouseX/2, 0, width/2, -PI, PI), .05);
         } else {
