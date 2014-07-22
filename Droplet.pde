@@ -71,6 +71,9 @@ class Droplet extends Visualizer {
                 }
             }
         }
+        for (int i = 0; i < rings.length; i++) {
+            rings[i].update();
+        }
     }
     
     class Ring {
