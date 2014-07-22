@@ -51,6 +51,7 @@ class Droplet extends Visualizer {
         rotater = new RotationTracker();
         rings = new Ring[SPEC_SIZE];
         setupDroplet();
+        aPressed();
     }
     
     void setupDroplet() {
