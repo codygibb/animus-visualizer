@@ -41,6 +41,7 @@ public abstract class Visualizer {
     abstract void frontView();
     abstract void rearView();
     abstract void topView();
+    abstract void autoPan();
 
     
     // implements particle mode (should just be switching boolean particles on/off)
@@ -252,6 +253,7 @@ public abstract class Visualizer {
     void aPressed(){
         camera.autoPanSwitch();
         camera.dirSwitch();
+        autoPan();
         rearView = false;
         topView = false;
         frontView = false; 

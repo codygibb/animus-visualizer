@@ -32,6 +32,7 @@ public class Animus extends PApplet {
 final float PHI = (1.0f + sqrt(5.0f)) / 2.0f;
 final int FONT_SIZE = 14;
 final int TEXT_OFFSET = 20;
+final int INTERFACE_FADE_RATE = 10;
 
 Minim minim;
 AudioInput input;
@@ -62,10 +63,10 @@ PImage cam, modeBackground;
 public void setup() {
     size(displayWidth, displayHeight, P3D);
     minim = new Minim(this); 
-    PFont pfont = createFont("Courier", FONT_SIZE, true);
+    PFont pfont = createFont("Andale Mono.ttf", FONT_SIZE, true);
     ControlFont cFont = new ControlFont(pfont, FONT_SIZE);
     textFont(pfont);
-    showInterface = true;
+    // showInterface = true;
     Visualizer ring, fluid, droplet;
     logo = loadImage("Logo.png");
     AudioInput input = minim.getLineIn(Minim.STEREO, 512);
@@ -124,17 +125,20 @@ public void setup() {
 
 public void draw() {
     smooth(8);
+
     pushStyle();
     pushMatrix();
 
     visualizers[select].retrieveSound();
     visualizers[select].draw();
+
     blendMode(BLEND);
     popMatrix();
     popStyle();
     noLights();
-
+    
     updateGui();
+
     contrast = visualizers[select].contrast;
     if(showIntro == 0) {
         image(cam, width - 147, TEXT_OFFSET + 266);
@@ -144,20 +148,21 @@ public void draw() {
     }
     
     if (showInterface) {
-        interfaceT = lerp(interfaceT, 255, .01f);
+        // interfaceT = lerp(interfaceT, 255, .01);
+        if (interfaceT < 255) {
+            interfaceT += INTERFACE_FADE_RATE;
+            setGuiColors();
+        }
+        
         tint(255, (int)interfaceT);
      
         boolean handOn = false;
         if (cp5.isMouseOver()) {
             handOn = true;
         }
-        interfaceLabel.setVisible(true);
+        
         for (int i = 0; i < buttons.length; i++) {
             buttons[i].setVisible(true);
-        }
-        for(int i = 0; i < buttonLabels.length; i++){
-            buttonLabels[i].setVisible(true);
-
         }
 
         // for (int i = 0; i < dots.length; i++) {
@@ -175,8 +180,8 @@ public void draw() {
         //     }
         // }
         textAlign(CENTER, TOP);
-        fill(255 - visualizers[select].contrast);
-        text(visualizers[select].name, displayWidth / 2, TEXT_OFFSET);
+        // fill(255 - visualizers[select].contrast);
+
         if (debugMode) {
             visualizers[select].displayDebugText();
         }
@@ -187,13 +192,20 @@ public void draw() {
         }
     } else {
         checkMouse();
-        interfaceT = lerp(interfaceT, 0, .2f);
-        tint(255, (int)interfaceT);
-        for(int i = 0; i < buttonLabels.length; i++){
-            buttonLabels[i].setVisible(false);
+        // interfaceT = lerp(interfaceT, 0, .2);
+        if (interfaceT > 0) {
+            interfaceT -= INTERFACE_FADE_RATE;
+            setGuiColors();
+        } else {
+            setInterfaceVisibility(false);
         }
-        interfaceLabel.setVisible(false);
+
+        tint(255, (int)interfaceT);
     }
+
+    fill((int) abs(visualizers[select].contrast - interfaceT));
+    text(visualizers[select].name, displayWidth / 2, TEXT_OFFSET);
+
     volumeBar.visible = showInterface;
     if(showIntro != 0){
         for(int i = 0; i < buttons.length; i++) {
@@ -205,8 +217,9 @@ public void draw() {
         rect(0, 0, width, height);
         tint(255, (int)showIntro);
         image(logo, width / 2 - logo.width / 2, height / 2-logo.height / 2);
-        if(showIntro == 0) {
+        if (showIntro == 0) {
             showInterface = true;
+            setInterfaceVisibility(true);
         }
     }
     if (visualizers[select].sampleParticleMode) {
@@ -261,6 +274,7 @@ public void updateGui() {
     buttons[11].setArrayValue(select == 0 ? on : off);
     buttons[12].setArrayValue(select == 1 ? on : off);
     buttons[13].setArrayValue(select == 2 ? on : off);
+
     // image(loadImage("Button.png"), mouseX, mouseY);
     // if(mousePressed){
     //     println(mouseX + " " + mouseY);
@@ -300,7 +314,7 @@ public void guiSetup(ControlFont font){
     buttons[11] = ring = cp5.addCheckBox("ring").addItem("Ring", 0);
     buttonLabels[11] = cp5.addTextlabel("Mode").setText("Mode");
     buttons[12] = fluid = cp5.addCheckBox("fluid").addItem("Fluid", 0);
-    buttonLabels[12] = cp5.addTextlabel("Input Volume").setText("Input Volume");
+    buttonLabels[12] = cp5.addTextlabel("Sensitivity").setText("Sensitivity");
     buttons[13] = droplet = cp5.addCheckBox("droplet").addItem("Droplet", 0);
     buttonLabels[13] = cp5.addTextlabel(" ").setText(" ");
     
@@ -337,10 +351,16 @@ public void guiSetup(ControlFont font){
 }
 
 public void setGuiColors() {
+    interfaceT = visualizers[select].bindRange(interfaceT, 0.0f, 255.0f);
+    int textColor = (int) abs(visualizers[select].contrast - interfaceT);
+
     for(int i = 0; i < buttonLabels.length; i++) {
-        buttonLabels[i].setColor(color(255 - visualizers[select].contrast));
+        // buttonLabels[i].setColor(color(255 - visualizers[select].contrast));
+        buttonLabels[i].setColor(textColor);
     }
-    interfaceLabel.setColor(color(255 - visualizers[select].contrast));
+    // interfaceLabel.setColor(color(255 - visualizers[select].contrast));
+    // println("orig: " + (255 - visualizers[select].contrast) + ", interfaceT: " + interfaceT);
+    interfaceLabel.setColor(textColor);
 }
 
 public void controlEvent(ControlEvent theEvent) {
@@ -425,9 +445,15 @@ public void keyPressed() {
             break;
         case 'h':
             showInterface = !showInterface;
+            if (showInterface) {
+                setInterfaceVisibility(true);
+            }
             break;
         case 'H':
             showInterface = !showInterface;
+            if (showInterface) {
+                setInterfaceVisibility(true);
+            }
             break;            
         case 'i':
             visualizers[select].contrast = 255 - visualizers[select].contrast;
@@ -457,6 +483,13 @@ public void keyPressed() {
             break;
     }
     visualizers[select].keyPressed();
+}
+
+public void setInterfaceVisibility(boolean val) {
+    for (int i = 0; i < buttonLabels.length; i++) {
+        buttonLabels[i].setVisible(val);
+    }
+    interfaceLabel.setVisible(val);
 }
 
 public void stop() {
@@ -808,7 +841,7 @@ public class ColorTracker {
 class Droplet extends Visualizer {
     public @Override
     int getOptimalFrameRate() {
-        return 35;
+        return 40;
     }
  
     final int SPEC_SIZE = 50;
@@ -823,7 +856,10 @@ class Droplet extends Visualizer {
     final float MIN_PART_SIZE = 2;
     final float MAX_PART_SIZE = 20;
     final float PART_SCALE = 0.5f;
-    int dropletSize = 4;
+    final int MAX_DROPLET_SIZE = 4;
+
+    int particleDetail = -1;
+    int dropletSize = MAX_DROPLET_SIZE;
     float dropletXRot, dropletYRot;
     
     float currExpand = 0;
@@ -841,7 +877,7 @@ class Droplet extends Visualizer {
 
     Droplet(AudioInput input) {
         super(input, "DROPLET");
-        camera.pos = new PVector(0, 0, 400);
+        camera.pos = new PVector(-350, 0, .0001f);
         float n = SPEC_SIZE * SPEC_WIDTH;
         camera.setOuterBounds(-n, -n * 1.2f, -n, n, n * 1.2f, n);
         camera.setInnerBounds(-n / 4, 0, - n / 4, n / 4, 0, n / 4);
@@ -872,6 +908,9 @@ class Droplet extends Visualizer {
                     rings[i].points[j].oneDeeper = rings[i].points[j].findNearestOneDeeper(i);
                 }
             }
+        }
+        for (int i = 0; i < rings.length; i++) {
+            rings[i].update();
         }
     }
     
@@ -1146,6 +1185,8 @@ class Droplet extends Visualizer {
             setBackground(contrast, 150);
         }
 
+        hint(DISABLE_DEPTH_MASK);
+
         if (expand && currExpand < 1) {
             currExpand += EXPAND_RATE;
         } else if (!expand && currExpand > 0) {
@@ -1164,25 +1205,25 @@ class Droplet extends Visualizer {
         
 
         camera.update();
-
-        for (ColorTracker ct : colorTrackers) {
-            ct.incrementColor();
-        }
+        
         if (!pause) {
             for (int i = 0; i < rings.length; i++) {
                 rings[i].update();
             }
+            for (ColorTracker ct : colorTrackers) {
+                ct.incrementColor();
+            }
         }
         if (followMouse) {
-            dropletXRot = lerp(dropletXRot, map(mouseY/2, 0, height/2, -PI, PI), .05f);
-            dropletYRot = lerp(dropletYRot, map(mouseX/2, 0, width/2, -PI, PI), .05f);
+            dropletXRot = lerp(dropletXRot, map(mouseY/2, 0, height/2, -PI/2, PI/2), .05f);
+            dropletYRot = lerp(dropletYRot, map(mouseX/2, 0, width/2, -PI/2, PI/2), .05f);
         } else {
             dropletXRot = lerp(dropletXRot, 0, .05f);
             dropletYRot = lerp(dropletYRot, 0, .05f);
             rotater.update();
         }
-        rotateX(dropletXRot);
-        rotateY(dropletYRot);         
+        rotateX(-dropletYRot);
+        rotateZ(-dropletXRot);         
         // if the camera is above the figure, the bottom rings are drawn last. If the camera is below the figure,
         // the top rings are drawn last.
         if (camera.pos.y > 0) { 
@@ -1220,17 +1261,16 @@ class Droplet extends Visualizer {
     }
 
     public @Override
-    void adjustDetail(float avgFr) {
-        // TODO
-    }
-
-    public @Override
     void particles() {
         particles = !particles;
-        if(particles){
+        if (particles) {
+            if (particleDetail != -1) {
+                dropletSize = particleDetail;
+            }
             dropletSize = dropletSize >= 2 ? dropletSize -1: dropletSize;
         } else {
-            dropletSize++;
+            // dropletSize++;
+            dropletSize = MAX_DROPLET_SIZE;
         }
         setupDroplet();
         if (highlight) {
@@ -1290,21 +1330,42 @@ class Droplet extends Visualizer {
     void pause() {
         pause = !pause;
     }
-    
+ 
+    public @Override
+    void adjustDetail(float avgFr) {
+        // println(avgFr);
+        if (avgFr < 25) {
+            particleDetail = 1;
+        } else if (avgFr < 28) {
+            particleDetail = MAX_DROPLET_SIZE - 2;
+        } else if (avgFr < 32) {
+            particleDetail = MAX_DROPLET_SIZE - 1;
+        } else if (avgFr < 35) {
+           particleDetail = MAX_DROPLET_SIZE;
+        }
+        dropletSize = particleDetail;
+        setupDroplet();
+        // println(particleDetail);
+    }
+
+    public @Override
+    void autoPan() {
+    }
+
     public @Override
     void keyPressed() {
         super.keyPressed();
         switch (keyCode) {
-             case 38:
-                 dropletSize++;;
-                 setupDroplet();
-                 break;
-             case 40:
-                 if (dropletSize > 1) {
-                     dropletSize--;
-                     setupDroplet();
-                 }
-                 break;
+             // case 38:
+             //     dropletSize++;;
+             //     setupDroplet();
+             //     break;
+             // case 40:
+             //     if (dropletSize > 1) {
+             //         dropletSize--;
+             //         setupDroplet();
+             //     }
+             //     break;
             default:
                 break;
         }
@@ -1368,6 +1429,7 @@ class Fluid extends Visualizer {
     final float ANGLE_INC = 0.001f;
     final float MIN_PARTICLE_SIZE = 2;
     final float MAX_PARTICLE_SIZE = 20;
+    
 
     // since we need 4 different color trackers -- base and peak colors for both
     // bottom and top halves -- stored all dem in an array
@@ -1386,7 +1448,7 @@ class Fluid extends Visualizer {
     int particleDetailLoss = 1;
     
     Fluid(AudioInput input) {
-        super(input, "FLUID");
+        super(input, "TERRAIN");
         colorTrackers = new ColorTracker[4];
         for (int i = 0; i < colorTrackers.length; i++) {
             colorTrackers[i] = new ColorTracker(0.5f, 4);   
@@ -1403,7 +1465,7 @@ class Fluid extends Visualizer {
         camera.viewingMode = false;
         camera.pos = new PVector(SPEC_SIZE * SPEC_WIDTH, 0, -130);
         camera.setOuterBounds(0, -200, -200, SPEC_SIZE * SPEC_WIDTH * 2, 200, REFRESH * HORIZ_SAMPLE_NUM);
-        noFill();
+        // noFill();
     }
 
     class Point {
@@ -1584,7 +1646,8 @@ class Fluid extends Visualizer {
                 if (!particles) {
                     vertex(points[i].x, points[i].y * ydir);
                     vertex(points[i + 1].x, points[i + 1].y * ydir);
-                } else {
+                } else if (i % particleDetailLoss == 0) {
+                    strokeWeight(bindRange(weight, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
                     point(points[i].x, points[i].y * ydir);
                 }
             }
@@ -1595,6 +1658,7 @@ class Fluid extends Visualizer {
                 vertex(points[points.length - 2].x, points[points.length - 2].y * ydir);
                 vertex(points[points.length - 1].x, points[points.length - 1].y * ydir);
             } else {
+                strokeWeight(bindRange(weight, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
                 point(points[points.length - 2].x, points[points.length - 2].y * ydir);
             }
 
@@ -1612,10 +1676,11 @@ class Fluid extends Visualizer {
             setBackground(contrast, 80);
         } else {
             setBackground(contrast, 255);
+            // setBackground(contrast, 150);
         }
-        
+
+        hint(DISABLE_DEPTH_MASK);
         camera.update();
-    
         // --------------------------------------------------- Rotate Fluid
         if(revolve) {
             translate(0, 0, HORIZ_SAMPLE_NUM * REFRESH/2);
@@ -1636,11 +1701,6 @@ class Fluid extends Visualizer {
         } else {
             translate(-SPEC_SIZE*SPEC_WIDTH, 0, -HORIZ_SAMPLE_NUM * REFRESH/2);
         }
-
-
-        for (ColorTracker ct : colorTrackers) {
-            ct.incrementColor();
-        }
         noFill();
         pushMatrix();
     
@@ -1649,10 +1709,17 @@ class Fluid extends Visualizer {
             translate(0, 0, 170);
         }
         if (!pause) {
+            for (ColorTracker ct : colorTrackers) {
+                ct.incrementColor();
+            }
+
             if (revolve) {
                 currRot += ANGLE_INC;
             } else {
-                currRot = lerp(currRot, 0, PHI * 40 * ANGLE_INC);
+                if(currRot > 0){
+                    currRot -= ANGLE_INC;
+                    currRot = max(0, currRot);
+                }
             }
 
             for (int i = 0; i < VERT_SAMPLE_NUM; i++) {
@@ -1662,7 +1729,7 @@ class Fluid extends Visualizer {
         for (int i = 0; i < VERT_SAMPLE_NUM; i++) {
             VertSample s = vertSamples[i];
             if (s.continueSampling) {
-                    rotateZ(currRot);
+                rotateZ(currRot);
                 float fade = 1 - s.pos / (VERT_SAMPLE_NUM * REFRESH);
                 setComplementaryColor(fade, colorTrackers[0]);
                 s.drawLines(1);
@@ -1711,7 +1778,7 @@ class Fluid extends Visualizer {
             rotateZ(-currRot * relativeIndex);
             
         }
-
+        
         popMatrix();
     }
     
@@ -1730,7 +1797,7 @@ class Fluid extends Visualizer {
         } else if (avgFr < 38) {
             particleDetailLoss = 2;
         }
-        println(particleDetailLoss);
+        // println(particleDetailLoss);
     }
 
     public @Override
@@ -1813,6 +1880,21 @@ class Fluid extends Visualizer {
         camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
     }
 
+    public @Override
+    void autoPan() {
+        float camZ = HORIZ_SAMPLE_NUM * REFRESH/ 1.99f;
+        float camY = -150;
+        if (frontView) {
+            camZ = HORIZ_SAMPLE_NUM * REFRESH / 2.1f;
+            camY = 160;
+        }
+        if (revolve) {
+            camera.initMoveCenter(0, 0, HORIZ_SAMPLE_NUM * REFRESH / 2, (int) frameRate / 2);
+        } else {
+            camera.initMoveCenter(SPEC_SIZE * SPEC_WIDTH, 0, HORIZ_SAMPLE_NUM * REFRESH / 2, (int) frameRate);
+        }
+    }
+
 }
  
 
@@ -1856,7 +1938,7 @@ class Ring extends Visualizer {
     boolean throttlingOn = false;
     
     public Ring(AudioInput input) {
-        super(input, "RING");
+        super(input, "VORTEX");
         tracker = new ColorTracker(0.1f, 0.8f);
         tracker2 = new ColorTracker(0.1f, 0.8f);
         camera.viewingMode = false;
@@ -2040,25 +2122,31 @@ class Ring extends Visualizer {
         }
     }
 
-    public synchronized void draw() {
+    public @Override
+    void draw() {
         if (blur) {
             setBackground(contrast, 40);
         } else { 
             setBackground(contrast, 150);
         }
-       if (sampleParticleMode) {
-           float avgFr = sampleFrameRate();
-           if (avgFr > 0) {
-               adjustDetail(avgFr);
-           }
-       }
-        hint(ENABLE_DEPTH_MASK);
-        tracker.incrementColor();
-        tracker2.incrementColor();
+
+        hint(DISABLE_DEPTH_MASK);
+
+        if (sampleParticleMode) {
+            float avgFr = sampleFrameRate();
+            if (avgFr > 0) {
+                adjustDetail(avgFr);
+            }
+        }
+        // hint(ENABLE_DEPTH_MASK);
+
         pushMatrix();
 
         camera.update();
         if (!pause) {
+            tracker.incrementColor();
+            tracker2.incrementColor();
+
             if (millis() - start < stop) {
                 averageSpeed = incrRot(deltaRotation);
                 if (averageSpeed > MAX_SPEED || averageSpeed < -MAX_SPEED) {
@@ -2081,7 +2169,7 @@ class Ring extends Visualizer {
             }
         }
 
-        hint(DISABLE_DEPTH_MASK);
+        // hint(DISABLE_DEPTH_MASK);
         if (followMouse) {
             ringXRot = lerp(ringXRot, map(mouseY/2, 0, height/2, -PI, PI), .05f);
             ringYRot = lerp(ringYRot, map(mouseX/2, 0, width/2, -PI, PI), .05f);
@@ -2143,7 +2231,7 @@ class Ring extends Visualizer {
         //      samples[i].stop = SAMPLE_NUM * REFRESH;
         //      samples[i].pos *= REFRESH;
         // }
-        setupRing();     
+        // setupRing();     
     }
  
     public @Override
@@ -2157,6 +2245,7 @@ class Ring extends Visualizer {
         revolve = !revolve;
             // camera.initMoveCamera(new PVector(0, 1300, 0), (int)frameRate*2);
         blur = revolve;
+        camera.initMoveCenter(0, 0, 0, (int)frameRate *2);
         if (topView) {
             camera.initMoveCamera(new PVector(0, -REFRESH * SAMPLE_NUM - 600, 0), (int)frameRate * 2);
         }
@@ -2178,10 +2267,19 @@ class Ring extends Visualizer {
     void topView() {
         if(revolve) {
             camera.initMoveCamera(new PVector(0, 1300, 0), (int)frameRate*2);
-            camera.initMoveCenter(0, 0, 0, (int)frameRate);
+            camera.initMoveCenter(0, 0, 0, (int)frameRate *2);
         } else {
-            camera.initMoveCenter(0, 0, (REFRESH * SAMPLE_NUM), (int)frameRate);
+            camera.initMoveCenter(0, 0, (REFRESH * SAMPLE_NUM), (int)frameRate*2);
             camera.initMoveCamera(new PVector(0, -285 , -5 ), (int)frameRate*2);
+        }
+    }
+
+    public @Override
+    void autoPan(){
+        if(revolve) {
+            camera.initMoveCenter(0, 0, 0, (int)frameRate *2);
+        } else {
+            camera.initMoveCenter(0, 0, (REFRESH * SAMPLE_NUM)/2, (int)frameRate*2);
         }
     }
 
@@ -2201,6 +2299,7 @@ class Ring extends Visualizer {
         if(key == 'l')
             leftView();
     }
+
 }
 class RotationTracker {
     float xRot, yRot, zRot, xStart, yStart,zStart, xEnd, yEnd, zEnd;
@@ -2324,6 +2423,7 @@ public abstract class Visualizer {
     public abstract void frontView();
     public abstract void rearView();
     public abstract void topView();
+    public abstract void autoPan();
 
     
     // implements particle mode (should just be switching boolean particles on/off)
@@ -2385,7 +2485,7 @@ public abstract class Visualizer {
             return -1;
         } else {
             samplerStartTime = -1;
-            println("avg particle framerate: " + totalFrameRate / frameRateSampleNum + " (" + name + ")");
+            // println("avg particle framerate: " + totalFrameRate / frameRateSampleNum + " (" + name + ")");
             return totalFrameRate / frameRateSampleNum;
         }
     }
@@ -2416,6 +2516,7 @@ public abstract class Visualizer {
         } else {
             blendMode(DIFFERENCE);
         }
+        hint(DISABLE_DEPTH_MASK);
     }
     
     // given an intensity, a peak (max intensity), and two ColorTrackers, calculates and returns an
@@ -2534,6 +2635,7 @@ public abstract class Visualizer {
     public void aPressed(){
         camera.autoPanSwitch();
         camera.dirSwitch();
+        autoPan();
         rearView = false;
         topView = false;
         frontView = false; 

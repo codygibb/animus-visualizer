@@ -39,7 +39,7 @@ class Droplet extends Visualizer {
 
     Droplet(AudioInput input) {
         super(input, "DROPLET");
-        camera.pos = new PVector(0, 0, 400);
+        camera.pos = new PVector(-350, 0, .0001);
         float n = SPEC_SIZE * SPEC_WIDTH;
         camera.setOuterBounds(-n, -n * 1.2, -n, n, n * 1.2, n);
         camera.setInnerBounds(-n / 4, 0, - n / 4, n / 4, 0, n / 4);
@@ -377,16 +377,15 @@ class Droplet extends Visualizer {
             }
         }
         if (followMouse) {
-            camera.pos.z = lerp(camera.pos.z, map(mouseY/2, 0, height/2, 160, 500), .05);
-            dropletXRot = lerp(dropletXRot, map(mouseY/2, 0, height/2, -PI, PI), .05);
-            dropletYRot = lerp(dropletYRot, map(mouseX/2, 0, width/2, -PI, PI), .05);
+            dropletXRot = lerp(dropletXRot, map(mouseY/2, 0, height/2, -PI/2, PI/2), .05);
+            dropletYRot = lerp(dropletYRot, map(mouseX/2, 0, width/2, -PI/2, PI/2), .05);
         } else {
             dropletXRot = lerp(dropletXRot, 0, .05);
             dropletYRot = lerp(dropletYRot, 0, .05);
             rotater.update();
         }
-        rotateX(dropletXRot);
-        rotateY(dropletYRot);         
+        rotateX(-dropletYRot);
+        rotateZ(-dropletXRot);         
         // if the camera is above the figure, the bottom rings are drawn last. If the camera is below the figure,
         // the top rings are drawn last.
         if (camera.pos.y > 0) { 
@@ -509,6 +508,10 @@ class Droplet extends Visualizer {
         dropletSize = particleDetail;
         setupDroplet();
         // println(particleDetail);
+    }
+
+    @Override
+    void autoPan() {
     }
 
     @Override

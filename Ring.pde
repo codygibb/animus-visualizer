@@ -347,6 +347,7 @@ class Ring extends Visualizer {
         revolve = !revolve;
             // camera.initMoveCamera(new PVector(0, 1300, 0), (int)frameRate*2);
         blur = revolve;
+        camera.initMoveCenter(0, 0, 0, (int)frameRate *2);
         if (topView) {
             camera.initMoveCamera(new PVector(0, -REFRESH * SAMPLE_NUM - 600, 0), (int)frameRate * 2);
         }
@@ -368,10 +369,19 @@ class Ring extends Visualizer {
     void topView() {
         if(revolve) {
             camera.initMoveCamera(new PVector(0, 1300, 0), (int)frameRate*2);
-            camera.initMoveCenter(0, 0, 0, (int)frameRate);
+            camera.initMoveCenter(0, 0, 0, (int)frameRate *2);
         } else {
-            camera.initMoveCenter(0, 0, (REFRESH * SAMPLE_NUM), (int)frameRate);
+            camera.initMoveCenter(0, 0, (REFRESH * SAMPLE_NUM), (int)frameRate*2);
             camera.initMoveCamera(new PVector(0, -285 , -5 ), (int)frameRate*2);
+        }
+    }
+
+    @Override
+    void autoPan(){
+        if(revolve) {
+            camera.initMoveCenter(0, 0, 0, (int)frameRate *2);
+        } else {
+            camera.initMoveCenter(0, 0, (REFRESH * SAMPLE_NUM)/2, (int)frameRate*2);
         }
     }
 
@@ -391,4 +401,5 @@ class Ring extends Visualizer {
         if(key == 'l')
             leftView();
     }
+
 }

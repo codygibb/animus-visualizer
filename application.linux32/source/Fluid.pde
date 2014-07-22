@@ -14,6 +14,7 @@ class Fluid extends Visualizer {
     final float ANGLE_INC = 0.001;
     final float MIN_PARTICLE_SIZE = 2;
     final float MAX_PARTICLE_SIZE = 20;
+    
 
     // since we need 4 different color trackers -- base and peak colors for both
     // bottom and top halves -- stored all dem in an array
@@ -32,7 +33,7 @@ class Fluid extends Visualizer {
     int particleDetailLoss = 1;
     
     Fluid(AudioInput input) {
-        super(input, "FLUID");
+        super(input, "TERRAIN");
         colorTrackers = new ColorTracker[4];
         for (int i = 0; i < colorTrackers.length; i++) {
             colorTrackers[i] = new ColorTracker(0.5, 4);   
@@ -49,7 +50,7 @@ class Fluid extends Visualizer {
         camera.viewingMode = false;
         camera.pos = new PVector(SPEC_SIZE * SPEC_WIDTH, 0, -130);
         camera.setOuterBounds(0, -200, -200, SPEC_SIZE * SPEC_WIDTH * 2, 200, REFRESH * HORIZ_SAMPLE_NUM);
-        noFill();
+        // noFill();
     }
 
     class Point {
@@ -230,7 +231,8 @@ class Fluid extends Visualizer {
                 if (!particles) {
                     vertex(points[i].x, points[i].y * ydir);
                     vertex(points[i + 1].x, points[i + 1].y * ydir);
-                } else {
+                } else if (i % particleDetailLoss == 0) {
+                    strokeWeight(bindRange(weight, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
                     point(points[i].x, points[i].y * ydir);
                 }
             }
@@ -241,6 +243,7 @@ class Fluid extends Visualizer {
                 vertex(points[points.length - 2].x, points[points.length - 2].y * ydir);
                 vertex(points[points.length - 1].x, points[points.length - 1].y * ydir);
             } else {
+                strokeWeight(bindRange(weight, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
                 point(points[points.length - 2].x, points[points.length - 2].y * ydir);
             }
 
@@ -258,10 +261,11 @@ class Fluid extends Visualizer {
             setBackground(contrast, 80);
         } else {
             setBackground(contrast, 255);
+            // setBackground(contrast, 150);
         }
-        
+
+        hint(DISABLE_DEPTH_MASK);
         camera.update();
-    
         // --------------------------------------------------- Rotate Fluid
         if(revolve) {
             translate(0, 0, HORIZ_SAMPLE_NUM * REFRESH/2);
@@ -282,11 +286,6 @@ class Fluid extends Visualizer {
         } else {
             translate(-SPEC_SIZE*SPEC_WIDTH, 0, -HORIZ_SAMPLE_NUM * REFRESH/2);
         }
-
-
-        for (ColorTracker ct : colorTrackers) {
-            ct.incrementColor();
-        }
         noFill();
         pushMatrix();
     
@@ -295,10 +294,17 @@ class Fluid extends Visualizer {
             translate(0, 0, 170);
         }
         if (!pause) {
+            for (ColorTracker ct : colorTrackers) {
+                ct.incrementColor();
+            }
+
             if (revolve) {
                 currRot += ANGLE_INC;
             } else {
-                currRot = lerp(currRot, 0, PHI * 40 * ANGLE_INC);
+                if(currRot > 0){
+                    currRot -= ANGLE_INC;
+                    currRot = max(0, currRot);
+                }
             }
 
             for (int i = 0; i < VERT_SAMPLE_NUM; i++) {
@@ -308,7 +314,7 @@ class Fluid extends Visualizer {
         for (int i = 0; i < VERT_SAMPLE_NUM; i++) {
             VertSample s = vertSamples[i];
             if (s.continueSampling) {
-                    rotateZ(currRot);
+                rotateZ(currRot);
                 float fade = 1 - s.pos / (VERT_SAMPLE_NUM * REFRESH);
                 setComplementaryColor(fade, colorTrackers[0]);
                 s.drawLines(1);
@@ -357,7 +363,7 @@ class Fluid extends Visualizer {
             rotateZ(-currRot * relativeIndex);
             
         }
-
+        
         popMatrix();
     }
     
@@ -376,7 +382,7 @@ class Fluid extends Visualizer {
         } else if (avgFr < 38) {
             particleDetailLoss = 2;
         }
-        println(particleDetailLoss);
+        // println(particleDetailLoss);
     }
 
     @Override
@@ -457,6 +463,21 @@ class Fluid extends Visualizer {
             camera.initMoveCenter(SPEC_SIZE * SPEC_WIDTH, 0, HORIZ_SAMPLE_NUM * REFRESH / 2, (int) frameRate);
         }
         camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
+    }
+
+    @Override
+    void autoPan() {
+        float camZ = HORIZ_SAMPLE_NUM * REFRESH/ 1.99;
+        float camY = -150;
+        if (frontView) {
+            camZ = HORIZ_SAMPLE_NUM * REFRESH / 2.1;
+            camY = 160;
+        }
+        if (revolve) {
+            camera.initMoveCenter(0, 0, HORIZ_SAMPLE_NUM * REFRESH / 2, (int) frameRate / 2);
+        } else {
+            camera.initMoveCenter(SPEC_SIZE * SPEC_WIDTH, 0, HORIZ_SAMPLE_NUM * REFRESH / 2, (int) frameRate);
+        }
     }
 
 }

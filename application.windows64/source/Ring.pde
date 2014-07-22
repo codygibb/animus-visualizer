@@ -40,7 +40,7 @@ class Ring extends Visualizer {
     boolean throttlingOn = false;
     
     public Ring(AudioInput input) {
-        super(input, "RING");
+        super(input, "VORTEX");
         tracker = new ColorTracker(0.1, 0.8);
         tracker2 = new ColorTracker(0.1, 0.8);
         camera.viewingMode = false;
@@ -224,25 +224,31 @@ class Ring extends Visualizer {
         }
     }
 
-    synchronized void draw() {
+    @Override
+    void draw() {
         if (blur) {
             setBackground(contrast, 40);
         } else { 
             setBackground(contrast, 150);
         }
-       if (sampleParticleMode) {
-           float avgFr = sampleFrameRate();
-           if (avgFr > 0) {
-               adjustDetail(avgFr);
-           }
-       }
-        hint(ENABLE_DEPTH_MASK);
-        tracker.incrementColor();
-        tracker2.incrementColor();
+
+        hint(DISABLE_DEPTH_MASK);
+
+        if (sampleParticleMode) {
+            float avgFr = sampleFrameRate();
+            if (avgFr > 0) {
+                adjustDetail(avgFr);
+            }
+        }
+        // hint(ENABLE_DEPTH_MASK);
+
         pushMatrix();
 
         camera.update();
         if (!pause) {
+            tracker.incrementColor();
+            tracker2.incrementColor();
+
             if (millis() - start < stop) {
                 averageSpeed = incrRot(deltaRotation);
                 if (averageSpeed > MAX_SPEED || averageSpeed < -MAX_SPEED) {
@@ -265,7 +271,7 @@ class Ring extends Visualizer {
             }
         }
 
-        hint(DISABLE_DEPTH_MASK);
+        // hint(DISABLE_DEPTH_MASK);
         if (followMouse) {
             ringXRot = lerp(ringXRot, map(mouseY/2, 0, height/2, -PI, PI), .05);
             ringYRot = lerp(ringYRot, map(mouseX/2, 0, width/2, -PI, PI), .05);
@@ -327,7 +333,7 @@ class Ring extends Visualizer {
         //      samples[i].stop = SAMPLE_NUM * REFRESH;
         //      samples[i].pos *= REFRESH;
         // }
-        setupRing();     
+        // setupRing();     
     }
  
     @Override
@@ -341,6 +347,7 @@ class Ring extends Visualizer {
         revolve = !revolve;
             // camera.initMoveCamera(new PVector(0, 1300, 0), (int)frameRate*2);
         blur = revolve;
+        camera.initMoveCenter(0, 0, 0, (int)frameRate *2);
         if (topView) {
             camera.initMoveCamera(new PVector(0, -REFRESH * SAMPLE_NUM - 600, 0), (int)frameRate * 2);
         }
@@ -362,10 +369,19 @@ class Ring extends Visualizer {
     void topView() {
         if(revolve) {
             camera.initMoveCamera(new PVector(0, 1300, 0), (int)frameRate*2);
-            camera.initMoveCenter(0, 0, 0, (int)frameRate);
+            camera.initMoveCenter(0, 0, 0, (int)frameRate *2);
         } else {
-            camera.initMoveCenter(0, 0, (REFRESH * SAMPLE_NUM), (int)frameRate);
+            camera.initMoveCenter(0, 0, (REFRESH * SAMPLE_NUM), (int)frameRate*2);
             camera.initMoveCamera(new PVector(0, -285 , -5 ), (int)frameRate*2);
+        }
+    }
+
+    @Override
+    void autoPan(){
+        if(revolve) {
+            camera.initMoveCenter(0, 0, 0, (int)frameRate *2);
+        } else {
+            camera.initMoveCenter(0, 0, (REFRESH * SAMPLE_NUM)/2, (int)frameRate*2);
         }
     }
 
@@ -385,4 +401,5 @@ class Ring extends Visualizer {
         if(key == 'l')
             leftView();
     }
+
 }

@@ -264,7 +264,7 @@ class Fluid extends Visualizer {
             // setBackground(contrast, 150);
         }
 
-        // hint(DISABLE_DEPTH_MASK);
+        hint(DISABLE_DEPTH_MASK);
         camera.update();
         // --------------------------------------------------- Rotate Fluid
         if(revolve) {
@@ -273,7 +273,6 @@ class Fluid extends Visualizer {
             translate(SPEC_SIZE*SPEC_WIDTH, 0, HORIZ_SAMPLE_NUM * REFRESH/2);
         }
         if (followMouse) {
-            // camera.pos.z = lerp(camera.pos.z, map(mouseY/2, 0, height/2, -PI, PI), .05);
             fluidXRot = lerp(fluidXRot, map(mouseY/2, 0, height/2, -PI, PI), .05);
             fluidYRot = lerp(fluidYRot, map(mouseX/2, 0, width/2, -PI, PI), .05);
         } else {
@@ -302,7 +301,10 @@ class Fluid extends Visualizer {
             if (revolve) {
                 currRot += ANGLE_INC;
             } else {
-                currRot = lerp(currRot, 0, PHI * 40 * ANGLE_INC);
+                if(currRot > 0){
+                    currRot -= ANGLE_INC;
+                    currRot = max(0, currRot);
+                }
             }
 
             for (int i = 0; i < VERT_SAMPLE_NUM; i++) {
@@ -461,6 +463,21 @@ class Fluid extends Visualizer {
             camera.initMoveCenter(SPEC_SIZE * SPEC_WIDTH, 0, HORIZ_SAMPLE_NUM * REFRESH / 2, (int) frameRate);
         }
         camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
+    }
+
+    @Override
+    void autoPan() {
+        float camZ = HORIZ_SAMPLE_NUM * REFRESH/ 1.99;
+        float camY = -150;
+        if (frontView) {
+            camZ = HORIZ_SAMPLE_NUM * REFRESH / 2.1;
+            camY = 160;
+        }
+        if (revolve) {
+            camera.initMoveCenter(0, 0, HORIZ_SAMPLE_NUM * REFRESH / 2, (int) frameRate / 2);
+        } else {
+            camera.initMoveCenter(SPEC_SIZE * SPEC_WIDTH, 0, HORIZ_SAMPLE_NUM * REFRESH / 2, (int) frameRate);
+        }
     }
 
 }

@@ -48,7 +48,7 @@ void setup() {
     ring = new Ring(input);
     fluid = new Fluid(input);
     droplet = new Droplet(input);
-    visualizers = new Visualizer[] {fluid, ring, droplet};
+    visualizers = new Visualizer[] {ring, fluid, droplet};
     select = 0;
     frameRate(visualizers[select].getOptimalFrameRate());
     ellipseMode(CENTER);

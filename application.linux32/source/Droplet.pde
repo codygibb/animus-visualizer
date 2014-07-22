@@ -3,7 +3,7 @@ import ddf.minim.*;
 class Droplet extends Visualizer {
     @Override
     int getOptimalFrameRate() {
-        return 35;
+        return 40;
     }
  
     final int SPEC_SIZE = 50;
@@ -18,7 +18,10 @@ class Droplet extends Visualizer {
     final float MIN_PART_SIZE = 2;
     final float MAX_PART_SIZE = 20;
     final float PART_SCALE = 0.5;
-    int dropletSize = 4;
+    final int MAX_DROPLET_SIZE = 4;
+
+    int particleDetail = -1;
+    int dropletSize = MAX_DROPLET_SIZE;
     float dropletXRot, dropletYRot;
     
     float currExpand = 0;
@@ -36,7 +39,7 @@ class Droplet extends Visualizer {
 
     Droplet(AudioInput input) {
         super(input, "DROPLET");
-        camera.pos = new PVector(0, 0, 400);
+        camera.pos = new PVector(-350, 0, .0001);
         float n = SPEC_SIZE * SPEC_WIDTH;
         camera.setOuterBounds(-n, -n * 1.2, -n, n, n * 1.2, n);
         camera.setInnerBounds(-n / 4, 0, - n / 4, n / 4, 0, n / 4);
@@ -67,6 +70,9 @@ class Droplet extends Visualizer {
                     rings[i].points[j].oneDeeper = rings[i].points[j].findNearestOneDeeper(i);
                 }
             }
+        }
+        for (int i = 0; i < rings.length; i++) {
+            rings[i].update();
         }
     }
     
@@ -341,6 +347,8 @@ class Droplet extends Visualizer {
             setBackground(contrast, 150);
         }
 
+        hint(DISABLE_DEPTH_MASK);
+
         if (expand && currExpand < 1) {
             currExpand += EXPAND_RATE;
         } else if (!expand && currExpand > 0) {
@@ -359,25 +367,25 @@ class Droplet extends Visualizer {
         
 
         camera.update();
-
-        for (ColorTracker ct : colorTrackers) {
-            ct.incrementColor();
-        }
+        
         if (!pause) {
             for (int i = 0; i < rings.length; i++) {
                 rings[i].update();
             }
+            for (ColorTracker ct : colorTrackers) {
+                ct.incrementColor();
+            }
         }
         if (followMouse) {
-            dropletXRot = lerp(dropletXRot, map(mouseY/2, 0, height/2, -PI, PI), .05);
-            dropletYRot = lerp(dropletYRot, map(mouseX/2, 0, width/2, -PI, PI), .05);
+            dropletXRot = lerp(dropletXRot, map(mouseY/2, 0, height/2, -PI/2, PI/2), .05);
+            dropletYRot = lerp(dropletYRot, map(mouseX/2, 0, width/2, -PI/2, PI/2), .05);
         } else {
             dropletXRot = lerp(dropletXRot, 0, .05);
             dropletYRot = lerp(dropletYRot, 0, .05);
             rotater.update();
         }
-        rotateX(dropletXRot);
-        rotateY(dropletYRot);         
+        rotateX(-dropletYRot);
+        rotateZ(-dropletXRot);         
         // if the camera is above the figure, the bottom rings are drawn last. If the camera is below the figure,
         // the top rings are drawn last.
         if (camera.pos.y > 0) { 
@@ -415,17 +423,16 @@ class Droplet extends Visualizer {
     }
 
     @Override
-    void adjustDetail(float avgFr) {
-        // TODO
-    }
-
-    @Override
     void particles() {
         particles = !particles;
-        if(particles){
+        if (particles) {
+            if (particleDetail != -1) {
+                dropletSize = particleDetail;
+            }
             dropletSize = dropletSize >= 2 ? dropletSize -1: dropletSize;
         } else {
-            dropletSize++;
+            // dropletSize++;
+            dropletSize = MAX_DROPLET_SIZE;
         }
         setupDroplet();
         if (highlight) {
@@ -485,21 +492,42 @@ class Droplet extends Visualizer {
     void pause() {
         pause = !pause;
     }
-    
+ 
+    @Override
+    void adjustDetail(float avgFr) {
+        // println(avgFr);
+        if (avgFr < 25) {
+            particleDetail = 1;
+        } else if (avgFr < 28) {
+            particleDetail = MAX_DROPLET_SIZE - 2;
+        } else if (avgFr < 32) {
+            particleDetail = MAX_DROPLET_SIZE - 1;
+        } else if (avgFr < 35) {
+           particleDetail = MAX_DROPLET_SIZE;
+        }
+        dropletSize = particleDetail;
+        setupDroplet();
+        // println(particleDetail);
+    }
+
+    @Override
+    void autoPan() {
+    }
+
     @Override
     void keyPressed() {
         super.keyPressed();
         switch (keyCode) {
-             case 38:
-                 dropletSize++;;
-                 setupDroplet();
-                 break;
-             case 40:
-                 if (dropletSize > 1) {
-                     dropletSize--;
-                     setupDroplet();
-                 }
-                 break;
+             // case 38:
+             //     dropletSize++;;
+             //     setupDroplet();
+             //     break;
+             // case 40:
+             //     if (dropletSize > 1) {
+             //         dropletSize--;
+             //         setupDroplet();
+             //     }
+             //     break;
             default:
                 break;
         }
