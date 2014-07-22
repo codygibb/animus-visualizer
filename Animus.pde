@@ -176,8 +176,8 @@ void draw() {
         tint(255, (int)interfaceT);
     }
 
-    fill((int) abs(visualizers[select].contrast - interfaceT));
-    text(visualizers[select].name, displayWidth / 2, TEXT_OFFSET);
+    // fill((int) abs(visualizers[select].contrast - interfaceT));
+    // text(visualizers[select].name, displayWidth / 2- visualizers[select].name.length() / 2, TEXT_OFFSET);
 
     volumeBar.visible = showInterface;
     if(showIntro != 0){
@@ -289,7 +289,7 @@ void guiSetup(ControlFont font){
     buttons[12] = fluid = cp5.addCheckBox("fluid").addItem("Fluid", 0);
     buttonLabels[12] = cp5.addTextlabel("Sensitivity").setText("Sensitivity");
     buttons[13] = droplet = cp5.addCheckBox("droplet").addItem("Droplet", 0);
-    buttonLabels[13] = cp5.addTextlabel(" ").setText(" ");
+    buttonLabels[13] = cp5.addTextlabel("name").setText(visualizers[select].name);
     
     float startHeight = TEXT_OFFSET + 92;
     PImage normal = loadImage("Button.png");
@@ -310,13 +310,13 @@ void guiSetup(ControlFont font){
             buttons[i].getItem(0).captionLabel().setFont(font).setSize(FONT_SIZE);
     }
     buttons[4].setPosition(width - 180, startHeight + 196); //front
-    buttonLabels[4].setPosition(width - 180, startHeight + 196); //front
+    buttonLabels[4].setPosition(width - 177, startHeight + 201); //front
     buttons[5].setPosition(width - 114, startHeight + 196); //rear
-    buttonLabels[5].setPosition(width - 114, startHeight + 196); //rear
+    buttonLabels[5].setPosition(width - 111, startHeight + 201); //rear
     buttons[6].setPosition(width - 147, startHeight + 166); //top
-    buttonLabels[6].setPosition(width - 147, startHeight + 166); //top
+    buttonLabels[6].setPosition(width - 144, startHeight + 171); //top
     buttons[7].setPosition(width - 147, startHeight + 226); //autoPan
-    buttonLabels[7].setPosition(width - 147, startHeight + 226); //autoPan
+    buttonLabels[7].setPosition(width - 144, startHeight + 231); //autoPan
     buttons[8].setPosition(width - 180, startHeight + 252); 
     buttons[11].setPosition(width - 180, TEXT_OFFSET + 23); //ring
     buttons[12].setPosition(width - 147, TEXT_OFFSET + 23); //fluid
@@ -325,13 +325,15 @@ void guiSetup(ControlFont font){
     buttonLabels[8].setPosition(width - (180 - 28), startHeight + 257);
     buttonLabels[11].setPosition(width - (212 - 58), startHeight - 20);
     buttonLabels[12].setPosition(width - (212 - 28), startHeight + 26);
+    buttonLabels[13].setPosition(displayWidth / 2 - 25, TEXT_OFFSET);
     setGuiColors();
 }
 
 void setGuiColors() {
     interfaceT = visualizers[select].bindRange(interfaceT, 0.0, 255.0);
     int textColor = (int) abs(visualizers[select].contrast - interfaceT);
-
+    buttonLabels[13].setText(visualizers[select].name);
+    buttonLabels[13].setPosition(displayWidth / 2 - 25, TEXT_OFFSET);
     for(int i = 0; i < buttonLabels.length; i++) {
         // buttonLabels[i].setColor(color(255 - visualizers[select].contrast));
         buttonLabels[i].setColor(textColor);

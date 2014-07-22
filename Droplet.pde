@@ -378,8 +378,8 @@ class Droplet extends Visualizer {
             }
         }
         if (followMouse) {
-            dropletXRot = lerp(dropletXRot, map(mouseY/2, 0, height/2, -PI/2, PI/2), .05);
-            dropletYRot = lerp(dropletYRot, map(mouseX/2, 0, width/2, -PI/2, PI/2), .05);
+            dropletXRot = lerp(dropletXRot, map(mouseY/2, 0, height/2, -PI, PI), .05);
+            dropletYRot = lerp(dropletYRot, map(mouseX/2, 0, width/2, -PI, PI), .05);
         } else {
             dropletXRot = lerp(dropletXRot, 0, .05);
             dropletYRot = lerp(dropletYRot, 0, .05);
