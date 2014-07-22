@@ -271,13 +271,13 @@ void guiSetup(ControlFont font){
     buttons[3] = particles = cp5.addCheckBox("particles").addItem("particles [4]", 0);
     buttonLabels[3] = cp5.addTextlabel("particlesT").setText("Particles [4]");
     buttons[4] = front = cp5.addCheckBox("front").addItem("front view [f]", 0);
-    buttonLabels[4] = cp5.addTextlabel("frontT").setText("");
+    buttonLabels[4] = cp5.addTextlabel("frontT").setText("a");
     buttons[5] = rear = cp5.addCheckBox("rear").addItem("rear view [r]", 0);
-    buttonLabels[5] = cp5.addTextlabel("rearT").setText("");
+    buttonLabels[5] = cp5.addTextlabel("rearT").setText("d");
     buttons[6] = top = cp5.addCheckBox("top").addItem("top view [t]" , 0);
-    buttonLabels[6] = cp5.addTextlabel("topT").setText("");
+    buttonLabels[6] = cp5.addTextlabel("topT").setText("w");
     buttons[7] = autoPan = cp5.addCheckBox("autoPan").addItem("autopan camera [a]", 0);
-    buttonLabels[7] = cp5.addTextlabel("autoPanT").setText("");
+    buttonLabels[7] = cp5.addTextlabel("autoPanT").setText("s");
     buttons[8] = viewing = cp5.addCheckBox("viewing").addItem("follow mouse [m]", 0);
     buttonLabels[8] = cp5.addTextlabel("viewingT").setText("Follow Mouse [m]");
     buttons[9] = blur = cp5.addCheckBox("blur").addItem("blur [b]", 0);
@@ -310,13 +310,18 @@ void guiSetup(ControlFont font){
             buttons[i].getItem(0).captionLabel().setFont(font).setSize(FONT_SIZE);
     }
     buttons[4].setPosition(width - 180, startHeight + 196); //front
+    buttonLabels[4].setPosition(width - 180, startHeight + 196); //front
     buttons[5].setPosition(width - 114, startHeight + 196); //rear
+    buttonLabels[5].setPosition(width - 114, startHeight + 196); //rear
     buttons[6].setPosition(width - 147, startHeight + 166); //top
+    buttonLabels[6].setPosition(width - 147, startHeight + 166); //top
     buttons[7].setPosition(width - 147, startHeight + 226); //autoPan
+    buttonLabels[7].setPosition(width - 147, startHeight + 226); //autoPan
     buttons[8].setPosition(width - 180, startHeight + 252); 
     buttons[11].setPosition(width - 180, TEXT_OFFSET + 23); //ring
     buttons[12].setPosition(width - 147, TEXT_OFFSET + 23); //fluid
     buttons[13].setPosition(width - 114, TEXT_OFFSET + 23); //droplet
+    
     buttonLabels[8].setPosition(width - (180 - 28), startHeight + 257);
     buttonLabels[11].setPosition(width - (212 - 58), startHeight - 20);
     buttonLabels[12].setPosition(width - (212 - 28), startHeight + 26);
