@@ -6,9 +6,9 @@ class Ring extends Visualizer {
         return 40;
     }
     
-    final int SAMPLE_NUM = 180;
-    final int SPEC_SIZE = 50;
-    final float REFRESH = 2;
+    int SAMPLE_NUM = 180;
+    final int SPEC_SIZE = 100;
+    float REFRESH = 2;
     final float ROT_SPEED = PI / 2800;
     final float DIST = PHI * 2; //PHI
     final float ADD_DIST = -10; //-10
@@ -273,11 +273,19 @@ class Ring extends Visualizer {
 
         // hint(DISABLE_DEPTH_MASK);
         if (followMouse) {
+            if(mousePressed){
+                println(ringXRot + " " + ringYRot);
+            }
             ringXRot = lerp(ringXRot, map(mouseY/2, 0, height/2, -PI, PI), .05);
             ringYRot = lerp(ringYRot, map(mouseX/2, 0, width/2, -PI, PI), .05);
         } else {
-            ringXRot = lerp(ringXRot, 0, .05);
+
             ringYRot = lerp(ringYRot, 0, .05);
+            if(topView) { //0.28124383 -9.732737E-10
+                ringXRot = lerp(ringXRot, PI/4, .05);
+            } else {
+                ringXRot = lerp(ringXRot, 0, .05);
+            }
         }
         rotateX(ringXRot);
         rotateY(ringYRot);
@@ -363,6 +371,7 @@ class Ring extends Visualizer {
     void rearView() {
         camera.initMoveCamera(new PVector(0, 0, REFRESH * SAMPLE_NUM), (int)frameRate*2);
         camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
+        camera.initMoveCenter(0, 0, 0, (int)frameRate *2);
     }
     
     @Override
@@ -371,8 +380,9 @@ class Ring extends Visualizer {
             camera.initMoveCamera(new PVector(0, 1300, 0), (int)frameRate*2);
             camera.initMoveCenter(0, 0, 0, (int)frameRate *2);
         } else {
-            camera.initMoveCenter(0, 0, (REFRESH * SAMPLE_NUM), (int)frameRate*2);
-            camera.initMoveCamera(new PVector(0, -285 , -5 ), (int)frameRate*2);
+            camera.initMoveCenter(0, 0, (REFRESH * SAMPLE_NUM)/2, (int)frameRate*2);
+            camera.initMoveCamera(new PVector(0, -300 , -1 ), (int)frameRate*2);
+            // camera.initMoveDir(new PVector(0, -1, 0), (int) frameRate);
         }
     }
 

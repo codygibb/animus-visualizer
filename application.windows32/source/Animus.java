@@ -203,9 +203,6 @@ public void draw() {
         tint(255, (int)interfaceT);
     }
 
-    fill((int) abs(visualizers[select].contrast - interfaceT));
-    text(visualizers[select].name, displayWidth / 2, TEXT_OFFSET);
-
     volumeBar.visible = showInterface;
     if(showIntro != 0){
         for(int i = 0; i < buttons.length; i++) {
@@ -298,13 +295,13 @@ public void guiSetup(ControlFont font){
     buttons[3] = particles = cp5.addCheckBox("particles").addItem("particles [4]", 0);
     buttonLabels[3] = cp5.addTextlabel("particlesT").setText("Particles [4]");
     buttons[4] = front = cp5.addCheckBox("front").addItem("front view [f]", 0);
-    buttonLabels[4] = cp5.addTextlabel("frontT").setText("");
+    buttonLabels[4] = cp5.addTextlabel("frontT").setText("a");
     buttons[5] = rear = cp5.addCheckBox("rear").addItem("rear view [r]", 0);
-    buttonLabels[5] = cp5.addTextlabel("rearT").setText("");
+    buttonLabels[5] = cp5.addTextlabel("rearT").setText("d");
     buttons[6] = top = cp5.addCheckBox("top").addItem("top view [t]" , 0);
-    buttonLabels[6] = cp5.addTextlabel("topT").setText("");
+    buttonLabels[6] = cp5.addTextlabel("topT").setText("w");
     buttons[7] = autoPan = cp5.addCheckBox("autoPan").addItem("autopan camera [a]", 0);
-    buttonLabels[7] = cp5.addTextlabel("autoPanT").setText("");
+    buttonLabels[7] = cp5.addTextlabel("autoPanT").setText("s");
     buttons[8] = viewing = cp5.addCheckBox("viewing").addItem("follow mouse [m]", 0);
     buttonLabels[8] = cp5.addTextlabel("viewingT").setText("Follow Mouse [m]");
     buttons[9] = blur = cp5.addCheckBox("blur").addItem("blur [b]", 0);
@@ -316,7 +313,7 @@ public void guiSetup(ControlFont font){
     buttons[12] = fluid = cp5.addCheckBox("fluid").addItem("Fluid", 0);
     buttonLabels[12] = cp5.addTextlabel("Sensitivity").setText("Sensitivity");
     buttons[13] = droplet = cp5.addCheckBox("droplet").addItem("Droplet", 0);
-    buttonLabels[13] = cp5.addTextlabel(" ").setText(" ");
+    buttonLabels[13] = cp5.addTextlabel("name").setText(visualizers[select].name);
     
     float startHeight = TEXT_OFFSET + 92;
     PImage normal = loadImage("Button.png");
@@ -337,23 +334,30 @@ public void guiSetup(ControlFont font){
             buttons[i].getItem(0).captionLabel().setFont(font).setSize(FONT_SIZE);
     }
     buttons[4].setPosition(width - 180, startHeight + 196); //front
+    buttonLabels[4].setPosition(width - 177, startHeight + 201); //front
     buttons[5].setPosition(width - 114, startHeight + 196); //rear
+    buttonLabels[5].setPosition(width - 111, startHeight + 201); //rear
     buttons[6].setPosition(width - 147, startHeight + 166); //top
+    buttonLabels[6].setPosition(width - 144, startHeight + 171); //top
     buttons[7].setPosition(width - 147, startHeight + 226); //autoPan
+    buttonLabels[7].setPosition(width - 144, startHeight + 231); //autoPan
     buttons[8].setPosition(width - 180, startHeight + 252); 
     buttons[11].setPosition(width - 180, TEXT_OFFSET + 23); //ring
     buttons[12].setPosition(width - 147, TEXT_OFFSET + 23); //fluid
     buttons[13].setPosition(width - 114, TEXT_OFFSET + 23); //droplet
+    
     buttonLabels[8].setPosition(width - (180 - 28), startHeight + 257);
     buttonLabels[11].setPosition(width - (212 - 58), startHeight - 20);
     buttonLabels[12].setPosition(width - (212 - 28), startHeight + 26);
+    buttonLabels[13].setPosition(displayWidth / 2 - 25, TEXT_OFFSET);
     setGuiColors();
 }
 
 public void setGuiColors() {
     interfaceT = visualizers[select].bindRange(interfaceT, 0.0f, 255.0f);
     int textColor = (int) abs(visualizers[select].contrast - interfaceT);
-
+    buttonLabels[13].setText(visualizers[select].name);
+    buttonLabels[13].setPosition(displayWidth / 2 - 25, TEXT_OFFSET);
     for(int i = 0; i < buttonLabels.length; i++) {
         // buttonLabels[i].setColor(color(255 - visualizers[select].contrast));
         buttonLabels[i].setColor(textColor);
@@ -889,6 +893,7 @@ class Droplet extends Visualizer {
         rotater = new RotationTracker();
         rings = new Ring[SPEC_SIZE];
         setupDroplet();
+        aPressed();
     }
     
     public void setupDroplet() {
@@ -1215,8 +1220,8 @@ class Droplet extends Visualizer {
             }
         }
         if (followMouse) {
-            dropletXRot = lerp(dropletXRot, map(mouseY/2, 0, height/2, -PI/2, PI/2), .05f);
-            dropletYRot = lerp(dropletYRot, map(mouseX/2, 0, width/2, -PI/2, PI/2), .05f);
+            dropletXRot = lerp(dropletXRot, map(mouseY/2, 0, height/2, -PI, PI), .05f);
+            dropletYRot = lerp(dropletYRot, map(mouseX/2, 0, width/2, -PI, PI), .05f);
         } else {
             dropletXRot = lerp(dropletXRot, 0, .05f);
             dropletYRot = lerp(dropletYRot, 0, .05f);
@@ -1280,6 +1285,7 @@ class Droplet extends Visualizer {
                 }
             }
         }
+        blur = particles;
     }
 
     public @Override
@@ -1561,7 +1567,7 @@ class Fluid extends Visualizer {
                     float yEnd = prevSample.points[i].y * ydir;
                     if(!expand) { 
                         if (abs(yEnd - yStart) <= 1)
-                            tempFade = .03f;
+                            tempFade = 0.1f;
                         else
                             tempFade = fade * abs(1-(yEnd / volumeScale / (PHI-1) - yStart / volumeScale / (PHI-1))/5.0f);
                     }
@@ -1904,9 +1910,9 @@ class Ring extends Visualizer {
         return 40;
     }
     
-    final int SAMPLE_NUM = 180;
-    final int SPEC_SIZE = 50;
-    final float REFRESH = 2;
+    int SAMPLE_NUM = 180;
+    final int SPEC_SIZE = 100;
+    float REFRESH = 2;
     final float ROT_SPEED = PI / 2800;
     final float DIST = PHI * 2; //PHI
     final float ADD_DIST = -10; //-10
@@ -2171,11 +2177,19 @@ class Ring extends Visualizer {
 
         // hint(DISABLE_DEPTH_MASK);
         if (followMouse) {
+            if(mousePressed){
+                println(ringXRot + " " + ringYRot);
+            }
             ringXRot = lerp(ringXRot, map(mouseY/2, 0, height/2, -PI, PI), .05f);
             ringYRot = lerp(ringYRot, map(mouseX/2, 0, width/2, -PI, PI), .05f);
         } else {
-            ringXRot = lerp(ringXRot, 0, .05f);
+
             ringYRot = lerp(ringYRot, 0, .05f);
+            if(topView) { //0.28124383 -9.732737E-10
+                ringXRot = lerp(ringXRot, PI/4, .05f);
+            } else {
+                ringXRot = lerp(ringXRot, 0, .05f);
+            }
         }
         rotateX(ringXRot);
         rotateY(ringYRot);
@@ -2261,6 +2275,7 @@ class Ring extends Visualizer {
     void rearView() {
         camera.initMoveCamera(new PVector(0, 0, REFRESH * SAMPLE_NUM), (int)frameRate*2);
         camera.initMoveDir(new PVector(0, 1, 0), (int) frameRate);
+        camera.initMoveCenter(0, 0, 0, (int)frameRate *2);
     }
     
     public @Override
@@ -2269,8 +2284,9 @@ class Ring extends Visualizer {
             camera.initMoveCamera(new PVector(0, 1300, 0), (int)frameRate*2);
             camera.initMoveCenter(0, 0, 0, (int)frameRate *2);
         } else {
-            camera.initMoveCenter(0, 0, (REFRESH * SAMPLE_NUM), (int)frameRate*2);
-            camera.initMoveCamera(new PVector(0, -285 , -5 ), (int)frameRate*2);
+            camera.initMoveCenter(0, 0, (REFRESH * SAMPLE_NUM)/2, (int)frameRate*2);
+            camera.initMoveCamera(new PVector(0, -300 , -1 ), (int)frameRate*2);
+            // camera.initMoveDir(new PVector(0, -1, 0), (int) frameRate);
         }
     }
 
@@ -2684,21 +2700,39 @@ public abstract class Visualizer {
             case 'm':
                 mPressed();
                 break;
-            case 'a':
+            case 's':
                 aPressed();
                 break;
-            case 'f':
+            case 'a':
                 fPressed();
                 break;
-            case 'r':
+            case 'd':
                 rPressed();
                 break;
-            case 't':
+            case 'w':
                 tPressed();
                 break;
             case 'b':
                 blur = !blur;
                 break;
+            case 'M':
+                mPressed();
+                break;
+            case 'S':
+                aPressed();
+                break;
+            case 'A':
+                fPressed();
+                break;
+            case 'D':
+                rPressed();
+                break;
+            case 'W':
+                tPressed();
+                break;
+            case 'B':
+                blur = !blur;
+                break;                
             case '1':
                 highlight();
                 break;

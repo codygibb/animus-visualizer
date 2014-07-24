@@ -163,6 +163,7 @@ class Fluid extends Visualizer {
                         if(!expand) {
                             strokeWeight(bindRange(currSample.points[i].intensity, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
                         }
+                        spriteShader.set("weight", bindRange(currSample.points[i].intensity, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
                         point(xStart, yStart, zStart);
 
                         strokeWeight(bindRange(prevSample.points[i].intensity, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));

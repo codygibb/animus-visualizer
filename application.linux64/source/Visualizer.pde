@@ -302,21 +302,39 @@ public abstract class Visualizer {
             case 'm':
                 mPressed();
                 break;
-            case 'a':
+            case 's':
                 aPressed();
                 break;
-            case 'f':
+            case 'a':
                 fPressed();
                 break;
-            case 'r':
+            case 'd':
                 rPressed();
                 break;
-            case 't':
+            case 'w':
                 tPressed();
                 break;
             case 'b':
                 blur = !blur;
                 break;
+            case 'M':
+                mPressed();
+                break;
+            case 'S':
+                aPressed();
+                break;
+            case 'A':
+                fPressed();
+                break;
+            case 'D':
+                rPressed();
+                break;
+            case 'W':
+                tPressed();
+                break;
+            case 'B':
+                blur = !blur;
+                break;                
             case '1':
                 highlight();
                 break;

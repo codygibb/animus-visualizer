@@ -146,7 +146,7 @@ class Fluid extends Visualizer {
                     float yEnd = prevSample.points[i].y * ydir;
                     if(!expand) { 
                         if (abs(yEnd - yStart) <= 1)
-                            tempFade = .03;
+                            tempFade = 0.1;
                         else
                             tempFade = fade * abs(1-(yEnd / volumeScale / (PHI-1) - yStart / volumeScale / (PHI-1))/5.0);
                     }

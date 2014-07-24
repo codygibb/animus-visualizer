@@ -7,7 +7,7 @@ class Ring extends Visualizer {
     }
     
     int SAMPLE_NUM = 180;
-    final int SPEC_SIZE = 100;
+    final int SPEC_SIZE = 50;
     float REFRESH = 2;
     final float ROT_SPEED = PI / 2800;
     final float DIST = PHI * 2; //PHI
@@ -112,7 +112,7 @@ class Ring extends Visualizer {
                         p.strokeWeight = min(0.3 + p.size, 8);
                     } else {
                         p.strokeWeight = min(0.3 + p.size * 3, 30);
-                    }   
+                    }
                 }
             } 
         }
@@ -178,7 +178,7 @@ class Ring extends Visualizer {
             PVector prevPos = prevPoint.pos;
             float fade = pow((stop - zpos) / stop, 5.0 / 6.0);
             stroke(colors[0] * fade, colors[1] * fade, colors[2] * fade);
-
+            fill(colors[0] * fade, colors[1] * fade, colors[2] * fade);
             float magnitude = zpos * (ADD_DIST / stop);
             if (!pause) {
                 if (prevPoint.pos.z == 0) {
@@ -203,15 +203,17 @@ class Ring extends Visualizer {
             rotationVector.set(pos.x, pos.y, pos.z);
             rotationVector.rotateX(theta * xRot);
             rotationVector.rotateZ(theta * zRot);
-
             if (!particles) {
                 vertex(rotationVector.x, rotationVector.y, rotationVector.z);
-            } else if (particleDetailLoss == 0){
+            } else {
+                float weight = bindRange(size * 10, MIN_PART_SIZE, MAX_PART_SIZE);
+                spriteShader.set("weight",weight);
                 strokeWeight(bindRange(size * 10, MIN_PART_SIZE, MAX_PART_SIZE));
-                point(rotationVector.x, rotationVector.y, rotationVector.z);
-            } else if(sampleIndex % particleDetailLoss == 0) {
-                strokeWeight(bindRange(size * 10, MIN_PART_SIZE, MAX_PART_SIZE));
-                point(rotationVector.x, rotationVector.y, rotationVector.z);
+                if (particleDetailLoss == 0) {
+                    point(rotationVector.x, rotationVector.y, rotationVector.z);
+                } else if(sampleIndex % particleDetailLoss == 0) {
+                    point(rotationVector.x, rotationVector.y, rotationVector.z);
+                }
             }
 
             rotationVector.set(prevPos.x, prevPos.y, prevPos.z);
@@ -220,6 +222,12 @@ class Ring extends Visualizer {
 
             if (!particles) {
                 vertex(rotationVector.x, rotationVector.y, rotationVector.z);
+            } else {
+                if (particleDetailLoss == 0) {
+                    point(rotationVector.x, rotationVector.y, rotationVector.z);
+                } else if(sampleIndex % particleDetailLoss == 0) {
+                    point(rotationVector.x, rotationVector.y, rotationVector.z);
+                }
             }
         }
     }
@@ -270,7 +278,6 @@ class Ring extends Visualizer {
                 samples[i].update();
             }
         }
-
         // hint(DISABLE_DEPTH_MASK);
         if (followMouse) {
             if(mousePressed){
@@ -289,6 +296,7 @@ class Ring extends Visualizer {
         }
         rotateX(ringXRot);
         rotateY(ringYRot);
+
         for (int i = 0; i < samples.length; i++) {
             samples[i].drawSample();
         }
