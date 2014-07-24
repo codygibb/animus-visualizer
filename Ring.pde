@@ -178,7 +178,6 @@ class Ring extends Visualizer {
             PVector prevPos = prevPoint.pos;
             float fade = pow((stop - zpos) / stop, 5.0 / 6.0);
             stroke(colors[0] * fade, colors[1] * fade, colors[2] * fade);
-            fill(colors[0] * fade, colors[1] * fade, colors[2] * fade);
             float magnitude = zpos * (ADD_DIST / stop);
             if (!pause) {
                 if (prevPoint.pos.z == 0) {
