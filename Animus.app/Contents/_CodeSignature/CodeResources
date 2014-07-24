@@ -18,7 +18,7 @@
 		</data>
 		<key>Resources/Contents/Resources/Java/Animus.jar</key>
 		<data>
-		xd5yJPaAZ0nc8lzsDDME5cP9BOs=
+		EIXhl+ajZv9D7ybFr/AwcoqCh6o=
 		</data>
 		<key>Resources/Contents/Resources/Java/controlP5.jar</key>
 		<data>
@@ -80,9 +80,45 @@
 		<data>
 		0lIla+ifKd+iVsKkuedW4QHpXI0=
 		</data>
+		<key>Resources/Contents/Resources/Java/data/glow.png</key>
+		<data>
+		NEMM7tB7kC9xzMBl6kNk+q1MRKw=
+		</data>
+		<key>Resources/Contents/Resources/Java/data/glow_big.png</key>
+		<data>
+		RGn2iOb15a+4FY4r3Mt0z0CyJwA=
+		</data>
+		<key>Resources/Contents/Resources/Java/data/glow_big2.png</key>
+		<data>
+		raDtxbNZRiT6L9AQ6j9aV3jvwoY=
+		</data>
 		<key>Resources/Contents/Resources/Java/data/monofonto.ttf</key>
 		<data>
 		jrC8/n1IfBlWpJUksyEwmTzkSqs=
+		</data>
+		<key>Resources/Contents/Resources/Java/data/pointfrag.glsl</key>
+		<data>
+		BMMiav9haqjEaaoIOdSGe6naGPI=
+		</data>
+		<key>Resources/Contents/Resources/Java/data/pointvert.glsl</key>
+		<data>
+		Ur/7ouO7D3iYdgilWjxSnwJObbM=
+		</data>
+		<key>Resources/Contents/Resources/Java/data/sprite.png</key>
+		<data>
+		iCEro6z6qPuG/hUBbsQ/DC9hlEA=
+		</data>
+		<key>Resources/Contents/Resources/Java/data/sprite2.png</key>
+		<data>
+		rBhwAir0+7Ia6EgnX28vPPFnuos=
+		</data>
+		<key>Resources/Contents/Resources/Java/data/spritefrag.glsl</key>
+		<data>
+		zD4f+6aCPUXfO7XP9fyXWJOpn5Y=
+		</data>
+		<key>Resources/Contents/Resources/Java/data/spritevert.glsl</key>
+		<data>
+		RRrd6njI5+C7t0pRZzsS+xBzWCI=
 		</data>
 		<key>Resources/Contents/Resources/Java/gluegen-rt-natives-macosx-universal.jar</key>
 		<data>
@@ -130,7 +166,7 @@
 		</data>
 		<key>Resources/Scripts/main.scpt</key>
 		<data>
-		r4vUhVefG4B5RNtjF51hToysp+o=
+		c5RBZ0j21o2Lb/csxOEWG92ReG0=
 		</data>
 		<key>Resources/applet.icns</key>
 		<data>
@@ -138,11 +174,11 @@
 		</data>
 		<key>Resources/applet.rsrc</key>
 		<data>
-		FS4KyZ6hSoRkFGhTVK9X7CXcSR0=
+		GU7cMjNQthvFlbmzmscuUVh06IU=
 		</data>
 		<key>Resources/description.rtfd/TXT.rtf</key>
 		<data>
-		K2wQWGeAmNawg1ZDnKNKyrxN1Bk=
+		sVgrf1i7AEa3QkwfAOs8gMhDwhQ=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -161,7 +197,7 @@
 		</data>
 		<key>Resources/Contents/Resources/Java/Animus.jar</key>
 		<data>
-		xd5yJPaAZ0nc8lzsDDME5cP9BOs=
+		EIXhl+ajZv9D7ybFr/AwcoqCh6o=
 		</data>
 		<key>Resources/Contents/Resources/Java/controlP5.jar</key>
 		<data>
@@ -223,9 +259,45 @@
 		<data>
 		0lIla+ifKd+iVsKkuedW4QHpXI0=
 		</data>
+		<key>Resources/Contents/Resources/Java/data/glow.png</key>
+		<data>
+		NEMM7tB7kC9xzMBl6kNk+q1MRKw=
+		</data>
+		<key>Resources/Contents/Resources/Java/data/glow_big.png</key>
+		<data>
+		RGn2iOb15a+4FY4r3Mt0z0CyJwA=
+		</data>
+		<key>Resources/Contents/Resources/Java/data/glow_big2.png</key>
+		<data>
+		raDtxbNZRiT6L9AQ6j9aV3jvwoY=
+		</data>
 		<key>Resources/Contents/Resources/Java/data/monofonto.ttf</key>
 		<data>
 		jrC8/n1IfBlWpJUksyEwmTzkSqs=
+		</data>
+		<key>Resources/Contents/Resources/Java/data/pointfrag.glsl</key>
+		<data>
+		BMMiav9haqjEaaoIOdSGe6naGPI=
+		</data>
+		<key>Resources/Contents/Resources/Java/data/pointvert.glsl</key>
+		<data>
+		Ur/7ouO7D3iYdgilWjxSnwJObbM=
+		</data>
+		<key>Resources/Contents/Resources/Java/data/sprite.png</key>
+		<data>
+		iCEro6z6qPuG/hUBbsQ/DC9hlEA=
+		</data>
+		<key>Resources/Contents/Resources/Java/data/sprite2.png</key>
+		<data>
+		rBhwAir0+7Ia6EgnX28vPPFnuos=
+		</data>
+		<key>Resources/Contents/Resources/Java/data/spritefrag.glsl</key>
+		<data>
+		zD4f+6aCPUXfO7XP9fyXWJOpn5Y=
+		</data>
+		<key>Resources/Contents/Resources/Java/data/spritevert.glsl</key>
+		<data>
+		RRrd6njI5+C7t0pRZzsS+xBzWCI=
 		</data>
 		<key>Resources/Contents/Resources/Java/gluegen-rt-natives-macosx-universal.jar</key>
 		<data>
@@ -273,7 +345,7 @@
 		</data>
 		<key>Resources/Scripts/main.scpt</key>
 		<data>
-		r4vUhVefG4B5RNtjF51hToysp+o=
+		c5RBZ0j21o2Lb/csxOEWG92ReG0=
 		</data>
 		<key>Resources/applet.icns</key>
 		<data>
@@ -281,11 +353,11 @@
 		</data>
 		<key>Resources/applet.rsrc</key>
 		<data>
-		FS4KyZ6hSoRkFGhTVK9X7CXcSR0=
+		GU7cMjNQthvFlbmzmscuUVh06IU=
 		</data>
 		<key>Resources/description.rtfd/TXT.rtf</key>
 		<data>
-		K2wQWGeAmNawg1ZDnKNKyrxN1Bk=
+		sVgrf1i7AEa3QkwfAOs8gMhDwhQ=
 		</data>
 	</dict>
 	<key>rules</key>

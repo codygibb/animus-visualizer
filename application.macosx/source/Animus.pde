@@ -6,6 +6,9 @@ final float PHI = (1.0 + sqrt(5.0)) / 2.0;
 final int FONT_SIZE = 14;
 final int TEXT_OFFSET = 20;
 final int INTERFACE_FADE_RATE = 10;
+PShader spriteShader;
+PImage sprite;
+PImage glow, glowBig, glowBig2;
 
 Minim minim;
 AudioInput input;
@@ -36,6 +39,13 @@ PImage cam, modeBackground;
 void setup() {
     size(displayWidth, displayHeight, P3D);
     minim = new Minim(this); 
+    spriteShader = loadShader("spritefrag.glsl", "spritevert.glsl");
+    sprite = loadImage("sprite.png");
+    glow = loadImage("glow.png");
+    glowBig = loadImage("glow_big.png");
+    glowBig2 = loadImage("glow_big2.png");
+    spriteShader.set("sprite", glow);
+    spriteShader.set("sharpness", .9);
     PFont pfont = createFont("Andale Mono.ttf", FONT_SIZE, true);
     ControlFont cFont = new ControlFont(pfont, FONT_SIZE);
     textFont(pfont);
@@ -103,6 +113,8 @@ void draw() {
     pushMatrix();
 
     visualizers[select].retrieveSound();
+    strokeCap(ROUND);
+    shader(spriteShader, POINTS);
     visualizers[select].draw();
 
     blendMode(BLEND);

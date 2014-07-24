@@ -33,6 +33,9 @@ final float PHI = (1.0f + sqrt(5.0f)) / 2.0f;
 final int FONT_SIZE = 14;
 final int TEXT_OFFSET = 20;
 final int INTERFACE_FADE_RATE = 10;
+PShader spriteShader;
+PImage sprite;
+PImage glow, glowBig, glowBig2;
 
 Minim minim;
 AudioInput input;
@@ -63,6 +66,13 @@ PImage cam, modeBackground;
 public void setup() {
     size(displayWidth, displayHeight, P3D);
     minim = new Minim(this); 
+    spriteShader = loadShader("spritefrag.glsl", "spritevert.glsl");
+    sprite = loadImage("sprite.png");
+    glow = loadImage("glow.png");
+    glowBig = loadImage("glow_big.png");
+    glowBig2 = loadImage("glow_big2.png");
+    spriteShader.set("sprite", glow);
+    spriteShader.set("sharpness", .9f);
     PFont pfont = createFont("Andale Mono.ttf", FONT_SIZE, true);
     ControlFont cFont = new ControlFont(pfont, FONT_SIZE);
     textFont(pfont);
@@ -130,6 +140,8 @@ public void draw() {
     pushMatrix();
 
     visualizers[select].retrieveSound();
+    strokeCap(ROUND);
+    shader(spriteShader, POINTS);
     visualizers[select].draw();
 
     blendMode(BLEND);
@@ -989,7 +1001,8 @@ class Droplet extends Visualizer {
             noFill();
 
             float strokeFactor = (expand) ? 4 : 2;
-            strokeWeight(1 + ((float) index) / SPEC_SIZE * strokeFactor);
+            float currWeight = 1 + ((float) index) / SPEC_SIZE * strokeFactor;
+            strokeWeight(currWeight);
             // strokeWeight(1.5);
 
             if (!particles) {
@@ -1070,7 +1083,9 @@ class Droplet extends Visualizer {
 
         public void drawParticle(Point p, int ydir) {
             float weight = abs(p.naturalY) + abs(p.pos.y) * currExpand * 0.25f;
-            strokeWeight(bindRange(weight * PART_SCALE, MIN_PART_SIZE, MAX_PART_SIZE));
+            float w2 = bindRange(weight * PART_SCALE, MIN_PART_SIZE, MAX_PART_SIZE);
+            spriteShader.set("weight", w2);
+            strokeWeight(w2);
             point(p.pos.x, p.pos.y * ydir, p.pos.z);
         }
     }
@@ -1175,7 +1190,6 @@ class Droplet extends Visualizer {
                 float fade = 1 - abs(pos.y) / HIGHLIGHT_POINT_STOP;
                 fade *= baseFade;
                 stroke((255 - colors[0]) * fade, (255 - colors[1]) * fade, (255 - colors[2]) * fade);
-
                 strokeWeight(size * 4);
                 point(pos.x, (baseY + pos.y) * ydir, pos.z);
             }
@@ -1234,6 +1248,7 @@ class Droplet extends Visualizer {
         if (camera.pos.y > 0) { 
             drawInOrder(1, -1);
         } else {
+            
             drawInOrder(-1, 1);
         } 
 
@@ -1269,14 +1284,16 @@ class Droplet extends Visualizer {
     void particles() {
         particles = !particles;
         if (particles) {
-            if (particleDetail != -1) {
-                dropletSize = particleDetail;
-            }
-            dropletSize = dropletSize >= 2 ? dropletSize -1: dropletSize;
+            particleDetail = 1;
+            // if (particleDetail != -1) {
+            //     dropletSize = particleDetail;
+            // }
+            // dropletSize = dropletSize >= 2 ? dropletSize -1: dropletSize;
         } else {
             // dropletSize++;
             dropletSize = MAX_DROPLET_SIZE;
         }
+        dropletSize = dropletSize >= 1 ? dropletSize : 1;
         setupDroplet();
         if (highlight) {
             for (Ring r : rings) {
@@ -1349,9 +1366,12 @@ class Droplet extends Visualizer {
         } else if (avgFr < 35) {
            particleDetail = MAX_DROPLET_SIZE;
         }
-        dropletSize = particleDetail;
+        if(particleDetail == -1){
+            dropletSize = MAX_DROPLET_SIZE;
+        } else {
+            dropletSize = particleDetail;
+        }
         setupDroplet();
-        // println(particleDetail);
     }
 
     public @Override
@@ -1584,6 +1604,7 @@ class Fluid extends Visualizer {
                         if(!expand) {
                             strokeWeight(bindRange(currSample.points[i].intensity, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
                         }
+                        spriteShader.set("weight", bindRange(currSample.points[i].intensity, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
                         point(xStart, yStart, zStart);
 
                         strokeWeight(bindRange(prevSample.points[i].intensity, MIN_PARTICLE_SIZE, MAX_PARTICLE_SIZE));
@@ -1911,7 +1932,7 @@ class Ring extends Visualizer {
     }
     
     int SAMPLE_NUM = 180;
-    final int SPEC_SIZE = 100;
+    final int SPEC_SIZE = 50;
     float REFRESH = 2;
     final float ROT_SPEED = PI / 2800;
     final float DIST = PHI * 2; //PHI
@@ -2016,7 +2037,7 @@ class Ring extends Visualizer {
                         p.strokeWeight = min(0.3f + p.size, 8);
                     } else {
                         p.strokeWeight = min(0.3f + p.size * 3, 30);
-                    }   
+                    }
                 }
             } 
         }
@@ -2082,7 +2103,6 @@ class Ring extends Visualizer {
             PVector prevPos = prevPoint.pos;
             float fade = pow((stop - zpos) / stop, 5.0f / 6.0f);
             stroke(colors[0] * fade, colors[1] * fade, colors[2] * fade);
-
             float magnitude = zpos * (ADD_DIST / stop);
             if (!pause) {
                 if (prevPoint.pos.z == 0) {
@@ -2107,15 +2127,17 @@ class Ring extends Visualizer {
             rotationVector.set(pos.x, pos.y, pos.z);
             rotationVector.rotateX(theta * xRot);
             rotationVector.rotateZ(theta * zRot);
-
             if (!particles) {
                 vertex(rotationVector.x, rotationVector.y, rotationVector.z);
-            } else if (particleDetailLoss == 0){
+            } else {
+                float weight = bindRange(size * 10, MIN_PART_SIZE, MAX_PART_SIZE);
+                spriteShader.set("weight",weight);
                 strokeWeight(bindRange(size * 10, MIN_PART_SIZE, MAX_PART_SIZE));
-                point(rotationVector.x, rotationVector.y, rotationVector.z);
-            } else if(sampleIndex % particleDetailLoss == 0) {
-                strokeWeight(bindRange(size * 10, MIN_PART_SIZE, MAX_PART_SIZE));
-                point(rotationVector.x, rotationVector.y, rotationVector.z);
+                if (particleDetailLoss == 0) {
+                    point(rotationVector.x, rotationVector.y, rotationVector.z);
+                } else if(sampleIndex % particleDetailLoss == 0) {
+                    point(rotationVector.x, rotationVector.y, rotationVector.z);
+                }
             }
 
             rotationVector.set(prevPos.x, prevPos.y, prevPos.z);
@@ -2124,6 +2146,12 @@ class Ring extends Visualizer {
 
             if (!particles) {
                 vertex(rotationVector.x, rotationVector.y, rotationVector.z);
+            } else {
+                if (particleDetailLoss == 0) {
+                    point(rotationVector.x, rotationVector.y, rotationVector.z);
+                } else if(sampleIndex % particleDetailLoss == 0) {
+                    point(rotationVector.x, rotationVector.y, rotationVector.z);
+                }
             }
         }
     }
@@ -2174,7 +2202,6 @@ class Ring extends Visualizer {
                 samples[i].update();
             }
         }
-
         // hint(DISABLE_DEPTH_MASK);
         if (followMouse) {
             if(mousePressed){
@@ -2193,6 +2220,7 @@ class Ring extends Visualizer {
         }
         rotateX(ringXRot);
         rotateY(ringYRot);
+
         for (int i = 0; i < samples.length; i++) {
             samples[i].drawSample();
         }
@@ -2680,10 +2708,17 @@ public abstract class Visualizer {
     public void mPressed(){
         followMouse = !followMouse;
         // camera.viewSwitch();
-        
+        camera.disableAllModes();
         rearView = false;
         topView = false;
         frontView = false;
+        if (!followMouse) {
+            if (this instanceof Droplet) {
+                aPressed();
+            } else {
+                fPressed();
+            }
+        }
     }
 
     public void keyPressed() {

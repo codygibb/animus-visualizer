@@ -22,8 +22,6 @@
 	<string>1.0</string>
 	<key>CFBundleSignature</key>
 	<string>aplt</string>
-	<key>CFBundleVersion</key>
-	<string>1</string>
 	<key>LSMinimumSystemVersionByArchitecture</key>
 	<dict>
 		<key>x86_64</key>
@@ -42,7 +40,7 @@
 		<key>positionOfDivider</key>
 		<real>333</real>
 		<key>savedFrame</key>
-		<string>359 325 602 597 0 0 1680 1028 </string>
+		<string>55 431 602 597 0 0 1680 1028 </string>
 		<key>selectedTabView</key>
 		<string>result</string>
 	</dict>

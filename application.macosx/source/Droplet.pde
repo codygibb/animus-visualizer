@@ -147,7 +147,8 @@ class Droplet extends Visualizer {
             noFill();
 
             float strokeFactor = (expand) ? 4 : 2;
-            strokeWeight(1 + ((float) index) / SPEC_SIZE * strokeFactor);
+            float currWeight = 1 + ((float) index) / SPEC_SIZE * strokeFactor;
+            strokeWeight(currWeight);
             // strokeWeight(1.5);
 
             if (!particles) {
@@ -228,7 +229,9 @@ class Droplet extends Visualizer {
 
         void drawParticle(Point p, int ydir) {
             float weight = abs(p.naturalY) + abs(p.pos.y) * currExpand * 0.25;
-            strokeWeight(bindRange(weight * PART_SCALE, MIN_PART_SIZE, MAX_PART_SIZE));
+            float w2 = bindRange(weight * PART_SCALE, MIN_PART_SIZE, MAX_PART_SIZE);
+            spriteShader.set("weight", w2);
+            strokeWeight(w2);
             point(p.pos.x, p.pos.y * ydir, p.pos.z);
         }
     }
@@ -333,7 +336,6 @@ class Droplet extends Visualizer {
                 float fade = 1 - abs(pos.y) / HIGHLIGHT_POINT_STOP;
                 fade *= baseFade;
                 stroke((255 - colors[0]) * fade, (255 - colors[1]) * fade, (255 - colors[2]) * fade);
-
                 strokeWeight(size * 4);
                 point(pos.x, (baseY + pos.y) * ydir, pos.z);
             }
@@ -392,6 +394,7 @@ class Droplet extends Visualizer {
         if (camera.pos.y > 0) { 
             drawInOrder(1, -1);
         } else {
+            
             drawInOrder(-1, 1);
         } 
 
@@ -427,14 +430,16 @@ class Droplet extends Visualizer {
     void particles() {
         particles = !particles;
         if (particles) {
-            if (particleDetail != -1) {
-                dropletSize = particleDetail;
-            }
-            dropletSize = dropletSize >= 2 ? dropletSize -1: dropletSize;
+            particleDetail = 1;
+            // if (particleDetail != -1) {
+            //     dropletSize = particleDetail;
+            // }
+            // dropletSize = dropletSize >= 2 ? dropletSize -1: dropletSize;
         } else {
             // dropletSize++;
             dropletSize = MAX_DROPLET_SIZE;
         }
+        dropletSize = dropletSize >= 1 ? dropletSize : 1;
         setupDroplet();
         if (highlight) {
             for (Ring r : rings) {
@@ -507,9 +512,12 @@ class Droplet extends Visualizer {
         } else if (avgFr < 35) {
            particleDetail = MAX_DROPLET_SIZE;
         }
-        dropletSize = particleDetail;
+        if(particleDetail == -1){
+            dropletSize = MAX_DROPLET_SIZE;
+        } else {
+            dropletSize = particleDetail;
+        }
         setupDroplet();
-        // println(particleDetail);
     }
 
     @Override

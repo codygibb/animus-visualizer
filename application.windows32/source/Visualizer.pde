@@ -282,10 +282,17 @@ public abstract class Visualizer {
     void mPressed(){
         followMouse = !followMouse;
         // camera.viewSwitch();
-        
+        camera.disableAllModes();
         rearView = false;
         topView = false;
         frontView = false;
+        if (!followMouse) {
+            if (this instanceof Droplet) {
+                aPressed();
+            } else {
+                fPressed();
+            }
+        }
     }
 
     void keyPressed() {
