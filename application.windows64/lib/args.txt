@@ -1,3 +1,0 @@
- -Xms64m -Xmx1500m
-Animus
-Animus.jar,core.jar,jogl-all.jar,gluegen-rt.jar,jogl-all-natives-windows-amd64.jar,gluegen-rt-natives-windows-amd64.jar,jl1.0.jar,jsminim.jar,minim.jar,mp3spi1.9.4.jar,tritonus_aos.jar,tritonus_share.jar,controlP5.jar

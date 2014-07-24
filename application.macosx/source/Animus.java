@@ -140,8 +140,8 @@ public void draw() {
     pushMatrix();
 
     visualizers[select].retrieveSound();
-    strokeCap(ROUND);
-    shader(spriteShader, POINTS);
+    // strokeCap(ROUND);
+    // shader(spriteShader, POINTS);
     visualizers[select].draw();
 
     blendMode(BLEND);
@@ -291,7 +291,7 @@ public void updateGui() {
 }
 
 public void guiSetup(ControlFont font){
-    volumeBar = new VolumeBar(width - (212), TEXT_OFFSET+69, "VolumeBackground.png", "VolumeMid.png", "VolumeEnd.png");
+    volumeBar = new VolumeBar(width - (212), TEXT_OFFSET+69, "VolumeBackground.png", "VolumeMid.png", "VolumeEnd.png", "VolumeBackgroundI.png", "VolumeMidI.png", "VolumeEndI.png");
     interfaceLabel = cp5.addTextlabel("label")
             .setText("Press [h] To Hide Interface")
             .setFont(font)
@@ -323,7 +323,7 @@ public void guiSetup(ControlFont font){
     buttons[11] = ring = cp5.addCheckBox("ring").addItem("Ring", 0);
     buttonLabels[11] = cp5.addTextlabel("Mode").setText("Mode");
     buttons[12] = fluid = cp5.addCheckBox("fluid").addItem("Fluid", 0);
-    buttonLabels[12] = cp5.addTextlabel("Sensitivity").setText("Sensitivity");
+    buttonLabels[12] = cp5.addTextlabel("Sensitivity").setText("Mic Sensitivity");
     buttons[13] = droplet = cp5.addCheckBox("droplet").addItem("Droplet", 0);
     buttonLabels[13] = cp5.addTextlabel("name").setText(visualizers[select].name);
     
@@ -360,7 +360,7 @@ public void guiSetup(ControlFont font){
     
     buttonLabels[8].setPosition(width - (180 - 28), startHeight + 257);
     buttonLabels[11].setPosition(width - (212 - 58), startHeight - 20);
-    buttonLabels[12].setPosition(width - (212 - 28), startHeight + 26);
+    buttonLabels[12].setPosition(width - (212 - 12), startHeight + 26);
     buttonLabels[13].setPosition(displayWidth / 2 - 25, TEXT_OFFSET);
     setGuiColors();
 }
@@ -377,6 +377,7 @@ public void setGuiColors() {
     // interfaceLabel.setColor(color(255 - visualizers[select].contrast));
     // println("orig: " + (255 - visualizers[select].contrast) + ", interfaceT: " + interfaceT);
     interfaceLabel.setColor(textColor);
+    volumeBar.invert = visualizers[select].contrast == 255 ? true: false;
 }
 
 public void controlEvent(ControlEvent theEvent) {
@@ -419,30 +420,49 @@ class VolumeBar {
     PImage backgroundImg;
     PImage midSection;
     PImage end;
+    PImage backgroundImgI;
+    PImage midSectionI;
+    PImage endI;
     int size;
     boolean visible;
+    boolean invert;
     
-    VolumeBar(int x, int y, String backgroundImg, String midSection, String end) {
+    VolumeBar(int x, int y, String backgroundImg, String midSection, String end, String backgroundImgI, String midSectionI, String endI) {
         this.x = x;
         this.y = y; 
         this.backgroundImg = loadImage(backgroundImg);
         this.midSection = loadImage(midSection);
         this.end = loadImage(end);
+        this.backgroundImgI = loadImage(backgroundImgI);
+        this.midSectionI = loadImage(midSectionI);
+        this.endI = loadImage(endI);
         value = 0.5f;
         visible = true;
     }
     
     //Visible is not Normal, The GUI handels showing/hiding images
     public void update() {
+        if(invert) {
+            image(backgroundImgI, x, y);
+        } else {
             image(backgroundImg, x, y);
-            size = size >= 137 ? 137: size;
-            size = size <= 9 ? 9: size;
-            size = round(lerp(size, round(value * backgroundImg.width) - 9, .2f));
-    
-            for(int i = 0; i < size-end.width; i+=midSection.width) {
+        }
+        size = size >= 136 ? 136: size;
+        size = size <= 10 ? 10: size;
+        size = round(lerp(size, round(value * backgroundImg.width) - 9, .2f));
+
+        for(int i = 0; i < size-end.width; i+=midSection.width) {
+            if(invert) {
+                image(midSectionI, PApplet.parseInt(this.x+11 + i), this.y);
+            } else {
                 image(midSection, PApplet.parseInt(this.x+11 + i), this.y);
             }
+        }
+        if(invert) {
+            image(endI, this.x+size+4, this.y);
+        } else {
             image(end, this.x+size+4, this.y);
+        }
         if(visible) {
             if(mousePressed) {
               if(mouseX >= this.x && mouseX < this.x + this.backgroundImg.width &&

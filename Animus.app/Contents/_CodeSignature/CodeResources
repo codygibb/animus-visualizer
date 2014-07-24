@@ -16,9 +16,13 @@
 		<data>
 		n57qDP4tZfLD1rCS43W0B4LQjzE=
 		</data>
+		<key>Resources/Contents/Resources/Icon</key>
+		<data>
+		2jmj7l5rSw0yVb/vlWAYkK/YBwk=
+		</data>
 		<key>Resources/Contents/Resources/Java/Animus.jar</key>
 		<data>
-		EIXhl+ajZv9D7ybFr/AwcoqCh6o=
+		jNhqM0JRrym0f5RhsxK3gr02Jl4=
 		</data>
 		<key>Resources/Contents/Resources/Java/controlP5.jar</key>
 		<data>
@@ -68,13 +72,25 @@
 		<data>
 		NzRZc+nYhLnssFLqwRJNjVuZNgk=
 		</data>
+		<key>Resources/Contents/Resources/Java/data/VolumeBackgroundI.png</key>
+		<data>
+		uSOJs29GfyYHyCKC1DX1ZYhG73w=
+		</data>
 		<key>Resources/Contents/Resources/Java/data/VolumeEnd.png</key>
 		<data>
 		k8BpjEFeXSDmjhltL4fGhATcInQ=
 		</data>
+		<key>Resources/Contents/Resources/Java/data/VolumeEndI.png</key>
+		<data>
+		aOumFZwe123mpJ1v16v2x51IqgQ=
+		</data>
 		<key>Resources/Contents/Resources/Java/data/VolumeMid.png</key>
 		<data>
 		8BMbl8Dz0w8kSsbD6LAG5eRgqKo=
+		</data>
+		<key>Resources/Contents/Resources/Java/data/VolumeMidI.png</key>
+		<data>
+		+m4hQGfRbSWdutObB32+Qcc29FY=
 		</data>
 		<key>Resources/Contents/Resources/Java/data/button copy 2.png</key>
 		<data>
@@ -164,17 +180,21 @@
 		<data>
 		IKPzEh0egQ/a73gT8jquCQ3RsdE=
 		</data>
+		<key>Resources/Icon</key>
+		<data>
+		2jmj7l5rSw0yVb/vlWAYkK/YBwk=
+		</data>
 		<key>Resources/Scripts/main.scpt</key>
 		<data>
-		c5RBZ0j21o2Lb/csxOEWG92ReG0=
+		ZF2IzGVjlHo1pmUkIw+dgSM5HqU=
 		</data>
 		<key>Resources/applet.icns</key>
 		<data>
-		sINd6lbiqHD5dL8c6u79cFvVXhw=
+		IKPzEh0egQ/a73gT8jquCQ3RsdE=
 		</data>
 		<key>Resources/applet.rsrc</key>
 		<data>
-		GU7cMjNQthvFlbmzmscuUVh06IU=
+		f3OJHykzcpxtjvKUmxAeR1l/vrU=
 		</data>
 		<key>Resources/description.rtfd/TXT.rtf</key>
 		<data>
@@ -195,9 +215,13 @@
 		<data>
 		n57qDP4tZfLD1rCS43W0B4LQjzE=
 		</data>
+		<key>Resources/Contents/Resources/Icon</key>
+		<data>
+		2jmj7l5rSw0yVb/vlWAYkK/YBwk=
+		</data>
 		<key>Resources/Contents/Resources/Java/Animus.jar</key>
 		<data>
-		EIXhl+ajZv9D7ybFr/AwcoqCh6o=
+		jNhqM0JRrym0f5RhsxK3gr02Jl4=
 		</data>
 		<key>Resources/Contents/Resources/Java/controlP5.jar</key>
 		<data>
@@ -247,13 +271,25 @@
 		<data>
 		NzRZc+nYhLnssFLqwRJNjVuZNgk=
 		</data>
+		<key>Resources/Contents/Resources/Java/data/VolumeBackgroundI.png</key>
+		<data>
+		uSOJs29GfyYHyCKC1DX1ZYhG73w=
+		</data>
 		<key>Resources/Contents/Resources/Java/data/VolumeEnd.png</key>
 		<data>
 		k8BpjEFeXSDmjhltL4fGhATcInQ=
 		</data>
+		<key>Resources/Contents/Resources/Java/data/VolumeEndI.png</key>
+		<data>
+		aOumFZwe123mpJ1v16v2x51IqgQ=
+		</data>
 		<key>Resources/Contents/Resources/Java/data/VolumeMid.png</key>
 		<data>
 		8BMbl8Dz0w8kSsbD6LAG5eRgqKo=
+		</data>
+		<key>Resources/Contents/Resources/Java/data/VolumeMidI.png</key>
+		<data>
+		+m4hQGfRbSWdutObB32+Qcc29FY=
 		</data>
 		<key>Resources/Contents/Resources/Java/data/button copy 2.png</key>
 		<data>
@@ -343,17 +379,21 @@
 		<data>
 		IKPzEh0egQ/a73gT8jquCQ3RsdE=
 		</data>
+		<key>Resources/Icon</key>
+		<data>
+		2jmj7l5rSw0yVb/vlWAYkK/YBwk=
+		</data>
 		<key>Resources/Scripts/main.scpt</key>
 		<data>
-		c5RBZ0j21o2Lb/csxOEWG92ReG0=
+		ZF2IzGVjlHo1pmUkIw+dgSM5HqU=
 		</data>
 		<key>Resources/applet.icns</key>
 		<data>
-		sINd6lbiqHD5dL8c6u79cFvVXhw=
+		IKPzEh0egQ/a73gT8jquCQ3RsdE=
 		</data>
 		<key>Resources/applet.rsrc</key>
 		<data>
-		GU7cMjNQthvFlbmzmscuUVh06IU=
+		f3OJHykzcpxtjvKUmxAeR1l/vrU=
 		</data>
 		<key>Resources/description.rtfd/TXT.rtf</key>
 		<data>
