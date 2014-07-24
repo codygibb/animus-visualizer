@@ -345,7 +345,9 @@ void setGuiColors() {
     buttonLabels[13].setPosition(displayWidth / 2 - 25, TEXT_OFFSET);
     for(int i = 0; i < buttonLabels.length; i++) {
         // buttonLabels[i].setColor(color(255 - visualizers[select].contrast));
-        buttonLabels[i].setColor(textColor);
+        if (i < 4 || i > 7) {// don't reverse camera keys
+            buttonLabels[i].setColor(textColor);
+        }
     }
     // interfaceLabel.setColor(color(255 - visualizers[select].contrast));
     // println("orig: " + (255 - visualizers[select].contrast) + ", interfaceT: " + interfaceT);
