@@ -315,8 +315,8 @@ void guiSetup(ControlFont font){
         buttons[i].setPosition(width - 212, startHeight + (1 + i) * 28)
             .setImages(normal, hover, click)
             .setSize(23, 23)
-            .captionLabel().setFont(font).setSize(FONT_SIZE);
-            buttons[i].getItem(0).captionLabel().setFont(font).setSize(FONT_SIZE);
+            .getCaptionLabel().setFont(font).setSize(FONT_SIZE);
+            buttons[i].getItem(0).getCaptionLabel().setFont(font).setSize(FONT_SIZE);
     }
     buttons[4].setPosition(width - 180, startHeight + 196); //front
     buttonLabels[4].setPosition(width - 177, startHeight + 201); //front
