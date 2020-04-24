@@ -1,6 +1,8 @@
 import ddf.minim.*;
 import controlP5.*;
 import java.util.*;
+import codeanticode.syphon.*;
+
 
 final float PHI = (1.0 + sqrt(5.0)) / 2.0;
 final int FONT_SIZE = 14;
@@ -10,6 +12,7 @@ PShader spriteShader;
 PImage sprite;
 PImage glow, glowBig, glowBig2;
 
+SyphonServer server;
 Minim minim;
 AudioInput input;
 Visualizer[] visualizers;
@@ -76,6 +79,7 @@ void setup() {
     guiSetup(cFont);
     visualizers[select].setup();
     background(0);
+    server = new SyphonServer(this, "Animus Syphon");
 }
 
 // class PageDot {
@@ -210,6 +214,7 @@ void draw() {
             visualizers[select].adjustDetail(avgFr);
         }
     }
+server.sendScreen();
 }
 
 // void mousePressed() {
@@ -315,8 +320,8 @@ void guiSetup(ControlFont font){
         buttons[i].setPosition(width - 212, startHeight + (1 + i) * 28)
             .setImages(normal, hover, click)
             .setSize(23, 23)
-            .captionLabel().setFont(font).setSize(FONT_SIZE);
-            buttons[i].getItem(0).captionLabel().setFont(font).setSize(FONT_SIZE);
+            .getCaptionLabel().setFont(font).setSize(FONT_SIZE);
+            buttons[i].getItem(0).getCaptionLabel().setFont(font).setSize(FONT_SIZE);
     }
     buttons[4].setPosition(width - 180, startHeight + 196); //front
     buttonLabels[4].setPosition(width - 177, startHeight + 201); //front
